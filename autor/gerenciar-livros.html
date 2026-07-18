@@ -67,6 +67,24 @@
                 <button type="submit" class="btn-submit">Publicar no Codex</button>
             </form>
         </div>
+
+        <!-- Nova seção para gerenciar os livros existentes -->
+        <h2 class="autor-title" style="margin-top: 50px;">Suas Obras Cadastradas</h2>
+        <div class="form-wrapper" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; color: #FFF;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #8C8C8C; font-size: 0.85rem;">
+                        <th style="padding: 12px;">Capa</th>
+                        <th style="padding: 12px;">Título</th>
+                        <th style="padding: 12px;">Universo</th>
+                        <th style="padding: 12px; text-align: right;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-gerenciar-livros">
+                    <!-- Preenchido dinamicamente via JS -->
+                </tbody>
+            </table>
+        </div>
     </main>
 
     <!-- Script de Integração com o Banco -->
