@@ -3,14 +3,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Pegue a configuração que você usou no seu auth.js
+// CREDENCIAIS OFICIAIS SINCRONIZADAS COM O AUTH.JS
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY_AQUI",
-  authDomain: "seu-projeto.firebaseapp.com",
-  projectId: "seu-projeto",
-  storageBucket: "seu-projeto.appspot.com",
-  messagingSenderId: "seu-id",
-  appId: "seu-app-id"
+  apiKey: "AIzaSyCPFNgtGch_nWL6gDNmXzGuwWtd4X4QDgs",
+  authDomain: "aurora-codex.firebaseapp.com",
+  projectId: "aurora-codex",
+  storageBucket: "aurora-codex.firebasestorage.app",
+  messagingSenderId: "193340365366",
+  appId: "1:193340365366:web:6b6920e8c8b4d434749697"
 };
 
 const app = initializeApp(firebaseConfig);
