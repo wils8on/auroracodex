@@ -3,7 +3,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const firebaseConfig = { /* SUE CONFIUGAÇÃO DO FIREBASE AQUI */ };
+const firebaseConfig = { apiKey: "AIzaSyCPFNgtGch_nWL6gDNmXzGuwWtd4X4QDgs",
+  authDomain: "aurora-codex.firebaseapp.com",
+  projectId: "aurora-codex",
+  storageBucket: "aurora-codex.firebasestorage.app",
+  messagingSenderId: "193340365366",
+  appId: "1:193340365366:web:6b6920e8c8b4d434749697" };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
