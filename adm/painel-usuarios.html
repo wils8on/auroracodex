@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Codex - Painel do Administrador</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* Ajustes específicos para a tabela administrativa premium */
+        .adm-container { max-width: 1000px; margin: 100px auto padding: 0 20px; }
+        .adm-title { font-family: 'Cinzel', serif; color: #FFF; margin-bottom: 30px; letter-spacing: 1px; }
+        .table-wrapper { background-color: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 20px; backdrop-filter: blur(8px); }
+        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px; }
+        th, td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; }
+        th { color: #8C8C8C; font-weight: 500; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
+        .user-row-info { display: flex; align-items: center; gap: 12px; }
+        .user-row-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        select { background-color: #1A1A1A; color: #FFF; border: 1px solid #404040; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+        select:focus { border-color: #E50914; outline: none; }
+        .badge-status { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background-color: rgba(235, 156, 15, 0.15); color: #eb9c0f; }
+        .status-active { background-color: rgba(70, 211, 105, 0.15); color: #46d369; }
+    </style>
+</head>
+<body>
+
+    <!-- Menu Superior Administrativo -->
+    <nav class="navbar nav-black">
+        <div class="nav-left">
+            <h1 class="nav-logo" style="cursor:pointer;" onclick="window.location.href='../dashboard.html'">AURORA CODEX</h1>
+            <ul class="nav-links">
+                <li><a href="../dashboard.html">Voltar ao Portal</a></li>
+                <li class="active"><a href="#">Gerenciar Usuários</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="adm-container animate-fade-in">
+        <h2 class="adm-title">Controle de Credenciais</h2>
+        
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>E-mail</th>
+                        <th>Status</th>
+                        <th>Definir Perfil</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-usuarios">
+                    <!-- Linhas preenchidas dinamicamente via JS -->
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #737373;">Carregando usuários cadastrados...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script type="module" src="../js/adm.js"></script>
+</body>
+</html>
