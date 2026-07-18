@@ -3,181 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aurora Codex - Painel do Autor</title>
+    <title>Aurora Codex - Gerenciar Livros</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/dashboard.css"> <!-- Reaproveita a base da Navbar -->
-    <link rel="stylesheet" href="../css/autor.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .autor-container { max-width: 800px; margin: 100px auto; padding: 0 20px; }
+        .autor-title { font-family: 'Cinzel', serif; color: #FFF; margin-bottom: 30px; letter-spacing: 1px; }
+        .form-wrapper { background-color: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 30px; backdrop-filter: blur(8px); }
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { color: #8C8C8C; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group textarea, .form-group select { background-color: #1A1A1A; color: #FFF; border: 1px solid #404040; padding: 12px; border-radius: 4px; font-family: inherit; font-size: 0.95rem; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #E50914; outline: none; }
+        .btn-submit { background-color: #E50914; color: #FFF; border: none; padding: 14px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 1rem; margin-top: 10px; }
+        .btn-submit:hover { background-color: #B81D24; }
+    </style>
 </head>
 <body>
 
-    <!-- Barra de Navegação Superior Fixa -->
+    <!-- Menu Superior do Autor -->
     <nav class="navbar nav-black">
         <div class="nav-left">
-            <h1 class="nav-logo" onclick="window.location.href='../dashboard.html'" style="cursor:pointer">AURORA CODEX</h1>
+            <h1 class="nav-logo" style="cursor:pointer;" onclick="window.location.href='../dashboard.html'">AURORA CODEX</h1>
             <ul class="nav-links">
-                <li><a href="../dashboard.html">Voltar ao Início</a></li>
-                <li class="active"><a href="#">Estúdio do Autor</a></li>
+                <li><a href="../dashboard.html">Voltar ao Portal</a></li>
+                <li class="active"><a href="#">Meus Livros</a></li>
             </ul>
-        </div>
-        <div class="nav-right">
-            <div class="user-profile">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100" alt="Perfil">
-                <span class="badge-profile">Estúdio</span>
-            </div>
         </div>
     </nav>
 
-    <main class="studio-container">
-        <!-- Lado Esquerdo: Seletor de Livros do Autor -->
-        <aside class="sidebar-books">
-            <div class="sidebar-header-studio">
-                <h3>Minhas Obras</h3>
-                <button class="btn-add-book" id="btn-new-book">+ Novo Livro</button>
-            </div>
-            
-            <div class="my-books-list">
-                <!-- Livro Ativo para Edição -->
-                <div class="author-book-item active">
-                    <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=100" alt="Capa">
-                    <div class="item-info">
-                        <h4>Labirinto de Vidro</h4>
-                        <p>1 Capítulo • Ativo</p>
-                    </div>
+    <main class="autor-container animate-fade-in">
+        <h2 class="autor-title">Cadastrar Nova Obra</h2>
+        
+        <div class="form-wrapper">
+            <form id="form-cadastrar-livro">
+                <div class="form-group">
+                    <label for="titulo">Título do Livro</label>
+                    <input type="text" id="titulo" placeholder="Ex: Labirinto de Vidro" required>
                 </div>
 
-                <!-- Outro Livro -->
-                <div class="author-book-item">
-                    <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=100" alt="Capa">
-                    <div class="item-info">
-                        <h4>Laços Invisíveis</h4>
-                        <p>Publicado na Amazon</p>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Lado Direito: Área de Trabalho da Obra Selecionada -->
-        <section class="workspace-book">
-            <header class="workspace-header">
-                <div class="workspace-title-area">
-                    <h2>Editando: <span>Labirinto de Vidro</span></h2>
-                    <p class="meta-status">ID da Obra: <code class="code-id">id_livro_001</code></p>
-                </div>
-            </header>
-
-            <!-- Abas Estilo Netflix/Configurações Pro -->
-            <nav class="studio-tabs">
-                <button class="tab-link active" onclick="openTab(event, 'tab-chapters')">📝 Capítulos</button>
-                <button class="tab-link" onclick="openTab(event, 'tab-characters')">👥 Fichas de Personagens</button>
-                <button class="tab-link" onclick="openTab(event, 'tab-gallery')">🖼️ Galeria de Ambientes</button>
-            </nav>
-
-            <!-- CONTEÚDO DA ABA: CAPÍTULOS -->
-            <div id="tab-chapters" class="tab-content active">
-                <div class="tab-actions-header">
-                    <h3>Gerenciar Manuscritos</h3>
+                <div class="form-group">
+                    <label for="universo">Universo Conectado</label>
+                    <select id="universo" required>
+                        <option value="">Selecione o Universo...</option>
+                        <option value="original">Universo Original</option>
+                        <option value="vampire-diaries">The Vampire Diaries (Fanfiction)</option>
+                        <option value="50-shades">50 Shades of Grey (Fanfiction)</option>
+                    </select>
                 </div>
 
-                <!-- Formulário de Novo Capítulo -->
-                <form class="studio-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Título do Capítulo</label>
-                            <input type="text" placeholder="Ex: Capítulo 2: Vidro Rachado" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Link da Trilha Sonora (Spotify / YouTube / MP3)</label>
-                            <input type="url" placeholder="https://open.spotify.com/track/...">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Conteúdo da História</label>
-                        <textarea placeholder="Escreva ou cole aqui o texto do seu capítulo..." class="textarea-story" required></textarea>
-                    </div>
-                    <button type="submit" class="btn-save">Salvar e Publicar Capítulo</button>
-                </form>
-            </div>
-
-            <!-- CONTEÚDO DA ABA: PERSONAGENS -->
-            <div id="tab-characters" class="tab-content">
-                <div class="tab-actions-header">
-                    <h3>Fichas do Oráculo</h3>
+                <div class="form-group">
+                    <label for="url-capa">URL da Imagem da Capa (Horizontal)</label>
+                    <input type="url" id="url-capa" placeholder="https://exemplo.com/imagem.jpg" required>
                 </div>
 
-                <form class="studio-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nome do Personagem</label>
-                            <input type="text" placeholder="Ex: Zuri Afolayan" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Função / Papel na Trama</label>
-                            <input type="text" placeholder="Ex: Protagonista, Antagonista...">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Idade</label>
-                            <input type="text" placeholder="Ex: 24 anos">
-                        </div>
-                        <div class="form-group">
-                            <label>URL da Imagem do Avatar (Inspiração visual)</label>
-                            <input type="url" placeholder="https://images.unsplash.com/...">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Descrição Psicológica, Visual e Detalhes Importantes</label>
-                        <textarea placeholder="Fale sobre a personalidade, vestuário marcante, cicatrizes, segredos e o que mais achar relevante..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn-save">Vincular Personagem ao Livro</button>
-                </form>
-            </div>
-
-            <!-- CONTEÚDO DA ABA: GALERIA -->
-            <div id="tab-gallery" class="tab-content">
-                <div class="tab-actions-header">
-                    <h3>Moodboard e Cenários</h3>
+                <div class="form-group">
+                    <label for="sinopse">Sinopse da Obra</label>
+                    <textarea id="sinopse" rows="5" placeholder="Escreva a sinopse ou introdução marcante do livro..." required></textarea>
                 </div>
 
-                <form class="studio-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nome do Ambiente / Cenário</label>
-                            <input type="text" placeholder="Ex: Mansão Claes - Escritório Central" required>
-                        </div>
-                        <div class="form-group">
-                            <label>URL da Imagem de Inspiração</label>
-                            <input type="url" placeholder="https://images.unsplash.com/..." required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Nota do Autor / Descrição da Estética</label>
-                        <textarea placeholder="Explique os elementos visuais, paleta de cores ou o sentimento que esse ambiente evoca na cena..."></textarea>
-                    </div>
-                    <button type="submit" class="btn-save">Adicionar à Galeria Visual</button>
-                </form>
-            </div>
-
-        </section>
+                <button type="submit" class="btn-submit">Publicar no Codex</button>
+            </form>
+        </div>
     </main>
 
-    <!-- Script de alternar Abas -->
-    <script>
-        function openTab(evt, tabName) {
-            let i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active");
-            }
-            tablinks = document.getElementsByClassName("tab-link");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove("active");
-            }
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
-    </script>
+    <!-- Script de Integração com o Banco -->
+    <script type="module" src="../js/autor.js"></script>
 </body>
 </html>
