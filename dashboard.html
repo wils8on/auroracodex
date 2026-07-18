@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Codex - Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <!-- Barra de Navegação Estilo Netflix -->
+    <nav class="navbar" id="main-nav">
+        <div class="nav-left">
+            <h1 class="nav-logo">AURORA CODEX</h1>
+            <ul class="nav-links">
+                <li class="active"><a href="#">Início</a></li>
+                <li><a href="#">Universos</a></li>
+                <li><a href="#">Meus Livros</a></li>
+                <li><a href="#">O Oráculo</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            <!-- Avatar do usuário vindo do Google Auth -->
+            <div class="user-profile">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100" alt="Perfil" id="user-avatar">
+                <span class="badge-profile">Autor</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Banner de Destaque Principal -->
+    <header class="hero-banner">
+        <div class="hero-cover-bg"></div>
+        <div class="hero-content">
+            <span class="hero-tagline">✨ DESTAQUE DO SEU UNIVERSO</span>
+            <h2 class="hero-title">Labirinto de Vidro</h2>
+            <p class="hero-synopsis">
+                Em uma sociedade onde segredos moldam a arquitetura do poder, Zuri Afolayan descobre que a verdade por trás do império Claes é mais frágil — e perigosa — do que vidro temperado.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn-read">
+                    <svg viewBox="0 0 24 24" class="icon-play"><path d="M8 5v14l11-7z"/></svg>
+                    Ler Capítulo 1
+                </button>
+                <button class="btn-info">
+                    <svg viewBox="0 0 24 24" class="icon-info"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v-2h-2v2z"/></svg>
+                    Ver Oráculo / Fichas
+                </button>
+            </div>
+        </div>
+        <div class="hero-vignette"></div>
+    </header>
+
+    <!-- Conteúdo dos Carrosséis -->
+    <main class="content-rows">
+
+        <!-- Fileira 1: Universos Literários -->
+        <section class="row">
+            <h3 class="row-title">Universos Conectados</h3>
+            <div class="row-posters">
+                
+                <!-- Card do Livro 1 -->
+                <div class="book-card">
+                    <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400" alt="Capa do Livro" class="book-cover">
+                    <div class="book-hover-info">
+                        <h4>Labirinto de Vidro</h4>
+                        <div class="book-meta"><span>98% Relevante</span> <span class="badge-age">16+</span></div>
+                        <p class="book-mini-desc">Romance, Suspense, Intriga.</p>
+                    </div>
+                </div>
+
+                <!-- Card do Livro 2 -->
+                <div class="book-card">
+                    <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=400" alt="Capa do Livro" class="book-cover">
+                    <div class="book-hover-info">
+                        <h4>Laços Invisíveis</h4>
+                        <div class="book-meta"><span>Novo</span> <span class="badge-age">14+</span></div>
+                        <p class="book-mini-desc">Romance Contemporâneo, Drama.</p>
+                    </div>
+                </div>
+
+                <!-- Card do Livro 3 (Exemplo de preenchimento de catálogo) -->
+                <div class="book-card">
+                    <img src="https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=400" alt="Capa do Livro" class="book-cover">
+                    <div class="book-hover-info">
+                        <h4>Crônicas de Outono</h4>
+                        <div class="book-meta"><span>94% Relevante</span> <span class="badge-age">L</span></div>
+                        <p class="book-mini-desc">Fantasia Urbana, Mistério.</p>
+                    </div>
+                </div>
+
+                <!-- Card do Livro 4 -->
+                <div class="book-card">
+                    <img src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=400" alt="Capa do Livro" class="book-cover">
+                    <div class="book-hover-info">
+                        <h4>Ecos do Passado</h4>
+                        <div class="book-meta"><span>89% Relevante</span> <span class="badge-age">16+</span></div>
+                        <p class="book-mini-desc">Suspense Psicológico.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Fileira 2: Seção do Oráculo (Cards de Inspiração/Moodboard) -->
+        <section class="row">
+            <h3 class="row-title">Galeria de Ambientes & Inspirações</h3>
+            <div class="row-posters visual-gallery">
+                
+                <div class="gallery-card">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=500" alt="Ambiente">
+                    <span class="gallery-label">Mansão Claes</span>
+                </div>
+
+                <div class="gallery-card">
+                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=500" alt="Ambiente">
+                    <span class="gallery-label">Distrito Tecnológico</span>
+                </div>
+
+                <div class="gallery-card">
+                    <img src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=500" alt="Ambiente">
+                    <span class="gallery-label">Sala Escura de Leitura</span>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Script para mudar a cor da Navbar ao rolar a página -->
+    <script>
+        const nav = document.getElementById('main-nav');
+        window.onscroll = function () { 
+            if (window.scrollY > 50) {
+                nav.classList.add("nav-black");
+            } else {
+                nav.classList.remove("nav-black");
+            }
+        };
+    </script>
+</body>
+</html>

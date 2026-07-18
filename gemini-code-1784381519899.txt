@@ -1,0 +1,14 @@
+meu-wattpad-netflix/
+├── index.html               # Tela de Login (Google Auth) + Aguardando Aprovação
+├── dashboard.html           # Home estilo Netflix (Carrosséis de Livros/Universos)
+├── ler.html                 # Interface de leitura focada e limpa
+├── autor/
+│   ├── gerenciar-livros.html # Painel do Autor (Criar capítulos, fichas, galeria)
+│   └── oraculo.html          # O "Oráculo" (Conexões de universos e enciclopédia)
+├── adm/
+│   └── painel-usuarios.html  # Tela do ADM para liberar acessos e mudar perfis
+├── css/
+│   └── style.css            # Onde a mágica do design Netflix acontece
+└── js/
+    ├── auth.js              # Controle de login e permissões
+    └── app.js               # Lógica de carregamento de livros e dados
