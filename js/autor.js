@@ -38,9 +38,11 @@ function inicializarDadosAutor() {
     onSnapshot(livrosRef, (snapshot) => {
         const tbody = document.getElementById("tabela-gerenciar-livros");
         const selectLivro = document.getElementById("select-livro-capitulo");
+        const selectLivroPersonagem = document.getElementById("select-livro-personagem"); // Novo
         
         if (tbody) tbody.innerHTML = "";
         if (selectLivro) selectLivro.innerHTML = '<option value="">Selecione a Obra...</option>';
+        if (selectLivroPersonagem) selectLivroPersonagem.innerHTML = '<option value="">Selecione a Obra...</option>'; // Novo
 
         if (snapshot.empty) {
             if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color:#737373;">Nenhum livro cadastrado.</td></tr>`;
@@ -72,6 +74,14 @@ function inicializarDadosAutor() {
                 opt.value = id;
                 opt.innerText = livro.titulo;
                 selectLivro.appendChild(opt);
+            }
+
+            // Alimenta o Select de Personagens
+            if (selectLivroPersonagem) {
+                const opt = document.createElement("option");
+                opt.value = id;
+                opt.innerText = livro.titulo;
+                selectLivroPersonagem.appendChild(opt);
             }
         });
 
@@ -134,7 +144,7 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
 
 // Salvar Capítulo na Subcoleção do Livro Selecionado
 document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     const idLivro = document.getElementById("select-livro-capitulo").value;
     const capituloDados = {
         numero: parseInt(document.getElementById("numero-capitulo").value),
@@ -152,4 +162,27 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
         console.error(err);
         alert("Erro ao salvar capítulo.");
     }
-});
+
+// Salvar Personagem na Subcoleção do Livro Selecionado
+document.getElementById("form-cadastrar-personagem")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const idLivro = document.getElementById("select-livro-personagem").value;
+    const personagemDados = {
+        nome: document.getElementById("nome-personagem").value,
+        funcao: document.getElementById("funcao-personagem").value,
+        foto: document.getElementById("url-avatar-personagem").value,
+        descricao: document.getElementById("descricao-personagem").value,
+        data_cadastro: new Date().toISOString()
+    };
+
+    try {
+        // Grava na subcoleção: livros -> {idDoLivro} -> personagens
+        await addDoc(collection(db, "livros", idLivro, "personagens"), personagemDados);
+        alert(`"${personagemDados.nome}" foi adicionado ao Códice com sucesso!`);
+        e.target.reset();
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao salvar personagem no Códice.");
+    }
+
+});})

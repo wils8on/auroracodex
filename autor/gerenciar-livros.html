@@ -56,6 +56,7 @@
             <button class="tab-btn active" onclick="alternarAba('aba-cadastrar')">Nova Obra</button>
             <button class="tab-btn" onclick="alternarAba('aba-gerenciar')">Gerenciar Obras</button>
             <button class="tab-btn" onclick="alternarAba('aba-capitulos')">Adicionar Capítulos</button>
+            <button class="tab-btn" onclick="alternarAba('aba-personagens')">Cadastrar Personagens</button>
         </div>
 
         <!-- ABA 1: CADASTRAR NOVA OBRA -->
@@ -133,6 +134,38 @@
                         <textarea id="conteudo-capitulo" rows="12" placeholder="Escreva ou cole o texto do seu capítulo aqui..." required></textarea>
                     </div>
                     <button type="submit" class="btn-submit">Vincular Capítulo à Obra</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ABA 4: CADASTRO DE PERSONAGENS (CÓDICE) -->
+        <div id="aba-personagens" class="tab-content">
+            <h2 class="autor-title">Cadastrar Personagem (Códice)</h2>
+            <div class="form-wrapper">
+                <form id="form-cadastrar-personagem">
+                    <div class="form-group">
+                        <label for="select-livro-personagem">Vincular à Obra</label>
+                        <select id="select-livro-personagem" required>
+                            <option value="">Carregando seus livros...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nome-personagem">Nome do Personagem</label>
+                        <input type="text" id="nome-personagem" placeholder="Ex: Hugo Claes" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="funcao-personagem">Função / Papel na História</label>
+                        <input type="text" id="funcao-personagem" placeholder="Ex: Co-Protagonista • 26 anos" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="url-avatar-personagem">URL da Foto do Personagem</label>
+                        <input type="url" id="url-avatar-personagem" placeholder="https://lh3.googleusercontent.com/d/..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricao-personagem">Descrição / Ficha Breve</label>
+                        <textarea id="descricao-personagem" rows="4" placeholder="Ex: Herdeiro direto da dinastia Claes..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Adicionar ao Códice</button>
                 </form>
             </div>
         </div>

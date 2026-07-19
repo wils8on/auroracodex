@@ -1,7 +1,7 @@
 // js/ler.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Credenciais Oficiais
 const firebaseConfig = { 
@@ -39,10 +39,8 @@ async function carregarConteudoCapitulo() {
     }
 
     try {
-        // 1. Busca os detalhes do Livro (para o cabeçalho superior se necessário)
+        // 1. Busca os detalhes do Livro e do Capítulo de forma limpa
         const livroDoc = await getDoc(doc(db, "livros", livroId));
-        
-        // 2. Busca o conteúdo do capítulo na subcoleção
         const capDoc = await getDoc(doc(db, "livros", livroId, "capitulos", capituloId));
 
         if (capDoc.exists()) {
@@ -56,7 +54,7 @@ async function carregarConteudoCapitulo() {
             const txtTitulo = document.getElementById("capitulo-titulo-exibicao");
             const txtConteudo = document.getElementById("capitulo-texto-exibicao");
 
-            // Atualiza os metadados no topo da página
+            // Atualiza os metadados no topo e corpo da página
             if (txtHeaderLivro) txtHeaderLivro.innerText = dadosLivro.titulo;
             if (txtHeaderCapitulo) txtHeaderCapitulo.innerText = `Capítulo ${dadosCap.numero}: ${dadosCap.titulo}`;
             if (txtNumero) txtNumero.innerText = `CAPÍTULO ${dadosCap.numero}`;
@@ -64,8 +62,6 @@ async function carregarConteudoCapitulo() {
             
             // Renderiza o texto quebrando as linhas corretamente em parágrafos HTML
             if (txtConteudo) {
-                // Se o seu container original englobava outras coisas (como o player de música),
-                // certifique-se de aplicar o ID ou a classe diretamente no container do TEXTO narrativo.
                 const textoFormatado = dadosCap.conteudo.split('\n').map(paragrafo => {
                     if (paragrafo.trim() === "") return "";
                     return `<p style="line-height: 1.8; margin-bottom: 20px; font-size: 1.15rem; color: #D2D2D2; text-align: justify;">${paragrafo}</p>`;
@@ -73,6 +69,35 @@ async function carregarConteudoCapitulo() {
                 
                 txtConteudo.innerHTML = textoFormatado;
             }
+
+            // 2. BUSCA OS PERSONAGENS REAIS DO CÓDICE PARA ESSE LIVRO
+            const sidebarContent = document.querySelector(".sidebar-content");
+            if (sidebarContent) {
+                // Mantém o título da seção na sidebar e limpa os cards antigos estáticos
+                sidebarContent.innerHTML = `<h4>Personagens em Cena</h4>`;
+                
+                const queryPersonagens = await getDocs(collection(db, "livros", livroId, "personagens")); //
+                
+                if (queryPersonagens.empty) {
+                    sidebarContent.innerHTML += `<p style="color: #737373; font-size: 0.9rem; padding-top: 10px;">Nenhum detalhe registrado no códice para este universo.</p>`; //
+                } else {
+                    queryPersonagens.forEach((pSnap) => {
+                        const p = pSnap.data();
+                        const cardChar = document.createElement("div");
+                        cardChar.className = "character-mini-card";
+                        cardChar.innerHTML = `
+                            <img src="${p.foto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100'}" alt="${p.nome}">
+                            <div class="char-info">
+                                <h5>${p.nome}</h5>
+                                <p class="char-role">${p.funcao}</p>
+                                <p class="char-desc">${p.descricao}</p>
+                            </div>
+                        `; //
+                        sidebarContent.appendChild(cardChar); //
+                    });
+                }
+            }
+
         } else {
             alert("O conteúdo deste capítulo não foi localizado no Codex.");
             window.location.href = "dashboard.html";
