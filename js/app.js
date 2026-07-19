@@ -45,48 +45,100 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Busca as obras no Firestore em tempo real e monta os cards do Netflix Style
+// Atualize a função ouvirCatalogo do js/app.js para abrir o modal no clique do card
 function ouvirCatalogo() {
     const livrosRef = collection(db, "livros");
 
     onSnapshot(livrosRef, (snapshot) => {
         const container = document.getElementById("catalogo-livros");
         if (!container) return;
+        container.innerHTML = "";
 
         if (snapshot.empty) {
-            container.innerHTML = `<p style="color: #737373; padding: 20px; font-size: 0.9rem;">Nenhum livro cadastrado ainda. Vá em 'Meus Livros' para começar!</p>`;
+            container.innerHTML = `<p style="color: #737373; padding: 20px;">Nenhum livro cadastrado.</p>`;
             return;
         }
-
-        container.innerHTML = ""; // Limpa a mensagem de carregamento
 
         snapshot.forEach((docSnap) => {
             const livro = docSnap.data();
             const id = docSnap.id;
 
-            // Cria o elemento do card exatamente com as suas classes CSS originais
             const card = document.createElement("div");
             card.className = "book-card";
             card.style.cursor = "pointer";
             
-            // Redireciona para a página de leitura levando o ID exclusivo do Firebase
+            // CHAMA O MODAL PASSANDO OS DADOS COMPLETOS DA OBRA E O ID
             card.onclick = () => {
-                window.location.href = `ler.html?id=${id}`;
+                abrirModalNetflix(id, livro);
             };
 
             card.innerHTML = `
-                <img src="${livro.capa || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=400'}" alt="${livro.titulo}" class="book-cover">
+                <img src="${livro.capa}" alt="${livro.titulo}" class="book-cover">
                 <div class="book-hover-info">
                     <h4>${livro.titulo}</h4>
-                    <div class="book-meta">
-                        <span>${filtrarNomeUniverso(livro.universo)}</span>
-                    </div>
-                    <p class="book-mini-desc">${livro.sinopse ? livro.sinopse.substring(0, 60) + '...' : 'Sem sinopse disponível.'}</p>
+                    <div class="book-meta"><span>${filtrarNomeUniverso(livro.universo)}</span></div>
                 </div>
             `;
             container.appendChild(card);
         });
     });
+}
+
+// Nova função para renderizar o Pop-up Netflix completo com os capítulos dinâmicos
+import { query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+async function abrirModalNetflix(idLivro, livro) {
+    document.getElementById('modal-banner').style.backgroundImage = `url('${livro.capa}')`;
+    document.getElementById('modal-titulo').innerText = livro.titulo;
+    document.getElementById('modal-universo').innerText = filtrarNomeUniverso(livro.universo);
+    document.getElementById('modal-sinopse').innerText = livro.sinopse;
+
+    const listaCapitulosContainer = document.getElementById('modal-lista-capitulos');
+    listaCapitulosContainer.innerHTML = '<p style="color: #737373;">Carregando índice de capítulos...</p>';
+
+    document.getElementById('netflix-modal').style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Trava o scroll da home por trás
+
+    try {
+        // Busca os capítulos ordenados pelo número
+        const capsRef = collection(db, "livros", idLivro, "capitulos");
+        const q = query(capsRef, orderBy("numero", "asc"));
+        const capsSnap = await getDocs(q);
+
+        listaCapitulosContainer.innerHTML = "";
+
+        if (capsSnap.empty) {
+            listaCapitulosContainer.innerHTML = '<p style="color: #737373;">Nenhum capítulo publicado para esta obra ainda.</p>';
+            return;
+        }
+
+        capsSnap.forEach((capSnap) => {
+            const cap = capSnap.data();
+            const item = document.createElement('div');
+            item.style.cssText = "background: #2f2f2f; padding: 16px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;";
+            
+            // Efeito hover manual no JavaScript inline
+            item.onmouseenter = () => item.style.background = "#3c3c3c";
+            item.onmouseleave = () => item.style.background = "#2f2f2f";
+            
+            // Clique redireciona para a leitura do capítulo específico
+            item.onclick = () => {
+                window.location.href = `ler.html?livroId=${idLivro}&capituloId=${capSnap.id}`;
+            };
+
+            item.innerHTML = `
+                <div>
+                    <span style="color: #E50914; font-weight: 600; margin-right: 10px;">Episódio ${cap.numero}</span>
+                    <strong style="color: #FFF;">${cap.titulo}</strong>
+                </div>
+                <span style="color: #8C8C8C; font-size: 0.85rem;">Ler Agora &rarr;</span>
+            `;
+            listaCapitulosContainer.appendChild(item);
+        });
+    } catch (err) {
+        console.error("Erro ao carregar os capítulos:", err);
+        listaCapitulosContainer.innerHTML = '<p style="color: #E50914;">Erro ao mapear o índice de episódios.</p>';
+    }
 }
 
 // Converte a tag interna do banco para um nome polido na interface

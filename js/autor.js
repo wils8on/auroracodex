@@ -16,7 +16,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let idLivroEdicao = null; // Controla se estamos editando um livro ou criando um novo
+let idLivroEdicao = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -24,60 +24,26 @@ onAuthStateChanged(auth, async (user) => {
     } else {
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
         if (!userDoc.exists() || (userDoc.data().perfil !== "autor" && userDoc.data().perfil !== "admin")) {
-            alert("Acesso restrito a autores cadastrados.");
+            alert("Acesso restrito.");
             window.location.href = "../dashboard.html";
         } else {
-            listarLivrosAutor(); // Carrega a tabela se o acesso for liberado
+            inicializarDadosAutor();
         }
     }
 });
 
-const form = document.getElementById("form-cadastrar-livro");
-const btnSubmit = form ? form.querySelector(".btn-submit") : null;
-
-if (form) {
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const dados = {
-            titulo: document.getElementById("titulo").value,
-            universo: document.getElementById("universo").value,
-            capa: document.getElementById("url-capa").value,
-            sinopse: document.getElementById("sinopse").value
-        };
-
-        try {
-            if (idLivroEdicao) {
-                // MODO EDIÇÃO: Atualiza o livro existente
-                await updateDoc(doc(db, "livros", idLivroEdicao), dados);
-                alert("Obra atualizada com sucesso!");
-                idLivroEdicao = null;
-                if(btnSubmit) btnSubmit.innerText = "Publicar no Codex";
-            } else {
-                // MODO CADASTRO: Cria um documento novo
-                dados.data_criacao = new Date().toISOString();
-                await addDoc(collection(db, "livros"), dados);
-                alert(`"${dados.titulo}" foi adicionado ao catálogo!`);
-            }
-            form.reset();
-        } catch (error) {
-            console.error("Erro ao salvar:", error);
-            alert("Erro técnico ao salvar os dados.");
-        }
-    });
-}
-
-// Lista os livros na tabela com escuta em tempo real
-function listarLivrosAutor() {
+function inicializarDadosAutor() {
     const livrosRef = collection(db, "livros");
     
     onSnapshot(livrosRef, (snapshot) => {
         const tbody = document.getElementById("tabela-gerenciar-livros");
-        if (!tbody) return;
-        tbody.innerHTML = "";
+        const selectLivro = document.getElementById("select-livro-capitulo");
+        
+        if (tbody) tbody.innerHTML = "";
+        if (selectLivro) selectLivro.innerHTML = '<option value="">Selecione a Obra...</option>';
 
         if (snapshot.empty) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px; color: #737373;">Nenhum livro criado por você.</td></tr>`;
+            if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color:#737373;">Nenhum livro cadastrado.</td></tr>`;
             return;
         }
 
@@ -85,49 +51,105 @@ function listarLivrosAutor() {
             const id = docSnap.id;
             const livro = docSnap.data();
 
-            const tr = document.createElement("tr");
-            tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
-            
-            tr.innerHTML = `
-                <td style="padding: 12px;"><img src="${livro.capa}" style="width: 50px; height: 30px; object-fit: cover; border-radius: 4px;"></td>
-                <td style="padding: 12px;"><strong>${livro.titulo}</strong></td>
-                <td style="padding: 12px; color: #8C8C8C;">${livro.universo}</td>
-                <td style="padding: 12px; text-align: right;">
-                    <button class="btn-editar" data-id="${id}" style="background: #404040; color: #FFF; border: none; padding: 6px 12px; margin-right: 8px; border-radius: 4px; cursor: pointer;">Editar</button>
-                    <button class="btn-excluir" data-id="${id}" style="background: #E50914; color: #FFF; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Excluir</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+            // Alimenta a tabela de gerenciamento
+            if (tbody) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><img src="${livro.capa}" style="width: 50px; height: 30px; object-fit: cover; border-radius: 4px;"></td>
+                    <td><strong>${livro.titulo}</strong></td>
+                    <td>${livro.universo}</td>
+                    <td style="text-align: right;">
+                        <button class="btn-editar" data-id="${id}" style="background: #404040; color: #FFF; border: none; padding: 6px 12px; margin-right: 8px; border-radius: 4px; cursor: pointer;">Editar</button>
+                        <button class="btn-excluir" data-id="${id}" style="background: #E50914; color: #FFF; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            // Alimenta o Select de Capítulos
+            if (selectLivro) {
+                const opt = document.createElement("option");
+                opt.value = id;
+                opt.innerText = livro.titulo;
+                selectLivro.appendChild(opt);
+            }
         });
 
-        // Evento para o botão de Editar (Puxa os dados de volta para o formulário)
-        document.querySelectorAll(".btn-editar").forEach(btn => {
-            btn.addEventListener("click", async (e) => {
-                const id = e.target.getAttribute("data-id");
-                const docSnap = await getDoc(doc(db, "livros", id));
-                if (docSnap.exists()) {
-                    const livro = docSnap.data();
-                    idLivroEdicao = id; // Ativa o modo de edição
-                    
-                    document.getElementById("titulo").value = livro.titulo;
-                    document.getElementById("universo").value = livro.universo;
-                    document.getElementById("url-capa").value = livro.capa;
-                    document.getElementById("sinopse").value = livro.sinopse;
-                    
-                    if(btnSubmit) btnSubmit.innerText = "Salvar Alterações";
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); // Sobe a página suavemente até o formulário
-                }
-            });
-        });
+        // Eventos de Editar e Deletar Obras
+         VincularEventosObras();
+    });
+}
 
-        // Evento para o botão de Excluir
-        document.querySelectorAll(".btn-excluir").forEach(btn => {
-            btn.addEventListener("click", async (e) => {
-                const id = e.target.getAttribute("data-id");
-                if (confirm("Tem certeza absoluta de que deseja deletar esta obra do Codex?")) {
-                    await deleteDoc(doc(db, "livros", id));
-                }
-            });
+function VincularEventosObras() {
+    document.querySelectorAll(".btn-editar").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            const id = e.target.getAttribute("data-id");
+            const docSnap = await getDoc(doc(db, "livros", id));
+            if (docSnap.exists()) {
+                const livro = docSnap.data();
+                idLivroEdicao = id;
+                document.getElementById("titulo").value = livro.titulo;
+                document.getElementById("universo").value = livro.universo;
+                document.getElementById("url-capa").value = livro.capa;
+                document.getElementById("sinopse").value = livro.sinopse;
+                
+                document.getElementById("form-cadastrar-livro").querySelector(".btn-submit").innerText = "Salvar Alterações";
+                // Abre a aba de cadastro automaticamente para edição
+                document.querySelector('[onclick="alternarAba(\'aba-cadastrar\')"]').click();
+            }
+        });
+    });
+
+    document.querySelectorAll(".btn-excluir").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            const id = e.target.getAttribute("data-id");
+            if (confirm("Deseja mesmo excluir este livro?")) {
+                await deleteDoc(doc(db, "livros", id));
+            }
         });
     });
 }
+
+// Salvar/Editar Livro
+document.getElementById("form-cadastrar-livro")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const dados = {
+        titulo: document.getElementById("titulo").value,
+        universo: document.getElementById("universo").value,
+        capa: document.getElementById("url-capa").value,
+        sinopse: document.getElementById("sinopse").value
+    };
+    if (idLivroEdicao) {
+        await updateDoc(doc(db, "livros", idLivroEdicao), dados);
+        alert("Livro atualizado!");
+        idLivroEdicao = null;
+        document.getElementById("form-cadastrar-livro").querySelector(".btn-submit").innerText = "Publicar no Codex";
+    } else {
+        dados.data_criacao = new Date().toISOString();
+        await addDoc(collection(db, "livros"), dados);
+        alert("Livro criado!");
+    }
+    e.target.reset();
+});
+
+// Salvar Capítulo na Subcoleção do Livro Selecionado
+document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const idLivro = document.getElementById("select-livro-capitulo").value;
+    const capituloDados = {
+        numero: parseInt(document.getElementById("numero-capitulo").value),
+        titulo: document.getElementById("titulo-capitulo").value || `Capítulo ${document.getElementById("numero-capitulo").value}`,
+        conteudo: document.getElementById("conteudo-capitulo").value,
+        data_publicacao: new Date().toISOString()
+    };
+
+    try {
+        // Grava na subcoleção: livros -> {idDoLivro} -> capitulos
+        await addDoc(collection(db, "livros", idLivro, "capitulos"), capituloDados);
+        alert("Capítulo publicado com sucesso!");
+        e.target.reset();
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao salvar capítulo.");
+    }
+});

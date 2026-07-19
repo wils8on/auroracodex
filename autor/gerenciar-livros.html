@@ -3,91 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aurora Codex - Gerenciar Livros</title>
+    <title>Aurora Codex - Painel do Autor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        .autor-container { max-width: 800px; margin: 100px auto; padding: 0 20px; }
-        .autor-title { font-family: 'Cinzel', serif; color: #FFF; margin-bottom: 30px; letter-spacing: 1px; }
+        .autor-container { max-width: 900px; margin: 80px auto; padding: 0 20px; }
+        .autor-title { font-family: 'Cinzel', serif; color: #FFF; margin-bottom: 20px; letter-spacing: 1px; }
+        
+        /* Sistema de Abas Premium */
+        .tabs-nav { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .tab-btn { background: transparent; border: none; color: #8C8C8C; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; cursor: pointer; transition: all 0.2s; border-radius: 4px; }
+        .tab-btn:hover { color: #FFF; background-color: rgba(255,255,255,0.05); }
+        .tab-btn.active { color: #FFF; background-color: #E50914; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
         .form-wrapper { background-color: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 30px; backdrop-filter: blur(8px); }
         .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
         .form-group label { color: #8C8C8C; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-group input, .form-group textarea, .form-group select { background-color: #1A1A1A; color: #FFF; border: 1px solid #404040; padding: 12px; border-radius: 4px; font-family: inherit; font-size: 0.95rem; }
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #E50914; outline: none; }
+        
         .btn-submit { background-color: #E50914; color: #FFF; border: none; padding: 14px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 1rem; margin-top: 10px; }
         .btn-submit:hover { background-color: #B81D24; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; color: #FFF; }
+        th, td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { color: #8C8C8C; font-size: 0.8rem; text-transform: uppercase; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <!-- Menu Superior do Autor -->
     <nav class="navbar nav-black">
         <div class="nav-left">
             <h1 class="nav-logo" style="cursor:pointer;" onclick="window.location.href='../dashboard.html'">AURORA CODEX</h1>
             <ul class="nav-links">
                 <li><a href="../dashboard.html">Voltar ao Portal</a></li>
-                <li class="active"><a href="#">Meus Livros</a></li>
+                <li class="active"><a href="#">Painel Criativo</a></li>
             </ul>
         </div>
     </nav>
 
-    <main class="autor-container animate-fade-in">
-        <h2 class="autor-title">Cadastrar Nova Obra</h2>
-        
-        <div class="form-wrapper">
-            <form id="form-cadastrar-livro">
-                <div class="form-group">
-                    <label for="titulo">Título do Livro</label>
-                    <input type="text" id="titulo" placeholder="Ex: Labirinto de Vidro" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="universo">Universo Conectado</label>
-                    <select id="universo" required>
-                        <option value="">Selecione o Universo...</option>
-                        <option value="original">Universo Original</option>
-                        <option value="vampire-diaries">The Vampire Diaries (Fanfiction)</option>
-                        <option value="50-shades">50 Shades of Grey (Fanfiction)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="url-capa">URL da Imagem da Capa (Horizontal)</label>
-                    <input type="url" id="url-capa" placeholder="https://exemplo.com/imagem.jpg" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="sinopse">Sinopse da Obra</label>
-                    <textarea id="sinopse" rows="5" placeholder="Escreva a sinopse ou introdução marcante do livro..." required></textarea>
-                </div>
-
-                <button type="submit" class="btn-submit">Publicar no Codex</button>
-            </form>
+    <main class="autor-container">
+        <!-- Navegação por Abas -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="alternarAba('aba-cadastrar')">Nova Obra</button>
+            <button class="tab-btn" onclick="alternarAba('aba-gerenciar')">Gerenciar Obras</button>
+            <button class="tab-btn" onclick="alternarAba('aba-capitulos')">Adicionar Capítulos</button>
         </div>
 
-        <!-- Nova seção para gerenciar os livros existentes -->
-        <h2 class="autor-title" style="margin-top: 50px;">Suas Obras Cadastradas</h2>
-        <div class="form-wrapper" style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; color: #FFF;">
-                <thead>
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #8C8C8C; font-size: 0.85rem;">
-                        <th style="padding: 12px;">Capa</th>
-                        <th style="padding: 12px;">Título</th>
-                        <th style="padding: 12px;">Universo</th>
-                        <th style="padding: 12px; text-align: right;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-gerenciar-livros">
-                    <!-- Preenchido dinamicamente via JS -->
-                </tbody>
-            </table>
+        <!-- ABA 1: CADASTRAR NOVA OBRA -->
+        <div id="aba-cadastrar" class="tab-content active">
+            <h2 class="autor-title">Cadastrar Nova Obra</h2>
+            <div class="form-wrapper">
+                <form id="form-cadastrar-livro">
+                    <div class="form-group">
+                        <label for="titulo">Título do Livro</label>
+                        <input type="text" id="titulo" placeholder="Ex: Labirinto de Vidro" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="universo">Universo Conectado</label>
+                        <select id="universo" required>
+                            <option value="">Selecione o Universo...</option>
+                            <option value="original">Universo Original</option>
+                            <option value="vampire-diaries">The Vampire Diaries (Fanfiction)</option>
+                            <option value="50-shades">50 Shades of Grey (Fanfiction)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="url-capa">URL da Imagem da Capa (Horizontal)</label>
+                        <input type="url" id="url-capa" placeholder="https://lh3.googleusercontent.com/d/..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sinopse">Sinopse da Obra</label>
+                        <textarea id="sinopse" rows="5" placeholder="Escreva a sinopse..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Publicar no Codex</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ABA 2: GERENCIAR OBRAS EXISTENTES -->
+        <div id="aba-gerenciar" class="tab-content">
+            <h2 class="autor-title">Suas Obras Cadastradas</h2>
+            <div class="form-wrapper" style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Capa</th>
+                            <th>Título</th>
+                            <th>Universo</th>
+                            <th style="text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-gerenciar-livros">
+                        <!-- Alimentado via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ABA 3: CADASTRO DE CAPÍTULOS -->
+        <div id="aba-capitulos" class="tab-content">
+            <h2 class="autor-title">Adicionar Capítulo</h2>
+            <div class="form-wrapper">
+                <form id="form-cadastrar-capitulo">
+                    <div class="form-group">
+                        <label for="select-livro-capitulo">Selecionar a Obra</label>
+                        <select id="select-livro-capitulo" required>
+                            <option value="">Carregando seus livros...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="numero-capitulo">Número do Capítulo</label>
+                        <input type="number" id="numero-capitulo" min="1" placeholder="Ex: 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="titulo-capitulo">Título do Capítulo (Opcional)</label>
+                        <input type="text" id="titulo-capitulo" placeholder="Ex: Prólogo ou O Despertar da Verdade">
+                    </div>
+                    <div class="form-group">
+                        <label for="conteudo-capitulo">Conteúdo Narrativo</label>
+                        <textarea id="conteudo-capitulo" rows="12" placeholder="Escreva ou cole o texto do seu capítulo aqui..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Vincular Capítulo à Obra</button>
+                </form>
+            </div>
         </div>
     </main>
 
-    <!-- Script de Integração com o Banco -->
+    <script>
+        // Lógica de Alternância Visual de Abas
+        function alternarAba(abaId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(abaId).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
     <script type="module" src="../js/autor.js"></script>
 </body>
 </html>

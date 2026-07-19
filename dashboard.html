@@ -109,5 +109,43 @@
     </script>
 
     <script type="module" src="js/app.js"></script>
+    <!-- Modal Estilo Netflix (Pop-up de Detalhes da Obra) -->
+    <div id="netflix-modal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 9999; overflow-y: auto; backdrop-filter: blur(5px);">
+        <div style="background: #181818; max-width: 750px; margin: 40px auto; border-radius: 8px; overflow: hidden; color: #FFF; position: relative; border: 1px solid rgba(255,255,255,0.05);">
+            
+            <!-- Botão de fechar flutuante -->
+            <button onclick="fecharModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.5); border: none; color: #FFF; font-size: 1.5rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10;">&times;</button>
+            
+            <!-- Banner do modal -->
+            <div id="modal-banner" style="width:100%; height: 350px; background-size: cover; background-position: center; position: relative;">
+                <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 150px; background: linear-gradient(to top, #181818, transparent);"></div>
+                <h2 id="modal-titulo" style="position: absolute; bottom: 20px; left: 40px; font-family: 'Cinzel', serif; font-size: 2.2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);"></h2>
+            </div>
+
+            <!-- Conteúdo estrutural -->
+            <div style="padding: 40px; display: flex; flex-direction: column; gap: 24px;">
+                <div>
+                    <span id="modal-universo" style="color: #E50914; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;"></span>
+                    <p id="modal-sinopse" style="color: #D2D2D2; font-size: 1.05rem; line-height: 1.6; margin-top: 10px;"></p>
+                </div>
+
+                <!-- Seção de Capítulos -->
+                <div>
+                    <h3 style="font-family: 'Cinzel', serif; border-bottom: 2px solid #404040; padding-bottom: 10px; margin-bottom: 15px;">Capítulos Disponíveis</h3>
+                    <div id="modal-lista-capitulos" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Injetado dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function fecharModal() {
+            document.getElementById('netflix-modal').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Reativa o scroll da página principal
+        }
+    </script>
+
 </body>
 </html>
