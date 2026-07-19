@@ -10,24 +10,39 @@
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        .autor-container { max-width: 950px; margin: 80px auto; padding: 0 20px; }
+        /* CORREÇÃO DE OVERFLOW: Força a rolagem vertical nativa e impede cortes de tela */
+        html, body {
+            min-height: 100% !important;
+            height: auto !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+
+        /* Respiro na base (padding-bottom: 120px) para evitar botões colados ou ocultos */
+        .autor-container { 
+            max-width: 950px; 
+            margin: 80px auto; 
+            padding: 0 20px 120px 20px; 
+        }
+        
         .autor-title { font-family: 'Cinzel', serif; color: #FFF; margin-bottom: 20px; letter-spacing: 1px; }
         
-        .tabs-nav { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .tab-btn { background: transparent; border: none; color: #8C8C8C; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+        .tabs-nav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .tab-btn { background: transparent; border: none; color: #8C8C8C; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
+        .tab-btn:hover { color: #FFF; background-color: rgba(255,255,255,0.05); }
         .tab-btn.active { color: #FFF; background-color: #E50914; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
         .form-wrapper { background-color: #121214; border: 1px solid #202024; border-radius: 8px; padding: 30px; }
-        .form-row { display: flex; gap: 20px; margin-bottom: 20px; }
-        .form-group { flex: 1; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .form-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
         .form-group label { color: #8C8C8C; font-size: 0.85rem; text-transform: uppercase; font-weight: 500; }
         .form-group input, .form-group textarea, .form-group select { background-color: #1A1A1E; color: #FFF; border: 1px solid #29292E; padding: 12px; border-radius: 6px; font-family: inherit; font-size: 0.95rem; }
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #E50914; outline: none; }
         
-        /* Grid de Subgêneros (Estilo Tags das Imagens) */
+        /* Grid de Subgêneros (Tags Clicáveis) */
         .subgeneros-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
         .tag-checkbox { display: none; }
         .tag-label { background: #1A1A1E; border: 1px solid #29292E; color: #8C8C8C; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; user-select: none; }
@@ -36,8 +51,12 @@
         /* Meta de informações do capítulo */
         .cap-meta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #8C8C8C; font-size: 0.9rem; }
 
-        .btn-submit { background-color: #E50914; color: #FFF; border: none; padding: 14px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; }
+        .btn-submit { background-color: #E50914; color: #FFF; border: none; padding: 14px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; transition: background 0.2s; }
         .btn-submit:hover { background-color: #B81D24; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; color: #FFF; }
+        th, td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { color: #8C8C8C; font-size: 0.85rem; text-transform: uppercase; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -59,6 +78,7 @@
             <button class="tab-btn active" onclick="alternarAba('aba-cadastrar')">Editar/Criar Livro</button>
             <button class="tab-btn" onclick="alternarAba('aba-gerenciar')">Suas Obras</button>
             <button class="tab-btn" onclick="alternarAba('aba-capitulos')">Novo Capítulo</button>
+            <button class="tab-btn" onclick="alternarAba('aba-personagens')">Cadastrar Personagens</button>
         </div>
 
         <!-- ABA 1: CADASTRO/EDIÇÃO DE LIVRO -->
@@ -115,7 +135,7 @@
                             <label for="url-capa">Link Direto da Capa (Imagem)</label>
                             <input type="url" id="url-capa" placeholder="https://lh3.googleusercontent.com/d/..." required>
                         </div>
-                        <div class="form-group" style="max-width: 150px;">
+                        <div class="form-group" style="max-width: 150px; min-width: 120px;">
                             <label for="cor-tema">Cor tema do livro</label>
                             <input type="color" id="cor-tema" value="#f59e0b" style="height: 45px; padding: 2px; cursor: pointer;">
                         </div>
@@ -134,8 +154,8 @@
         <!-- ABA 2: LISTAGEM DE CONTROLE -->
         <div id="aba-gerenciar" class="tab-content">
             <h2 class="autor-title">Suas Obras Cadastradas</h2>
-            <div class="form-wrapper">
-                <table style="width:100%;">
+            <div class="form-wrapper" style="overflow-x: auto;">
+                <table>
                     <thead>
                         <tr style="color: #8C8C8C; font-size: 0.85rem;">
                             <th>Capa</th>
@@ -189,6 +209,38 @@
                 </form>
             </div>
         </div>
+
+        <!-- ABA 4: CADASTRO DE PERSONAGENS (CÓDICE) -->
+        <div id="aba-personagens" class="tab-content">
+            <h2 class="autor-title">Cadastrar Personagem (Códice)</h2>
+            <div class="form-wrapper">
+                <form id="form-cadastrar-personagem">
+                    <div class="form-group">
+                        <label for="select-livro-personagem">Vincular à Obra</label>
+                        <select id="select-livro-personagem" required>
+                            <option value="">Selecione a Obra...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nome-personagem">Nome do Personagem</label>
+                        <input type="text" id="nome-personagem" placeholder="Ex: Hugo Claes" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="funcao-personagem">Função / Papel na História</label>
+                        <input type="text" id="funcao-personagem" placeholder="Ex: Co-Protagonista • 26 anos" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="url-avatar-personagem">URL da Foto do Personagem</label>
+                        <input type="url" id="url-avatar-personagem" placeholder="https://lh3.googleusercontent.com/d/..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricao-personagem">Descrição / Ficha Breve</label>
+                        <textarea id="descricao-personagem" rows="4" placeholder="Ex: Herdeiro direto da dinastia Claes..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Adicionar ao Códice</button>
+                </form>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -196,7 +248,11 @@
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(abaId).classList.add('active');
-            event.target.classList.add('active');
+            
+            // Garante o mapeamento do botão mesmo com eventos dinâmicos
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
         }
 
         // Lógica do Contador de Palavras Real-time
