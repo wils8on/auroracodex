@@ -3,39 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aurora Codex - Painel do Autor</title>
+    <title>Aurora Codex - Painel do Autor Premium</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        .autor-container { max-width: 900px; margin: 80px auto; padding: 0 20px; }
+        .autor-container { max-width: 950px; margin: 80px auto; padding: 0 20px; }
         .autor-title { font-family: 'Cinzel', serif; color: #FFF; margin-bottom: 20px; letter-spacing: 1px; }
         
-        /* Sistema de Abas Premium */
         .tabs-nav { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .tab-btn { background: transparent; border: none; color: #8C8C8C; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; cursor: pointer; transition: all 0.2s; border-radius: 4px; }
-        .tab-btn:hover { color: #FFF; background-color: rgba(255,255,255,0.05); }
+        .tab-btn { background: transparent; border: none; color: #8C8C8C; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
         .tab-btn.active { color: #FFF; background-color: #E50914; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
-        .form-wrapper { background-color: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 30px; backdrop-filter: blur(8px); }
-        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
-        .form-group label { color: #8C8C8C; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .form-group input, .form-group textarea, .form-group select { background-color: #1A1A1A; color: #FFF; border: 1px solid #404040; padding: 12px; border-radius: 4px; font-family: inherit; font-size: 0.95rem; }
+        .form-wrapper { background-color: #121214; border: 1px solid #202024; border-radius: 8px; padding: 30px; }
+        .form-row { display: flex; gap: 20px; margin-bottom: 20px; }
+        .form-group { flex: 1; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .form-group label { color: #8C8C8C; font-size: 0.85rem; text-transform: uppercase; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select { background-color: #1A1A1E; color: #FFF; border: 1px solid #29292E; padding: 12px; border-radius: 6px; font-family: inherit; font-size: 0.95rem; }
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #E50914; outline: none; }
         
-        .btn-submit { background-color: #E50914; color: #FFF; border: none; padding: 14px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 1rem; margin-top: 10px; }
+        /* Grid de Subgêneros (Estilo Tags das Imagens) */
+        .subgeneros-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .tag-checkbox { display: none; }
+        .tag-label { background: #1A1A1E; border: 1px solid #29292E; color: #8C8C8C; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; user-select: none; }
+        .tag-checkbox:checked + .tag-label { background: rgba(229, 9, 20, 0.15); border-color: #E50914; color: #FFF; }
+
+        /* Meta de informações do capítulo */
+        .cap-meta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #8C8C8C; font-size: 0.9rem; }
+
+        .btn-submit { background-color: #E50914; color: #FFF; border: none; padding: 14px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; }
         .btn-submit:hover { background-color: #B81D24; }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; color: #FFF; }
-        th, td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        th { color: #8C8C8C; font-size: 0.8rem; text-transform: uppercase; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -45,140 +49,165 @@
             <h1 class="nav-logo" style="cursor:pointer;" onclick="window.location.href='../dashboard.html'">AURORA CODEX</h1>
             <ul class="nav-links">
                 <li><a href="../dashboard.html">Voltar ao Portal</a></li>
-                <li class="active"><a href="#">Painel Criativo</a></li>
+                <li class="active"><a href="#">Painel do Escritor</a></li>
             </ul>
         </div>
     </nav>
 
     <main class="autor-container">
-        <!-- Navegação por Abas -->
         <div class="tabs-nav">
-            <button class="tab-btn active" onclick="alternarAba('aba-cadastrar')">Nova Obra</button>
-            <button class="tab-btn" onclick="alternarAba('aba-gerenciar')">Gerenciar Obras</button>
-            <button class="tab-btn" onclick="alternarAba('aba-capitulos')">Adicionar Capítulos</button>
-            <button class="tab-btn" onclick="alternarAba('aba-personagens')">Cadastrar Personagens</button>
+            <button class="tab-btn active" onclick="alternarAba('aba-cadastrar')">Editar/Criar Livro</button>
+            <button class="tab-btn" onclick="alternarAba('aba-gerenciar')">Suas Obras</button>
+            <button class="tab-btn" onclick="alternarAba('aba-capitulos')">Novo Capítulo</button>
         </div>
 
-        <!-- ABA 1: CADASTRAR NOVA OBRA -->
+        <!-- ABA 1: CADASTRO/EDIÇÃO DE LIVRO -->
         <div id="aba-cadastrar" class="tab-content active">
-            <h2 class="autor-title">Cadastrar Nova Obra</h2>
+            <h2 class="autor-title">Configurações da Obra</h2>
             <div class="form-wrapper">
                 <form id="form-cadastrar-livro">
                     <div class="form-group">
-                        <label for="titulo">Título do Livro</label>
-                        <input type="text" id="titulo" placeholder="Ex: Labirinto de Vidro" required>
+                        <label for="titulo">Título do Livro *</label>
+                        <input type="text" id="titulo" placeholder="O Mundo Apesar de Mim" required>
                     </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="genero">Gênero Principal</label>
+                            <select id="genero" required>
+                                <option value="Romance">Romance</option>
+                                <option value="Fantasia">Fantasia / Sobrenatural</option>
+                                <option value="Cyberpunk">Cyberpunk / Distopia</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="status-obra">Status da Obra</label>
+                            <select id="status-obra" required>
+                                <option value="Em Breve">Em Breve</option>
+                                <option value="Em Andamento">Em Andamento</option>
+                                <option value="Concluído">Concluído</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Seção Avançada de Subgêneros/Tags -->
                     <div class="form-group">
-                        <label for="universo">Universo Conectado</label>
-                        <select id="universo" required>
-                            <option value="">Selecione o Universo...</option>
-                            <option value="original">Universo Original</option>
-                            <option value="vampire-diaries">The Vampire Diaries (Fanfiction)</option>
-                            <option value="50-shades">50 Shades of Grey (Fanfiction)</option>
-                        </select>
+                        <label>Subgêneros / Tags</label>
+                        <div class="subgeneros-grid">
+                            <input type="checkbox" id="tag-dark" class="tag-checkbox" value="Dark Romance"><label for="tag-dark" class="tag-label">Dark Romance</label>
+                            <input type="checkbox" id="tag-enemies" class="tag-checkbox" value="Enemies to Lovers"><label for="tag-enemies" class="tag-label">Enemies to Lovers</label>
+                            <input type="checkbox" id="tag-slow" class="tag-checkbox" value="Slow Burn"><label for="tag-slow" class="tag-label">Slow Burn</label>
+                            <input type="checkbox" id="tag-mafia" class="tag-checkbox" value="Máfia"><label for="tag-mafia" class="tag-label">Máfia</label>
+                            <input type="checkbox" id="tag-vampiros" class="tag-checkbox" value="Vampiros"><label for="tag-vampiros" class="tag-label">Vampiros</label>
+                            <input type="checkbox" id="tag-psicologico" class="tag-checkbox" value="Psicológico"><label for="tag-psicologico" class="tag-label">Psicológico</label>
+                            <input type="checkbox" id="tag-distopia" class="tag-checkbox" value="Distopia"><label for="tag-distopia" class="tag-label">Distopia</label>
+                        </div>
                     </div>
+
                     <div class="form-group">
-                        <label for="url-capa">URL da Imagem da Capa (Horizontal)</label>
-                        <input type="url" id="url-capa" placeholder="https://lh3.googleusercontent.com/d/..." required>
+                        <label for="sinopse">Sinopse</label>
+                        <textarea id="sinopse" rows="4" placeholder="Escreva a sinopse ou introdução marcante..." required></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="sinopse">Sinopse da Obra</label>
-                        <textarea id="sinopse" rows="5" placeholder="Escreva a sinopse..." required></textarea>
+
+                    <div class="form-row" style="align-items: center;">
+                        <div class="form-group">
+                            <label for="url-capa">Link Direto da Capa (Imagem)</label>
+                            <input type="url" id="url-capa" placeholder="https://lh3.googleusercontent.com/d/..." required>
+                        </div>
+                        <div class="form-group" style="max-width: 150px;">
+                            <label for="cor-tema">Cor tema do livro</label>
+                            <input type="color" id="cor-tema" value="#f59e0b" style="height: 45px; padding: 2px; cursor: pointer;">
+                        </div>
                     </div>
-                    <button type="submit" class="btn-submit">Publicar no Codex</button>
+
+                    <div class="form-group" style="flex-direction: row; gap: 10px; align-items: center;">
+                        <input type="checkbox" id="destacar-home" style="width: 18px; height: 18px; cursor: pointer;">
+                        <label for="destacar-home" style="cursor: pointer; text-transform: none; color: #FFF;">Destacar na página inicial</label>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Salvar Livro</button>
                 </form>
             </div>
         </div>
 
-        <!-- ABA 2: GERENCIAR OBRAS EXISTENTES -->
+        <!-- ABA 2: LISTAGEM DE CONTROLE -->
         <div id="aba-gerenciar" class="tab-content">
             <h2 class="autor-title">Suas Obras Cadastradas</h2>
-            <div class="form-wrapper" style="overflow-x: auto;">
-                <table>
+            <div class="form-wrapper">
+                <table style="width:100%;">
                     <thead>
-                        <tr>
+                        <tr style="color: #8C8C8C; font-size: 0.85rem;">
                             <th>Capa</th>
                             <th>Título</th>
-                            <th>Universo</th>
+                            <th>Gênero</th>
                             <th style="text-align: right;">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-gerenciar-livros">
-                        <!-- Alimentado via JS -->
-                    </tbody>
+                    <tbody id="tabela-gerenciar-livros"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ABA 3: CADASTRO DE CAPÍTULOS -->
+        <!-- ABA 3: ESCRITA E CADASTRO DE CAPÍTULOS -->
         <div id="aba-capitulos" class="tab-content">
-            <h2 class="autor-title">Adicionar Capítulo</h2>
+            <h2 class="autor-title">Escrever Capítulo</h2>
             <div class="form-wrapper">
                 <form id="form-cadastrar-capitulo">
-                    <div class="form-group">
-                        <label for="select-livro-capitulo">Selecionar a Obra</label>
-                        <select id="select-livro-capitulo" required>
-                            <option value="">Carregando seus livros...</option>
-                        </select>
+                    
+                    <div class="cap-meta-header">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span>Cap. nº</span>
+                            <input type="number" id="numero-capitulo" min="1" value="1" style="width: 70px; background: #1A1A1E; border: 1px solid #29292E; color: #FFF; padding: 6px; border-radius: 4px; text-align: center;">
+                        </div>
+                        <div>
+                            <span id="contador-palavras">0</span> palavras
+                        </div>
                     </div>
+
                     <div class="form-group">
-                        <label for="numero-capitulo">Número do Capítulo</label>
-                        <input type="number" id="numero-capitulo" min="1" placeholder="Ex: 1" required>
+                        <label for="select-livro-capitulo">Vincular à Obra</label>
+                        <select id="select-livro-capitulo" required></select>
                     </div>
+
                     <div class="form-group">
-                        <label for="titulo-capitulo">Título do Capítulo (Opcional)</label>
-                        <input type="text" id="titulo-capitulo" placeholder="Ex: Prólogo ou O Despertar da Verdade">
+                        <label for="titulo-capitulo">Título do Capítulo</label>
+                        <input type="text" id="titulo-capitulo" placeholder="Ex: O Começo de Tudo" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="trilha-sonora">Trilha Sonora — Link do Spotify ou YouTube (Opcional)</label>
+                        <input type="url" id="trilha-sonora" placeholder="https://open.spotify.com/track/...">
+                    </div>
+
                     <div class="form-group">
                         <label for="conteudo-capitulo">Conteúdo Narrativo</label>
-                        <textarea id="conteudo-capitulo" rows="12" placeholder="Escreva ou cole o texto do seu capítulo aqui..." required></textarea>
+                        <textarea id="conteudo-capitulo" rows="18" placeholder="Escreva o capítulo aqui..." style="line-height: 1.6; font-size: 1.05rem;" required></textarea>
                     </div>
-                    <button type="submit" class="btn-submit">Vincular Capítulo à Obra</button>
-                </form>
-            </div>
-        </div>
 
-        <!-- ABA 4: CADASTRO DE PERSONAGENS (CÓDICE) -->
-        <div id="aba-personagens" class="tab-content">
-            <h2 class="autor-title">Cadastrar Personagem (Códice)</h2>
-            <div class="form-wrapper">
-                <form id="form-cadastrar-personagem">
-                    <div class="form-group">
-                        <label for="select-livro-personagem">Vincular à Obra</label>
-                        <select id="select-livro-personagem" required>
-                            <option value="">Carregando seus livros...</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="nome-personagem">Nome do Personagem</label>
-                        <input type="text" id="nome-personagem" placeholder="Ex: Hugo Claes" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="funcao-personagem">Função / Papel na História</label>
-                        <input type="text" id="funcao-personagem" placeholder="Ex: Co-Protagonista • 26 anos" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="url-avatar-personagem">URL da Foto do Personagem</label>
-                        <input type="url" id="url-avatar-personagem" placeholder="https://lh3.googleusercontent.com/d/..." required>
-                    </div>
-                    <div class="form-group">
-                        <label for="descricao-personagem">Descrição / Ficha Breve</label>
-                        <textarea id="descricao-personagem" rows="4" placeholder="Ex: Herdeiro direto da dinastia Claes..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn-submit">Adicionar ao Códice</button>
+                    <button type="submit" class="btn-submit">Publicar Capítulo</button>
                 </form>
             </div>
         </div>
     </main>
 
     <script>
-        // Lógica de Alternância Visual de Abas
         function alternarAba(abaId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
             document.getElementById(abaId).classList.add('active');
             event.target.classList.add('active');
+        }
+
+        // Lógica do Contador de Palavras Real-time
+        const txArea = document.getElementById('conteudo-capitulo');
+        const contador = document.getElementById('contador-palavras');
+        if(txArea && contador) {
+            txArea.addEventListener('input', () => {
+                const texto = txArea.value.trim();
+                const palavras = texto === "" ? 0 : texto.split(/\s+/).length;
+                contador.innerText = palavras;
+            });
         }
     </script>
     <script type="module" src="../js/autor.js"></script>
