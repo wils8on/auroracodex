@@ -11,16 +11,17 @@
 </head>
 <body>
 
-    <!-- Cabeçalho de Leitura (Sutil) -->
+    <!-- Cabeçalho de Leitura (Sutil e Dinâmico) -->
     <header class="reader-header">
         <button class="btn-back" onclick="window.location.href='dashboard.html'">
             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
             Voltar ao Catálogo
         </button>
         <div class="reading-meta">
-            <span class="book-title-nav">Labirinto de Vidro</span>
+            <!-- IDs adicionados para mapeamento via JS -->
+            <span class="book-title-nav" id="header-nome-livro">Carregando Obra...</span>
             <span class="divider">•</span>
-            <span class="chapter-title-nav">Capítulo 1: O Começo de Tudo</span>
+            <span class="chapter-title-nav" id="header-nome-capitulo">Aguardando Índice</span>
         </div>
         <button class="btn-sidebar-toggle" id="open-oracle">
             🔮 Ver Códice/Personagens
@@ -31,20 +32,17 @@
     <main class="reader-container">
         <article class="reading-core">
             <header class="chapter-intro">
-                <p class="chapter-number">CAPÍTULO I</p>
-                <h2 class="chapter-title">O Começo de Tudo</h2>
+                <!-- IDs estratégicos para o JS injetar o conteúdo real do banco -->
+                <p class="chapter-number" id="capitulo-numero-exibicao">NÚMERO</p>
+                <h2 class="chapter-title" id="capitulo-titulo-exibicao">CARREGANDO TEXTO...</h2>
                 <div class="author-signature">Por Ison W. Lone</div>
             </header>
 
-            <!-- O Texto usa a fonte Lora, excelente para leitura longa digital -->
-            <section class="chapter-text">
-                <p>O reflexo do vidro nunca mentia, mas omitia o suficiente para manter as aparências. Zuri Afolayan ajustou a gola de seu casaco escuro enquanto observava a névoa cobrir os andares inferiores do Distrito Tecnológico. As luzes da cidade piscavam lá embaixo como um ecossistema de dados pulsantes.</p>
-                
-                <p>Ela sabia que cruzar os portões da mansão Claes naquela noite mudaria tudo. Não era apenas uma questão de prestígio ou o ápice de sua carreira literária e investigativa; era sobre o rastro invisível que conectava as grandes dinastias a segredos que nunca deveriam ser catalogados.</p>
-
-                <p>— Você está atrasada — uma voz ecoou das sombras do corredor de mármre polido. Hugo Claes deu um passo à frente, a iluminação contrastante realçando as linhas duras de seu rosto e a sutil determinação em seu olhar.</p>
-                
-                <p>Zuri não recuou. Ela apenas sorriu, sabendo que os fios daquele labirinto estavam prestes a se entrelaçar de forma irreversível.</p>
+            <!-- O Texto usa a fonte Lora. Toda a narrativa gerada pelo Firebase entrará aqui dentro -->
+            <section class="chapter-text" id="capitulo-texto-exibicao">
+                <p style="color: #737373; font-style: italic; text-align: center; padding: 40px 0;">
+                    Buscando manuscritos no Aurora Codex...
+                </p>
             </section>
 
             <!-- Rodapé do Capítulo (Interações) -->
@@ -88,7 +86,6 @@
         <div class="sidebar-content">
             <h4>Personagens em Cena</h4>
             
-            <!-- Ficha de Personagem Estilo Ficha Limpa Premium -->
             <div class="character-mini-card">
                 <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100" alt="Hugo Claes">
                 <div class="char-info">
@@ -119,7 +116,6 @@
             </div>
         </div>
         <div class="player-controls">
-            <!-- Usaremos uma tag de áudio padrão estilizada ocultada, disparada por esses botões modernos -->
             <audio id="chapter-audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
             <button class="btn-play-pause" id="play-pause-btn">
                 <svg viewBox="0 0 24 24" id="play-icon"><path d="M8 5v14l11-7z"/></svg>
@@ -130,37 +126,46 @@
         </div>
     </div>
 
+    <!-- Interface nativa com o script dinâmico do Firebase -->
+    <script type="module" src="js/ler.js"></script>
+
     <!-- Script de Interação Local da Página -->
     <script>
         // Lógica do Player de Áudio
         const audio = document.getElementById('chapter-audio');
         const playBtn = document.getElementById('play-pause-btn');
-        const playIcon = document.getElementById('play-icon');
         const progressBar = document.getElementById('audio-progress');
 
-        playBtn.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play();
-                playBtn.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`; // Ícone Pause
-            } else {
-                audio.pause();
-                playBtn.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000;"><path d="M8 5v14l11-7z"/></svg>`; // Ícone Play
-            }
-        });
+        if (playBtn && audio) {
+            playBtn.addEventListener('click', () => {
+                if (audio.paused) {
+                    audio.play();
+                    playBtn.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+                } else {
+                    audio.pause();
+                    playBtn.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000;"><path d="M8 5v14l11-7z"/></svg>`;
+                }
+            });
 
-        audio.addEventListener('timeupdate', () => {
-            const percentage = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = percentage + '%';
-        });
+            audio.addEventListener('timeupdate', () => {
+                const percentage = (audio.currentTime / audio.duration) * 100;
+                if (progressBar) progressBar.style.width = percentage + '%';
+            });
+        }
 
         // Lógica da Aba Lateral do Oráculo
         const sidebar = document.getElementById('oracle-sidebar');
-        document.getElementById('open-oracle').addEventListener('click', () => sidebar.classList.add('active'));
-        document.getElementById('close-oracle').addEventListener('click', () => sidebar.classList.remove('active'));
+        const openOracle = document.getElementById('open-oracle');
+        const closeOracle = document.getElementById('close-oracle');
+
+        if (openOracle && sidebar) openOracle.addEventListener('click', () => sidebar.classList.add('active'));
+        if (closeOracle && sidebar) closeOracle.addEventListener('click', () => sidebar.classList.remove('active'));
 
         // Lógica de Curtida Visual
         const likeBtn = document.getElementById('btn-like');
-        likeBtn.addEventListener('click', () => likeBtn.classList.toggle('liked'));
+        if (likeBtn) {
+            likeBtn.addEventListener('click', () => likeBtn.classList.toggle('liked'));
+        }
     </script>
 </body>
 </html>
