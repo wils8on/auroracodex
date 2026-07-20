@@ -36,26 +36,27 @@
         </div>
     </nav>
 
-    <!-- Banner de Destaque Principal -->
-    <header class="hero-banner">
-        <div class="hero-cover-bg"></div>
+    <!-- Banner de Destaque Principal Dinâmico -->
+    <header class="hero-banner" id="hero-banner-bg" style="position: relative; background-size: cover; background-position: center top; transition: background-image 0.5s ease-in-out;">
+        <!-- Removida a div hero-cover-bg que travava a imagem fixa -->
         <div class="hero-content">
             <span class="hero-tagline">✨ DESTAQUE DO SEU UNIVERSO</span>
-            <h2 class="hero-title">Labirinto de Vidro</h2>
-            <p class="hero-synopsis">
-                Em uma sociedade onde segredos moldam a arquitetura do power, Zuri Afolayan descobre que a verdade por trás do império Claes é mais frágil — e perigosa — do que vidro temperado.
+            <h2 class="hero-title" id="hero-titulo-destaque">Labirinto de Vidro</h2>
+            <p class="hero-synopsis" id="hero-sinopse-destaque">
+                Em uma sociedade onde segredos moldam a arquitetura do poder...
             </p>
             <div class="hero-buttons">
-                <button class="btn-read">
+                <button class="btn-read" id="btn-ler-destaque">
                     <svg viewBox="0 0 24 24" class="icon-play"><path d="M8 5v14l11-7z"/></svg>
                     Ler Capítulo 1
                 </button>
-                <button class="btn-info">
+                <button class="btn-info" id="btn-info-destaque">
                     <svg viewBox="0 0 24 24" class="icon-info"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v-2h-2v2z"/></svg>
-                    Ver Oráculo / Fichas
+                    Ver Detalhes
                 </button>
             </div>
         </div>
+        <!-- Mantida a vinheta para dar o degradê escuro e legibilidade aos textos -->
         <div class="hero-vignette"></div>
     </header>
 
