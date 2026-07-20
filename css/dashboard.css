@@ -120,16 +120,17 @@ a {
     z-index: 1;
 }
 
-/* Gradiente escuro para fazer o texto saltar aos olhos */
+/* Vinheta suave e ajustada para destacar a arte sem escurecer o centro */
 .hero-vignette {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to right, #141414 20%, rgba(20,20,20,0.2) 60%, transparent 100%),
-                linear-gradient(to top, #141414 0%, transparent 40%);
-    z-index: 2;
+    /* Degradê suave da esquerda (atrás do texto) para a direita + sombra suave na base */
+    background: linear-gradient(90deg, rgba(20, 20, 20, 0.92) 0%, rgba(20, 20, 20, 0.6) 28%, rgba(20, 20, 20, 0) 55%),
+                linear-gradient(0deg, #141414 0%, transparent 25%);
+    pointer-events: none;
 }
 
 .hero-content {

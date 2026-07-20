@@ -106,8 +106,8 @@ function atualizarBannerDestaque(idLivro, livro) {
     const btnInfo = document.getElementById("btn-info-destaque") || document.querySelector(".btn-info");
 
     if (heroBg && livro.capa) {
-        // Aplica o gradiente escuro junto com a imagem da capa do livro cadastrado
-        heroBg.style.backgroundImage = `linear-gradient(to right, rgba(0,0,0,0.85) 20%, rgba(0,0,0,0.3) 60%, transparent 100%), url('${livro.capa}')`;
+        // Aplica a imagem limpa e deixa o gradiente profissional por conta do CSS (.hero-vignette)
+        heroBg.style.backgroundImage = `url('${livro.capa}')`;
         heroBg.style.backgroundSize = "cover";
         heroBg.style.backgroundPosition = "center top";
     }
@@ -115,7 +115,6 @@ function atualizarBannerDestaque(idLivro, livro) {
     if (heroTitulo) heroTitulo.innerText = livro.titulo;
     if (heroSinopse) heroSinopse.innerText = livro.sinopse;
 
-    // Configura os botões do banner principal para abrir o modal
     if (btnInfo) {
         btnInfo.onclick = () => abrirModalNetflix(idLivro, livro);
     }
