@@ -17,6 +17,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Estado do Carrossel de Destaques
+let listaDestaques = [];
+let indiceDestaqueAtual = 0;
+let timerCarrossel = null;
+
 // Monitora o estado do usuário logado na Home
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -48,7 +53,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Busca os livros no Firestore, atualiza o catálogo e define o Destaque Principal (Hero Banner)
+// Busca os livros no Firestore, atualiza o catálogo e preenche o Carrossel de Destaques
 function ouvirCatalogo() {
     const livrosRef = collection(db, "livros");
 
@@ -56,14 +61,14 @@ function ouvirCatalogo() {
         const container = document.getElementById("catalogo-livros");
         if (container) container.innerHTML = "";
 
+        listaDestaques = []; // Reinicia a lista a cada atualização do banco
+
         if (snapshot.empty) {
             if (container) {
                 container.innerHTML = `<p style="color: #737373; padding: 20px;">Nenhum livro cadastrado ainda.</p>`;
             }
             return;
         }
-
-        let destaqueEncontrado = false;
 
         snapshot.forEach((docSnap) => {
             const livro = docSnap.data();
@@ -88,17 +93,50 @@ function ouvirCatalogo() {
                 container.appendChild(card);
             }
 
-            // 2. ATUALIZA O HERO BANNER SE O LIVRO FOR MARCADO COMO DESTAQUE
-            if (livro.destacar && !destaqueEncontrado) {
-                destaqueEncontrado = true;
-                atualizarBannerDestaque(id, livro);
+            // 2. COLETA OS LIVROS MARCADOS PARA DESTAQUE
+            if (livro.destacar) {
+                listaDestaques.push({ id, ...livro });
             }
         });
+
+        // Inicializa o slider principal com todos os destaques encontrados
+        iniciarCarrosselHero();
     });
 }
 
-// Atualiza o Hero Banner dinamicamente com a imagem e textos da obra destacada
-function atualizarBannerDestaque(idLivro, livro) {
+// Inicializa ou reseta o Carrossel do Hero Banner
+function iniciarCarrosselHero() {
+    const controlesContainer = document.getElementById("hero-controls");
+    
+    if (listaDestaques.length === 0) {
+        if (controlesContainer) controlesContainer.style.display = "none";
+        return;
+    }
+
+    // Se houver mais de 1 destaque, exibe o painel de controles
+    if (controlesContainer) {
+        controlesContainer.style.display = listaDestaques.length > 1 ? "flex" : "none";
+    }
+
+    // Garante que o índice não saia dos limites da lista
+    if (indiceDestaqueAtual >= listaDestaques.length) {
+        indiceDestaqueAtual = 0;
+    }
+
+    exibirDestaquePorIndice(indiceDestaqueAtual);
+
+    // Ativa rotação automática de 6 segundos apenas se houver mais de 1 item
+    if (timerCarrossel) clearInterval(timerCarrossel);
+    if (listaDestaques.length > 1) {
+        timerCarrossel = setInterval(proximoDestaque, 6000);
+    }
+}
+
+// Exibe um destaque específico com transição
+function exibirDestaquePorIndice(index) {
+    if (!listaDestaques[index]) return;
+    
+    const livro = listaDestaques[index];
     const heroBg = document.getElementById("hero-banner-bg") || document.querySelector(".hero-banner");
     const heroTitulo = document.getElementById("hero-titulo-destaque") || document.querySelector(".hero-title");
     const heroSinopse = document.getElementById("hero-sinopse-destaque") || document.querySelector(".hero-synopsis");
@@ -106,7 +144,6 @@ function atualizarBannerDestaque(idLivro, livro) {
     const btnInfo = document.getElementById("btn-info-destaque") || document.querySelector(".btn-info");
 
     if (heroBg && livro.capa) {
-        // Aplica a imagem limpa e deixa o gradiente profissional por conta do CSS (.hero-vignette)
         heroBg.style.backgroundImage = `url('${livro.capa}')`;
         heroBg.style.backgroundSize = "cover";
         heroBg.style.backgroundPosition = "center top";
@@ -115,13 +152,59 @@ function atualizarBannerDestaque(idLivro, livro) {
     if (heroTitulo) heroTitulo.innerText = livro.titulo;
     if (heroSinopse) heroSinopse.innerText = livro.sinopse;
 
-    if (btnInfo) {
-        btnInfo.onclick = () => abrirModalNetflix(idLivro, livro);
-    }
-    if (btnLer) {
-        btnLer.onclick = () => abrirModalNetflix(idLivro, livro);
+    if (btnInfo) btnInfo.onclick = () => abrirModalNetflix(livro.id, livro);
+    if (btnLer) btnLer.onclick = () => abrirModalNetflix(livro.id, livro);
+
+    renderizarIndicadoresDots();
+}
+
+// Desenha os marcadores (dots) do carrossel
+function renderizarIndicadoresDots() {
+    const dotsContainer = document.getElementById("hero-dots");
+    if (!dotsContainer) return;
+    dotsContainer.innerHTML = "";
+
+    listaDestaques.forEach((_, index) => {
+        const dot = document.createElement("span");
+        dot.style.cssText = `width: ${index === indiceDestaqueAtual ? '24px' : '8px'}; height: 8px; border-radius: 4px; background: ${index === indiceDestaqueAtual ? '#E50914' : 'rgba(255,255,255,0.4)'}; cursor: pointer; transition: all 0.3s;`;
+        dot.onclick = () => {
+            indiceDestaqueAtual = index;
+            exibirDestaquePorIndice(indiceDestaqueAtual);
+            reiniciarTimerCarrossel();
+        };
+        dotsContainer.appendChild(dot);
+    });
+}
+
+function proximoDestaque() {
+    if (listaDestaques.length === 0) return;
+    indiceDestaqueAtual = (indiceDestaqueAtual + 1) % listaDestaques.length;
+    exibirDestaquePorIndice(indiceDestaqueAtual);
+}
+
+function destaqueAnterior() {
+    if (listaDestaques.length === 0) return;
+    indiceDestaqueAtual = (indiceDestaqueAtual - 1 + listaDestaques.length) % listaDestaques.length;
+    exibirDestaquePorIndice(indiceDestaqueAtual);
+}
+
+function reiniciarTimerCarrossel() {
+    if (timerCarrossel) clearInterval(timerCarrossel);
+    if (listaDestaques.length > 1) {
+        timerCarrossel = setInterval(proximoDestaque, 6000);
     }
 }
+
+// Vincula os botões de controle de setas (se existirem na DOM)
+document.getElementById("btn-next-hero")?.addEventListener("click", () => {
+    proximoDestaque();
+    reiniciarTimerCarrossel();
+});
+
+document.getElementById("btn-prev-hero")?.addEventListener("click", () => {
+    destaqueAnterior();
+    reiniciarTimerCarrossel();
+});
 
 // Pop-up estilo Netflix completo com busca de capítulos da subcoleção
 async function abrirModalNetflix(idLivro, livro) {
