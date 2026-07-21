@@ -106,22 +106,23 @@
         </div>
     </aside>
 
-    <!-- Player Fixo de Trilha Sonora (A Atmosfera Netflix/Spotify) -->
+    <!-- Player Fixo de Trilha Sonora Dinâmico -->
     <div class="audio-player-dock">
         <div class="player-track-info">
             <div class="track-icon">🎵</div>
             <div class="track-text">
-                <span class="track-title">Atmosphere Ambient Theme</span>
-                <span class="track-author">Trilha Oficial do Capítulo</span>
+                <span class="track-title" id="player-track-title">Trilha Sonora do Capítulo</span>
+                <span class="track-author" id="player-track-author">Carregando áudio...</span>
             </div>
         </div>
+        
         <div class="player-controls">
-            <audio id="chapter-audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
-            <button class="btn-play-pause" id="play-pause-btn">
-                <svg viewBox="0 0 24 24" id="play-icon"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="audio-progress"></div>
+            <!-- Container onde o player embutido do YouTube ou áudio nativo será injetado -->
+            <div id="media-player-container" style="display: flex; align-items: center;">
+                <audio id="chapter-audio" style="display: none;"></audio>
+                <button class="btn-play-pause" id="play-pause-btn">
+                    <svg viewBox="0 0 24 24" id="play-icon"><path d="M8 5v14l11-7z"/></svg>
+                </button>
             </div>
         </div>
     </div>
@@ -131,29 +132,31 @@
 
     <!-- Script de Interação Local da Página -->
     <script>
-        // Lógica do Player de Áudio
+        // Lógica do Player de Áudio Direto (somente se não for substituído pelo YouTube)
         const audio = document.getElementById('chapter-audio');
         const playBtn = document.getElementById('play-pause-btn');
         const progressBar = document.getElementById('audio-progress');
 
         if (playBtn && audio) {
             playBtn.addEventListener('click', () => {
-                if (audio.paused) {
-                    audio.play();
-                    playBtn.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
-                } else {
+                if (audio.src && !audio.paused) {
                     audio.pause();
                     playBtn.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000;"><path d="M8 5v14l11-7z"/></svg>`;
+                } else if (audio.src) {
+                    audio.play().catch(err => console.log("Aguardando ação de mídia do usuário."));
+                    playBtn.innerHTML = `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
                 }
             });
 
             audio.addEventListener('timeupdate', () => {
-                const percentage = (audio.currentTime / audio.duration) * 100;
-                if (progressBar) progressBar.style.width = percentage + '%';
+                if (audio.duration) {
+                    const percentage = (audio.currentTime / audio.duration) * 100;
+                    if (progressBar) progressBar.style.width = percentage + '%';
+                }
             });
         }
 
-        // Lógica da Aba Lateral do Oráculo
+        // Lógica da Aba Lateral do Oráculo (Códice)
         const sidebar = document.getElementById('oracle-sidebar');
         const openOracle = document.getElementById('open-oracle');
         const closeOracle = document.getElementById('close-oracle');

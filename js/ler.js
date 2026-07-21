@@ -17,8 +17,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Proteção básica de rota
-onAuthStateChanged(auth, (user) => {
+// Estado do Carrossel de Destaques e Leitura
+onAuthStateChanged(auth, async (user) => {
     if (!user) {
         window.location.href = "index.html";
     } else {
@@ -27,7 +27,6 @@ onAuthStateChanged(auth, (user) => {
 });
 
 async function carregarConteudoCapitulo() {
-    // Pega os IDs que foram passados na URL (?livroId=XXX&capituloId=YYY)
     const urlParams = new URLSearchParams(window.location.search);
     const livroId = urlParams.get('livroId');
     const capituloId = urlParams.get('capituloId');
@@ -39,7 +38,6 @@ async function carregarConteudoCapitulo() {
     }
 
     try {
-        // 1. Busca os detalhes do Livro e do Capítulo de forma limpa
         const livroDoc = await getDoc(doc(db, "livros", livroId));
         const capDoc = await getDoc(doc(db, "livros", livroId, "capitulos", capituloId));
 
@@ -47,39 +45,37 @@ async function carregarConteudoCapitulo() {
             const dadosCap = capDoc.data();
             const dadosLivro = livroDoc.exists() ? livroDoc.data() : { titulo: "Obra Codex" };
 
-            // Substitui os textos estáticos da tela pelos dados reais do banco
+            // 1. Atualiza cabeçalho e texto narrativo
             const txtHeaderLivro = document.getElementById("header-nome-livro");
             const txtHeaderCapitulo = document.getElementById("header-nome-capitulo");
             const txtNumero = document.getElementById("capitulo-numero-exibicao");
             const txtTitulo = document.getElementById("capitulo-titulo-exibicao");
             const txtConteudo = document.getElementById("capitulo-texto-exibicao");
 
-            // Atualiza os metadados no topo e corpo da página
             if (txtHeaderLivro) txtHeaderLivro.innerText = dadosLivro.titulo;
             if (txtHeaderCapitulo) txtHeaderCapitulo.innerText = `Capítulo ${dadosCap.numero}: ${dadosCap.titulo}`;
             if (txtNumero) txtNumero.innerText = `CAPÍTULO ${dadosCap.numero}`;
             if (txtTitulo) txtTitulo.innerText = dadosCap.titulo.toUpperCase();
             
-            // Renderiza o texto quebrando as linhas corretamente em parágrafos HTML
             if (txtConteudo) {
-                const textoFormatado = dadosCap.conteudo.split('\n').map(paragrafo => {
+                txtConteudo.innerHTML = dadosCap.conteudo.split('\n').map(paragrafo => {
                     if (paragrafo.trim() === "") return "";
                     return `<p style="line-height: 1.8; margin-bottom: 20px; font-size: 1.15rem; color: #D2D2D2; text-align: justify;">${paragrafo}</p>`;
                 }).join('');
-                
-                txtConteudo.innerHTML = textoFormatado;
             }
 
-            // 2. BUSCA OS PERSONAGENS REAIS DO CÓDICE PARA ESSE LIVRO
+            // 2. CONFIGURAÇÃO DINÂMICA DA TRILHA SONORA (PLAYER NO RODAPÉ)
+            configurarPlayerTrilha(dadosCap.trilhaSonora, dadosCap.titulo);
+
+            // 3. BUSCA OS PERSONAGENS REAIS DO CÓDICE PARA ESSE LIVRO
             const sidebarContent = document.querySelector(".sidebar-content");
             if (sidebarContent) {
-                // Mantém o título da seção na sidebar e limpa os cards antigos estáticos
                 sidebarContent.innerHTML = `<h4>Personagens em Cena</h4>`;
                 
-                const queryPersonagens = await getDocs(collection(db, "livros", livroId, "personagens")); //
+                const queryPersonagens = await getDocs(collection(db, "livros", livroId, "personagens"));
                 
                 if (queryPersonagens.empty) {
-                    sidebarContent.innerHTML += `<p style="color: #737373; font-size: 0.9rem; padding-top: 10px;">Nenhum detalhe registrado no códice para este universo.</p>`; //
+                    sidebarContent.innerHTML += `<p style="color: #737373; font-size: 0.9rem; padding-top: 10px;">Nenhum detalhe registrado no códice para este universo.</p>`;
                 } else {
                     queryPersonagens.forEach((pSnap) => {
                         const p = pSnap.data();
@@ -92,8 +88,8 @@ async function carregarConteudoCapitulo() {
                                 <p class="char-role">${p.funcao}</p>
                                 <p class="char-desc">${p.descricao}</p>
                             </div>
-                        `; //
-                        sidebarContent.appendChild(cardChar); //
+                        `;
+                        sidebarContent.appendChild(cardChar);
                     });
                 }
             }
@@ -104,5 +100,58 @@ async function carregarConteudoCapitulo() {
         }
     } catch (err) {
         console.error("Erro ao carregar leitura:", err);
+    }
+}
+
+// Trata o link do capítulo e embuti o áudio/vídeo do YouTube direto no rodapé
+function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
+    const trackTitle = document.getElementById("player-track-title");
+    const trackAuthor = document.getElementById("player-track-author");
+    const container = document.getElementById("media-player-container");
+    const audio = document.getElementById("chapter-audio");
+
+    if (!urlTrilha || urlTrilha.trim() === "") {
+        if (trackTitle) trackTitle.innerText = "Sem Trilha Sonora";
+        if (trackAuthor) trackAuthor.innerText = "Capítulo Silencioso";
+        if (container) container.innerHTML = `<span style="color: #737373; font-size: 0.85rem;">-</span>`;
+        return;
+    }
+
+    if (trackAuthor) trackAuthor.innerText = `Trilha: ${tituloCapitulo}`;
+
+    // SE FOR LINK DO YOUTUBE: Injeta o iFrame do mini-player na própria página
+    if (urlTrilha.includes("youtube.com") || urlTrilha.includes("youtu.be")) {
+        let videoId = "";
+        if (urlTrilha.includes("youtu.be/")) {
+            videoId = urlTrilha.split("youtu.be/")[1].split("?")[0];
+        } else if (urlTrilha.includes("v=")) {
+            videoId = urlTrilha.split("v=")[1].split("&")[0];
+        }
+
+        if (trackTitle) trackTitle.innerText = "Trilha do YouTube";
+
+        // Substitui o botão padrão pelo player embutido compacto do YouTube
+        if (container) {
+            container.innerHTML = `
+                <iframe 
+                    width="200" 
+                    height="40" 
+                    src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0" 
+                    title="Trilha do Capítulo" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    style="border-radius: 20px; filter: invert(0.9) hue-rotate(180deg);"
+                    allowfullscreen>
+                </iframe>
+            `;
+        }
+    } 
+    else {
+        // Se for um arquivo de áudio direto (ex: MP3/Stream)
+        if (audio) {
+            audio.src = urlTrilha;
+            audio.style.display = "none;"
+            if (trackTitle) trackTitle.innerText = "Trilha Oficial do Capítulo";
+        }
     }
 }
