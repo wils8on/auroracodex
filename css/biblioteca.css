@@ -1,0 +1,209 @@
+.biblioteca-body {
+    background-color: #141414;
+    min-height: 100vh;
+}
+
+.biblioteca-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 110px 4% 60px 4%;
+}
+
+.biblioteca-header h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    color: #FFFFFF;
+    margin-bottom: 8px;
+}
+
+.biblioteca-header p {
+    color: #A3A3A3;
+    font-size: 1rem;
+    margin-bottom: 35px;
+}
+
+/* --- BARRA DE BUSCA E FILTROS --- */
+.biblioteca-filtros {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.busca-wrapper {
+    flex-grow: 1;
+    min-width: 260px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.icon-busca {
+    position: absolute;
+    left: 16px;
+    width: 18px;
+    height: 18px;
+    fill: #737373;
+    pointer-events: none;
+}
+
+.busca-wrapper input {
+    width: 100%;
+    background-color: #1A1A1A;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 14px 16px 14px 46px;
+    color: #FFF;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.busca-wrapper input:focus {
+    outline: none;
+    border-color: #E50914;
+}
+
+.biblioteca-filtros select {
+    background-color: #1A1A1A;
+    color: #FFF;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+.biblioteca-filtros select:focus {
+    outline: none;
+    border-color: #E50914;
+}
+
+/* --- TAGS DE SUBGÊNERO --- */
+.biblioteca-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 35px;
+}
+
+.tag-filtro {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #D4D4D4;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.tag-filtro:hover {
+    border-color: #E50914;
+    color: #FFF;
+}
+
+.tag-filtro.active {
+    background-color: #E50914;
+    border-color: #E50914;
+    color: #FFF;
+    font-weight: 600;
+}
+
+/* --- GRID DE LIVROS --- */
+.biblioteca-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+}
+
+.biblioteca-card {
+    cursor: pointer;
+    transition: transform 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.biblioteca-card:hover {
+    transform: translateY(-6px);
+}
+
+.biblioteca-card-capa {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #1A1A1A;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    position: relative;
+}
+
+.biblioteca-card-capa img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.biblioteca-card-info {
+    padding: 12px 2px 0 2px;
+}
+
+.biblioteca-card-info h4 {
+    font-size: 0.95rem;
+    color: #FFFFFF;
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+
+.biblioteca-card-info .genero-label {
+    font-size: 0.78rem;
+    color: #8C8C8C;
+    margin-bottom: 8px;
+}
+
+/* --- BADGES DE STATUS --- */
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.status-em-breve {
+    background-color: rgba(157, 91, 245, 0.18);
+    color: #B48CFF;
+}
+
+.status-em-andamento {
+    background-color: rgba(59, 130, 246, 0.18);
+    color: #6EA8FE;
+}
+
+.status-concluido {
+    background-color: rgba(70, 211, 105, 0.18);
+    color: #46d369;
+}
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 768px) {
+    .biblioteca-container {
+        padding: 90px 16px 50px 16px;
+    }
+
+    .biblioteca-filtros {
+        flex-direction: column;
+    }
+
+    .biblioteca-filtros select {
+        width: 100%;
+    }
+
+    .biblioteca-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 14px;
+    }
+}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Codex - Biblioteca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/biblioteca.css">
+</head>
+<body class="biblioteca-body">
+
+    <!-- Navbar (idêntica ao dashboard, com "Biblioteca" ativa) -->
+    <nav class="navbar nav-black" id="main-nav">
+        <div class="nav-left">
+            <h1 class="nav-logo" style="cursor:pointer;" onclick="window.location.href='dashboard.html'">AURORA CODEX</h1>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Início</a></li>
+                <li><a href="biblioteca.html" class="active">Biblioteca</a></li>
+                <li><a href="#">Universos</a></li>
+                <li><a href="autor/gerenciar-livros.html">Meus Livros</a></li>
+                <li><a href="#">O Oráculo</a></li>
+            </ul>
+        </div>
+        <div class="nav-right" style="gap: 20px;">
+            <a href="adm/painel-usuarios.html" id="link-adm" style="font-size: 0.85rem; color: #8C8C8C; display: none;">Painel ADM</a>
+            <button id="btn-logout" style="background: transparent; border: none; color: #8C8C8C; font-size: 0.85rem; cursor: pointer;">Sair</button>
+            <div class="user-profile">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100" alt="Perfil" id="user-avatar">
+                <span class="badge-profile" id="user-role-badge">...</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="biblioteca-container">
+        <header class="biblioteca-header">
+            <h2>Biblioteca</h2>
+            <p>Explore todas as obras disponíveis</p>
+        </header>
+
+        <!-- Barra de busca e filtros -->
+        <div class="biblioteca-filtros">
+            <div class="busca-wrapper">
+                <svg viewBox="0 0 24 24" class="icon-busca"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                <input type="text" id="busca-titulo" placeholder="Buscar por título, sinopse...">
+            </div>
+            <select id="filtro-genero">
+                <option value="">Todos os Gêneros</option>
+                <option value="Romance">Romance</option>
+                <option value="Fantasia">Fantasia / Sobrenatural</option>
+                <option value="Cyberpunk">Cyberpunk / Distopia</option>
+                <option value="Outro">Outro</option>
+            </select>
+            <select id="filtro-status">
+                <option value="">Todos os Status</option>
+                <option value="Em Breve">Em Breve</option>
+                <option value="Em Andamento">Em Andamento</option>
+                <option value="Concluído">Concluído</option>
+            </select>
+        </div>
+
+        <!-- Tags de subgênero (geradas dinamicamente a partir dos livros cadastrados) -->
+        <div class="biblioteca-tags" id="biblioteca-tags"></div>
+
+        <!-- Grid de resultados -->
+        <div class="biblioteca-grid" id="biblioteca-grid">
+            <p style="color:#737373; padding: 20px;">Carregando catálogo...</p>
+        </div>
+
+        <p id="biblioteca-vazio" style="display:none; color:#737373; text-align:center; padding: 60px 20px;">
+            Nenhuma obra encontrada com esses filtros.
+        </p>
+    </main>
+
+    <!-- Modal Estilo Netflix (mesmo padrão usado na home) -->
+    <div id="netflix-modal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 9999; overflow-y: auto; backdrop-filter: blur(5px); padding: 20px 10px;">
+        <div style="background: #181818; width: 100%; max-width: 750px; margin: 20px auto; border-radius: 8px; overflow: hidden; color: #FFF; position: relative; border: 1px solid rgba(255,255,255,0.05);">
+            <button onclick="fecharModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: none; color: #FFF; font-size: 1.5rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10;">&times;</button>
+            <div id="modal-banner" style="width:100%; height: 45vh; max-height: 380px; min-height: 250px; background-size: cover; background-position: top center; position: relative;">
+                <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 150px; background: linear-gradient(to top, #181818, transparent);"></div>
+                <h2 id="modal-titulo" style="position: absolute; bottom: 20px; left: 20px; right: 20px; font-family: 'Cinzel', serif; font-size: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.9); line-height: 1.2;"></h2>
+            </div>
+            <div style="padding: 30px 20px; display: flex; flex-direction: column; gap: 24px;">
+                <div>
+                    <span id="modal-universo" style="color: #E50914; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;"></span>
+                    <p id="modal-sinopse" style="color: #D2D2D2; font-size: 1.05rem; line-height: 1.6; margin-top: 10px; text-align: justify;"></p>
+                </div>
+                <div>
+                    <h3 style="font-family: 'Cinzel', serif; border-bottom: 2px solid #404040; padding-bottom: 10px; margin-bottom: 15px;">Capítulos Disponíveis</h3>
+                    <div id="modal-lista-capitulos" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nav = document.getElementById('main-nav');
+        nav.classList.add('nav-black');
+
+        function fecharModal() {
+            document.getElementById('netflix-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+
+    <script type="module" src="js/biblioteca.js"></script>
+</body>
+</html>
