@@ -36,14 +36,14 @@
         </div>
     </nav>
 
-    <!-- Banner de Destaque Principal Dinâmico -->
-    <header class="hero-banner" id="hero-banner-bg" style="position: relative; background-size: cover; background-position: center top; transition: background-image 0.5s ease-in-out;">
-        <!-- Removida a div hero-cover-bg que travava a imagem fixa -->
+    <!-- Banner Principal com Suporte a Slider/Carrossel -->
+    <header class="hero-banner" id="hero-banner-bg" style="position: relative; background-size: cover; background-position: center top; transition: background-image 0.6s ease-in-out;">
+        
         <div class="hero-content">
-            <span class="hero-tagline">✨ DESTAQUE DO SEU UNIVERSO</span>
-            <h2 class="hero-title" id="hero-titulo-destaque">Labirinto de Vidro</h2>
+            <span class="hero-tagline">✨ DESTAQUES DO SEU UNIVERSO</span>
+            <h2 class="hero-title" id="hero-titulo-destaque">Carregando...</h2>
             <p class="hero-synopsis" id="hero-sinopse-destaque">
-                Em uma sociedade onde segredos moldam a arquitetura do poder...
+                Aguardando dados do Codex...
             </p>
             <div class="hero-buttons">
                 <button class="btn-read" id="btn-ler-destaque">
@@ -56,8 +56,16 @@
                 </button>
             </div>
         </div>
-        <!-- Mantida a vinheta para dar o degradê escuro e legibilidade aos textos -->
+
+        <!-- Vinheta de sombra ajustada para o texto -->
         <div class="hero-vignette"></div>
+
+        <!-- Controles do Carrossel (Visíveis se houver mais de 1 destaque) -->
+        <div id="hero-controls" style="display: none; position: absolute; bottom: 20px; right: 40px; z-index: 10; align-items: center; gap: 15px;">
+            <button id="btn-prev-hero" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #FFF; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">&lt;</button>
+            <div id="hero-dots" style="display: flex; gap: 8px;"></div>
+            <button id="btn-next-hero" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #FFF; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">&gt;</button>
+        </div>
     </header>
 
     <!-- Conteúdo dos Carrosséis -->

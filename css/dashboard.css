@@ -355,3 +355,128 @@ a {
     border-color: #E50914;
     box-shadow: 0 5px 15px rgba(229, 9, 20, 0.2);
 }
+
+/* =========================================================
+   RESPONSIVIDADE E ADAPTAÇÃO PARA CELULARES (MOBILE)
+   ========================================================= */
+
+@media (max-width: 768px) {
+    /* 1. Navbar Adaptável */
+    .navbar {
+        padding: 12px 16px !important;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .nav-logo {
+        font-size: 1.2rem !important;
+    }
+
+    .nav-links {
+        gap: 12px !important;
+        font-size: 0.85rem !important;
+    }
+
+    .user-profile img {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    /* 2. Hero Banner Destaque em Telas Pequenas */
+    .hero-banner {
+        height: auto !important;
+        min-height: 420px !important;
+        padding: 90px 20px 40px 20px !important;
+    }
+
+    .hero-title {
+        font-size: 1.8rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .hero-synopsis {
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+        -webkit-line-clamp: 3;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hero-buttons {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 10px !important;
+    }
+
+    .hero-buttons button {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 12px !important;
+    }
+
+    /* 3. Carrossel de Cards (Fileira de Livros) */
+    .row {
+        padding: 0 15px !important;
+    }
+
+    .row-posters {
+        gap: 10px !important;
+        padding: 10px 0 !important;
+    }
+
+    .book-card, .row-poster {
+        width: 130px !important;
+        height: 185px !important;
+    }
+
+    /* 4. Modal Estilo Netflix */
+    #netflix-modal > div {
+        margin: 10px auto !important;
+        width: 95% !important;
+        max-height: 90vh !important;
+    }
+
+    #modal-banner {
+        height: 220px !important;
+    }
+
+    #modal-titulo {
+        font-size: 1.4rem !important;
+        left: 15px !important;
+        bottom: 15px !important;
+    }
+
+    /* 5. Painel do Escritor */
+    .autor-container {
+        margin: 70px auto 40px auto !important;
+        padding: 0 15px 80px 15px !important;
+    }
+
+    .tabs-nav {
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        padding-bottom: 8px !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+        padding: 8px 14px !important;
+        font-size: 0.85rem !important;
+        flex-shrink: 0;
+    }
+
+    .form-wrapper {
+        padding: 20px 15px !important;
+    }
+
+    .form-row {
+        flex-direction: column !important;
+        gap: 0 !important;
+    }
+
+    .form-group {
+        min-width: 100% !important;
+    }
+}

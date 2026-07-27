@@ -273,14 +273,9 @@ async function abrirModalNetflix(idLivro, livro) {
     }
 }
 
-// Utilitário para formatar nomes dos universos na tela
-function filtrarNomeUniverso(slug) {
-    const nomes = {
-        'original': 'Universo Original',
-        'vampire-diaries': 'The Vampire Diaries',
-        '50-shades': '50 Shades of Grey'
-    };
-    return nomes[slug] || 'Outro Universo';
+// Exibe o nome do universo cadastrado pelo autor (campo dinâmico, sem mapa fixo)
+function filtrarNomeUniverso(universo) {
+    return universo && universo.trim() !== "" ? universo : "Universo Independente";
 }
 
 // Executa o Logout (Sair)
