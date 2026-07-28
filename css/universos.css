@@ -1,0 +1,142 @@
+/* --- GRID DE CARDS DE UNIVERSO (vista de lista) --- */
+.universos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.universo-card {
+    position: relative;
+    height: 180px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.08);
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.universo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+}
+
+.universo-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 10%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.15) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+}
+
+.universo-card-overlay h4 {
+    font-family: 'Cinzel', serif;
+    color: #FFFFFF;
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+}
+
+.universo-card-overlay p {
+    color: #D4D4D4;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.universo-card-count {
+    display: inline-block;
+    align-self: flex-start;
+    background: rgba(255,255,255,0.12);
+    color: #FFF;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+/* --- VOLTAR (vista de detalhe) --- */
+.universo-voltar {
+    display: inline-block;
+    color: #A3A3A3;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    transition: color 0.2s;
+}
+
+.universo-voltar:hover {
+    color: #FFFFFF;
+}
+
+/* --- BANNER DE DETALHE DO UNIVERSO --- */
+.universo-banner {
+    width: 100%;
+    min-height: 280px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    background-color: #1A1A1A;
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+    overflow: hidden;
+}
+
+.universo-banner-overlay {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 35px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 20%, rgba(0,0,0,0.2) 80%);
+}
+
+.universo-tag {
+    display: inline-block;
+    color: #E50914;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.universo-banner-overlay h2 {
+    font-family: 'Cinzel', serif;
+    color: #FFFFFF;
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+}
+
+.universo-banner-overlay p {
+    color: #D2D2D2;
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 700px;
+}
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 768px) {
+    .universos-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .universo-banner {
+        min-height: 200px;
+    }
+
+    .universo-banner-overlay {
+        padding: 20px;
+    }
+
+    .universo-banner-overlay h2 {
+        font-size: 1.5rem;
+    }
+}
