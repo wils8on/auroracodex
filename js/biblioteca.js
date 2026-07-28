@@ -62,6 +62,25 @@ function inicializarCatalogo() {
         aplicarFiltros();
     });
 
+    // Carrega as opções de gênero a partir da mesma coleção de configurações usada no painel do autor
+    onSnapshot(doc(db, "configuracoes", "catalogo"), (snap) => {
+        if (!snap.exists()) return;
+
+        const generos = snap.data().generos || [];
+        const select = document.getElementById("filtro-genero");
+        const valorAtual = select.value;
+
+        select.innerHTML = '<option value="">Todos os Gêneros</option>';
+        generos.forEach(g => {
+            const opt = document.createElement("option");
+            opt.value = g;
+            opt.innerText = g;
+            select.appendChild(opt);
+        });
+
+        if (generos.includes(valorAtual)) select.value = valorAtual;
+    });
+
     // Vincula os campos de filtro (uma única vez)
     document.getElementById("busca-titulo").addEventListener("input", aplicarFiltros);
     document.getElementById("filtro-genero").addEventListener("change", aplicarFiltros);

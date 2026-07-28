@@ -79,6 +79,7 @@
             <button class="tab-btn" onclick="alternarAba('aba-gerenciar')">Suas Obras</button>
             <button class="tab-btn" onclick="alternarAba('aba-capitulos')">Novo Capítulo</button>
             <button class="tab-btn" onclick="alternarAba('aba-personagens')">Cadastrar Personagens</button>
+            <button class="tab-btn" onclick="alternarAba('aba-taxonomias')">Gêneros &amp; Tags</button>
         </div>
 
         <!-- ABA 1: CADASTRO/EDIÇÃO DE LIVRO -->
@@ -95,10 +96,7 @@
                         <div class="form-group">
                             <label for="genero">Gênero Principal</label>
                             <select id="genero" required>
-                                <option value="Romance">Romance</option>
-                                <option value="Fantasia">Fantasia / Sobrenatural</option>
-                                <option value="Cyberpunk">Cyberpunk / Distopia</option>
-                                <option value="Outro">Outro</option>
+                                <!-- Opções carregadas dinamicamente a partir da aba "Gêneros & Tags" -->
                             </select>
                         </div>
                         <div class="form-group">
@@ -119,14 +117,8 @@
                     <!-- Seção Avançada de Subgêneros/Tags -->
                     <div class="form-group">
                         <label>Subgêneros / Tags</label>
-                        <div class="subgeneros-grid">
-                            <input type="checkbox" id="tag-dark" class="tag-checkbox" value="Dark Romance"><label for="tag-dark" class="tag-label">Dark Romance</label>
-                            <input type="checkbox" id="tag-enemies" class="tag-checkbox" value="Enemies to Lovers"><label for="tag-enemies" class="tag-label">Enemies to Lovers</label>
-                            <input type="checkbox" id="tag-slow" class="tag-checkbox" value="Slow Burn"><label for="tag-slow" class="tag-label">Slow Burn</label>
-                            <input type="checkbox" id="tag-mafia" class="tag-checkbox" value="Máfia"><label for="tag-mafia" class="tag-label">Máfia</label>
-                            <input type="checkbox" id="tag-vampiros" class="tag-checkbox" value="Vampiros"><label for="tag-vampiros" class="tag-label">Vampiros</label>
-                            <input type="checkbox" id="tag-psicologico" class="tag-checkbox" value="Psicológico"><label for="tag-psicologico" class="tag-label">Psicológico</label>
-                            <input type="checkbox" id="tag-distopia" class="tag-checkbox" value="Distopia"><label for="tag-distopia" class="tag-label">Distopia</label>
+                        <div class="subgeneros-grid" id="subgeneros-grid-dinamico">
+                            <!-- Checkboxes gerados dinamicamente a partir da aba "Gêneros & Tags" -->
                         </div>
                     </div>
 
@@ -135,10 +127,15 @@
                         <textarea id="sinopse" rows="4" placeholder="Escreva a sinopse ou introdução marcante..." required></textarea>
                     </div>
 
-                    <div class="form-row" style="align-items: center;">
+                    <div class="form-row" style="align-items: flex-start;">
                         <div class="form-group">
-                            <label for="url-capa">Link Direto da Capa (Imagem)</label>
-                            <input type="url" id="url-capa" placeholder="https://lh3.googleusercontent.com/d/..." required>
+                            <label for="arquivo-capa">Capa do Livro (Imagem)</label>
+                            <input type="file" id="arquivo-capa" accept="image/*">
+                            <input type="hidden" id="url-capa">
+                            <div id="preview-wrapper-capa" style="margin-top: 10px; display: none;">
+                                <img id="preview-capa" style="width: 90px; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #29292E;">
+                                <div id="progresso-upload-capa" style="font-size: 0.8rem; color: #8C8C8C; margin-top: 6px;"></div>
+                            </div>
                         </div>
                         <div class="form-group" style="max-width: 150px; min-width: 120px;">
                             <label for="cor-tema">Cor tema do livro</label>
@@ -213,6 +210,13 @@
                     <button type="submit" class="btn-submit">Publicar Capítulo</button>
                 </form>
             </div>
+
+            <div class="form-wrapper" style="margin-top: 25px;">
+                <h3 style="color:#8C8C8C; font-size:0.85rem; text-transform:uppercase; margin-bottom:15px;">Capítulos já publicados nesta obra</h3>
+                <div id="lista-capitulos-cadastrados">
+                    <p style="color:#737373; font-size:0.9rem;">Selecione uma obra acima para ver os capítulos já publicados.</p>
+                </div>
+            </div>
         </div>
 
         <!-- ABA 4: CADASTRO DE PERSONAGENS (CÓDICE) -->
@@ -235,8 +239,13 @@
                         <input type="text" id="funcao-personagem" placeholder="Ex: Co-Protagonista • 26 anos" required>
                     </div>
                     <div class="form-group">
-                        <label for="url-avatar-personagem">URL da Foto do Personagem</label>
-                        <input type="url" id="url-avatar-personagem" placeholder="https://lh3.googleusercontent.com/d/..." required>
+                        <label for="arquivo-avatar-personagem">Foto do Personagem</label>
+                        <input type="file" id="arquivo-avatar-personagem" accept="image/*">
+                        <input type="hidden" id="url-avatar-personagem">
+                        <div id="preview-wrapper-personagem" style="margin-top: 10px; display: none;">
+                            <img id="preview-avatar-personagem" style="width: 70px; height: 70px; object-fit: cover; border-radius: 50%; border: 1px solid #29292E;">
+                            <div id="progresso-upload-personagem" style="font-size: 0.8rem; color: #8C8C8C; margin-top: 6px;"></div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="descricao-personagem">Descrição / Ficha Breve</label>
@@ -252,6 +261,34 @@
                     <p style="color:#737373; font-size:0.9rem;">Selecione uma obra acima para ver os personagens já cadastrados.</p>
                 </div>
             </div>
+        </div>
+        <!-- ABA 5: GERENCIAR GÊNEROS E TAGS -->
+        <div id="aba-taxonomias" class="tab-content">
+            <h2 class="autor-title">Gêneros &amp; Tags</h2>
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+
+                <div class="form-wrapper" style="flex:1; min-width:280px;">
+                    <h3 style="color:#FFF; font-size:1rem; margin-bottom:15px;">Gêneros Principais</h3>
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <input type="text" id="novo-genero" placeholder="Ex: Suspense Psicológico" style="flex-grow:1; background:#1A1A1E; border:1px solid #29292E; color:#FFF; padding:10px 12px; border-radius:6px; font-family:inherit;">
+                        <button type="button" id="btn-add-genero" class="btn-submit" style="width:auto; padding:10px 20px;">Adicionar</button>
+                    </div>
+                    <div id="lista-generos-config"></div>
+                </div>
+
+                <div class="form-wrapper" style="flex:1; min-width:280px;">
+                    <h3 style="color:#FFF; font-size:1rem; margin-bottom:15px;">Subgêneros / Tags</h3>
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <input type="text" id="nova-tag" placeholder="Ex: BL (Boys Love)" style="flex-grow:1; background:#1A1A1E; border:1px solid #29292E; color:#FFF; padding:10px 12px; border-radius:6px; font-family:inherit;">
+                        <button type="button" id="btn-add-tag" class="btn-submit" style="width:auto; padding:10px 20px;">Adicionar</button>
+                    </div>
+                    <div id="lista-tags-config"></div>
+                </div>
+
+            </div>
+            <p style="color:#737373; font-size:0.85rem; margin-top:20px;">
+                Remover um gênero ou tag daqui não apaga os livros que já usam esse valor — só faz ele deixar de aparecer como opção para novos cadastros.
+            </p>
         </div>
     </main>
 
