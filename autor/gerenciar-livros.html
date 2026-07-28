@@ -237,9 +237,21 @@
                         <label for="nome-personagem">Nome do Personagem</label>
                         <input type="text" id="nome-personagem" placeholder="Ex: Hugo Claes" required>
                     </div>
-                    <div class="form-group">
-                        <label for="funcao-personagem">Função / Papel na História</label>
-                        <input type="text" id="funcao-personagem" placeholder="Ex: Co-Protagonista • 26 anos" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="papel-personagem">Papel na História</label>
+                            <select id="papel-personagem" required>
+                                <option value="Protagonista">Protagonista</option>
+                                <option value="Antagonista">Antagonista</option>
+                                <option value="Secundário" selected>Secundário</option>
+                                <option value="Coadjuvante">Coadjuvante</option>
+                                <option value="Menção">Menção</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="primeira-aparicao-personagem">Primeira Aparição</label>
+                            <input type="text" id="primeira-aparicao-personagem" placeholder="Ex: Capítulo 1">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="arquivo-avatar-personagem">Foto do Personagem</label>

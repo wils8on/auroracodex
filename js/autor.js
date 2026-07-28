@@ -20,8 +20,8 @@ const db = getFirestore(app);
 // CONFIGURAÇÃO DO CLOUDINARY (upload de imagens gratuito)
 // =====================================================
 // Troque pelos valores do SEU painel do Cloudinary (Dashboard > Cloud name / Settings > Upload > presets)
-const CLOUDINARY_CLOUD_NAME = "ffril2cr";
-const CLOUDINARY_UPLOAD_PRESET = "qrtn86gx";
+const CLOUDINARY_CLOUD_NAME = "COLOQUE_SEU_CLOUD_NAME_AQUI";
+const CLOUDINARY_UPLOAD_PRESET = "COLOQUE_SEU_UPLOAD_PRESET_AQUI";
 
 let idLivroEdicao = null;
 let livrosCache = [];
@@ -494,7 +494,7 @@ function carregarPersonagensDaObra(livroId) {
                 <img src="${p.foto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100'}" style="width:48px; height:48px; object-fit:cover; border-radius:4px;">
                 <div style="flex-grow:1;">
                     <strong style="color:#FFF;">${p.nome}</strong>
-                    <p style="color:#8C8C8C; font-size:0.8rem;">${p.funcao}</p>
+                    <p style="color:#8C8C8C; font-size:0.8rem;">${p.papel || p.funcao || 'Sem papel definido'}${p.primeiraAparicao ? ' • ' + p.primeiraAparicao : ''}</p>
                 </div>
                 <button class="btn-editar-personagem" data-id="${id}" style="background:#29292E; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
                 <button class="btn-excluir-personagem" data-id="${id}" style="background:#E50914; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
@@ -516,7 +516,8 @@ function vincularEventosPersonagens(livroId) {
                 idPersonagemEdicao = id;
 
                 document.getElementById("nome-personagem").value = p.nome;
-                document.getElementById("funcao-personagem").value = p.funcao;
+                document.getElementById("papel-personagem").value = p.papel || "Secundário";
+                document.getElementById("primeira-aparicao-personagem").value = p.primeiraAparicao || "";
                 document.getElementById("url-avatar-personagem").value = p.foto || "";
                 document.getElementById("arquivo-avatar-personagem").value = "";
                 if (p.foto) {
@@ -567,7 +568,8 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
 
         const dadosPersonagem = {
             nome: document.getElementById("nome-personagem").value,
-            funcao: document.getElementById("funcao-personagem").value,
+            papel: document.getElementById("papel-personagem").value,
+            primeiraAparicao: document.getElementById("primeira-aparicao-personagem").value.trim(),
             foto: urlFotoFinal,
             descricao: document.getElementById("descricao-personagem").value
         };

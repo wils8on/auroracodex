@@ -85,7 +85,7 @@ async function carregarConteudoCapitulo() {
                             <img src="${p.foto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100'}" alt="${p.nome}">
                             <div class="char-info">
                                 <h5>${p.nome}</h5>
-                                <p class="char-role">${p.funcao}</p>
+                                <p class="char-role">${p.papel || p.funcao || 'Personagem'}${p.primeiraAparicao ? ' • ' + p.primeiraAparicao : ''}</p>
                                 <p class="char-desc">${p.descricao}</p>
                             </div>
                         `;
