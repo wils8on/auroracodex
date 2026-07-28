@@ -80,6 +80,7 @@
             <button class="tab-btn" onclick="alternarAba('aba-capitulos')">Novo Capítulo</button>
             <button class="tab-btn" onclick="alternarAba('aba-personagens')">Cadastrar Personagens</button>
             <button class="tab-btn" onclick="alternarAba('aba-taxonomias')">Gêneros &amp; Tags</button>
+            <button class="tab-btn" onclick="alternarAba('aba-universos')">Universos</button>
         </div>
 
         <!-- ABA 1: CADASTRO/EDIÇÃO DE LIVRO -->
@@ -110,8 +111,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="universo">Universo / Saga (para conectar histórias)</label>
-                        <input type="text" id="universo" placeholder="Ex: Dinastia Claes — deixe igual em todos os livros do mesmo universo" required>
+                        <label>Universo</label>
+                        <p id="universo-atual-label" style="color:#D4D4D4; font-size:0.9rem; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; padding:12px; margin:0;">
+                            Nenhum — vincule na aba <strong>Universos</strong>
+                        </p>
                     </div>
 
                     <!-- Seção Avançada de Subgêneros/Tags -->
@@ -289,6 +292,55 @@
             <p style="color:#737373; font-size:0.85rem; margin-top:20px;">
                 Remover um gênero ou tag daqui não apaga os livros que já usam esse valor — só faz ele deixar de aparecer como opção para novos cadastros.
             </p>
+        </div>
+        <!-- ABA 6: GERENCIAR UNIVERSOS -->
+        <div id="aba-universos" class="tab-content">
+            <h2 class="autor-title">Universos</h2>
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+
+                <div class="form-wrapper" style="flex:1; min-width:320px;">
+                    <h3 id="titulo-form-universo" style="color:#FFF; font-size:1rem; margin-bottom:20px;">Novo Universo</h3>
+                    <form id="form-universo" style="display:flex; flex-direction:column; gap:16px;">
+                        <div class="form-group">
+                            <label for="nome-universo">Nome do Universo *</label>
+                            <input type="text" id="nome-universo" placeholder="Ex: Dinastia Claes" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descricao-universo">Descrição</label>
+                            <textarea id="descricao-universo" rows="3" placeholder="Descrição do universo..."></textarea>
+                        </div>
+
+                        <div class="form-group" style="flex-direction:row; align-items:center; gap:12px;">
+                            <label style="margin:0;">Cor Tema</label>
+                            <input type="color" id="cor-universo" value="#7c3aed" style="height:40px; width:60px; padding:2px; cursor:pointer;">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Capa do Universo</label>
+                            <input type="file" id="arquivo-capa-universo" accept="image/*">
+                            <input type="hidden" id="url-capa-universo">
+                            <div id="preview-wrapper-universo" style="margin-top:10px; display:none;">
+                                <img id="preview-capa-universo" style="width:90px; height:90px; object-fit:cover; border-radius:6px; border:1px solid #29292E;">
+                                <div id="progresso-upload-universo" style="font-size:0.8rem; color:#8C8C8C; margin-top:6px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Livros deste universo</label>
+                            <div id="checklist-livros-universo" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; padding-right:5px;"></div>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Criar Universo</button>
+                    </form>
+                </div>
+
+                <div class="form-wrapper" style="flex:1; min-width:280px;">
+                    <h3 style="color:#FFF; font-size:1rem; margin-bottom:15px;">Universos Cadastrados</h3>
+                    <div id="lista-universos-config"></div>
+                </div>
+
+            </div>
         </div>
     </main>
 

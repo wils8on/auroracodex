@@ -1,7 +1,7 @@
 // js/autor.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, getDoc, setDoc, onSnapshot, deleteDoc, updateDoc, orderBy, query, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, getDoc, setDoc, onSnapshot, deleteDoc, updateDoc, orderBy, query, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPFNgtGch_nWL6gDNmXzGuwWtd4X4QDgs",
@@ -24,6 +24,8 @@ const CLOUDINARY_CLOUD_NAME = "ffril2cr";
 const CLOUDINARY_UPLOAD_PRESET = "qrtn86gx";
 
 let idLivroEdicao = null;
+let livrosCache = [];
+let universosCache = [];
 
 // =====================================================
 // UPLOAD DE IMAGENS (Firebase Storage)
@@ -118,6 +120,7 @@ onAuthStateChanged(auth, async (user) => {
         inicializarDadosCapitulos();
         inicializarPreviewImagens();
         inicializarCatalogoConfig();
+        inicializarDadosUniversos();
     }
 });
 
@@ -166,6 +169,9 @@ function inicializarDadosAutor() {
             }
         });
 
+        livrosCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        atualizarUIUniversos();
+
          VincularEventosObras();
     });
 }
@@ -181,7 +187,9 @@ function VincularEventosObras() {
                 
                 document.getElementById("titulo").value = livro.titulo;
                 document.getElementById("genero").value = livro.genero || "Romance";
-                document.getElementById("universo").value = livro.universo || "";
+                document.getElementById("universo-atual-label").innerText = livro.universoNome
+                    ? livro.universoNome
+                    : "Nenhum — vincule na aba Universos";
                 document.getElementById("status-obra").value = livro.status || "Em Andamento";
                 document.getElementById("sinopse").value = livro.sinopse;
                 document.getElementById("url-capa").value = livro.capa || "";
@@ -252,7 +260,6 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
         const dados = {
             titulo: document.getElementById("titulo").value,
             genero: document.getElementById("genero").value,
-            universo: document.getElementById("universo").value.trim(),
             status: document.getElementById("status-obra").value,
             subgeneros: tagsSelecionadas,
             sinopse: document.getElementById("sinopse").value,
@@ -275,6 +282,7 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
         e.target.reset();
         document.querySelectorAll(".tag-checkbox").forEach(cb => cb.checked = false);
         document.getElementById("preview-wrapper-capa").style.display = "none";
+        document.getElementById("universo-atual-label").innerText = "Nenhum — vincule na aba Universos";
     } catch (err) {
         console.error(err);
         alert("Erro ao salvar a obra. Verifique sua conexão e tente novamente.");
@@ -712,4 +720,205 @@ document.getElementById("btn-add-tag")?.addEventListener("click", async () => {
 
     await setDoc(doc(db, "configuracoes", "catalogo"), { subgeneros: arrayUnion(valor) }, { merge: true });
     input.value = "";
+});
+
+// =====================================================
+// UNIVERSOS (agrupamento de livros conectados)
+// =====================================================
+
+let idUniversoEdicao = null;
+
+function inicializarDadosUniversos() {
+    const universosRef = collection(db, "universos");
+
+    onSnapshot(universosRef, (snapshot) => {
+        universosCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        atualizarUIUniversos();
+    });
+}
+
+// Chamado sempre que a lista de livros OU de universos muda, pra manter tudo sincronizado na tela
+function atualizarUIUniversos() {
+    renderizarChecklistLivros(idUniversoEdicao);
+    renderizarListaUniversos();
+}
+
+function renderizarChecklistLivros(idUniversoAtual) {
+    const container = document.getElementById("checklist-livros-universo");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (livrosCache.length === 0) {
+        container.innerHTML = '<p style="color:#737373; font-size:0.85rem;">Cadastre um livro primeiro na aba "Editar/Criar Livro".</p>';
+        return;
+    }
+
+    livrosCache.forEach(livro => {
+        const marcado = idUniversoAtual && livro.universoId === idUniversoAtual;
+        const row = document.createElement("label");
+        row.style.cssText = "display:flex; align-items:center; gap:10px; cursor:pointer; color:#D4D4D4; font-size:0.9rem;";
+        row.innerHTML = `
+            <input type="checkbox" class="checkbox-livro-universo" value="${livro.id}" ${marcado ? "checked" : ""} style="width:16px; height:16px; cursor:pointer;">
+            ${livro.titulo}
+        `;
+        container.appendChild(row);
+    });
+}
+
+function renderizarListaUniversos() {
+    const container = document.getElementById("lista-universos-config");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (universosCache.length === 0) {
+        container.innerHTML = '<p style="color:#737373; font-size:0.85rem;">Nenhum universo cadastrado ainda.</p>';
+        return;
+    }
+
+    universosCache.forEach(u => {
+        const qtdLivros = livrosCache.filter(l => l.universoId === u.id).length;
+
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex; align-items:center; gap:12px; padding:12px; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; margin-bottom:10px;";
+        row.innerHTML = `
+            <div style="width:40px; height:40px; border-radius:6px; background-color:${u.corTema || '#7c3aed'}; background-image:${u.capa ? `url('${u.capa}')` : 'none'}; background-size:cover; background-position:center; flex-shrink:0;"></div>
+            <div style="flex-grow:1;">
+                <strong style="color:#FFF;">${u.nome}</strong>
+                <p style="color:#8C8C8C; font-size:0.8rem;">${qtdLivros} livro(s)</p>
+            </div>
+            <button type="button" class="btn-editar-universo" data-id="${u.id}" style="background:#29292E; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Editar</button>
+            <button type="button" class="btn-excluir-universo" data-id="${u.id}" style="background:#E50914; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
+        `;
+        container.appendChild(row);
+    });
+
+    document.querySelectorAll(".btn-editar-universo").forEach(btn => {
+        btn.addEventListener("click", () => carregarUniversoParaEdicao(btn.getAttribute("data-id")));
+    });
+
+    document.querySelectorAll(".btn-excluir-universo").forEach(btn => {
+        btn.addEventListener("click", () => excluirUniverso(btn.getAttribute("data-id")));
+    });
+}
+
+function carregarUniversoParaEdicao(id) {
+    const u = universosCache.find(x => x.id === id);
+    if (!u) return;
+
+    idUniversoEdicao = id;
+    document.getElementById("nome-universo").value = u.nome;
+    document.getElementById("descricao-universo").value = u.descricao || "";
+    document.getElementById("cor-universo").value = u.corTema || "#7c3aed";
+    document.getElementById("url-capa-universo").value = u.capa || "";
+    document.getElementById("arquivo-capa-universo").value = "";
+
+    if (u.capa) {
+        document.getElementById("preview-capa-universo").src = u.capa;
+        document.getElementById("preview-wrapper-universo").style.display = "block";
+        document.getElementById("progresso-upload-universo").innerText = "Capa atual (envie um novo arquivo para substituir)";
+    } else {
+        document.getElementById("preview-wrapper-universo").style.display = "none";
+    }
+
+    document.getElementById("titulo-form-universo").innerText = `Editando: ${u.nome}`;
+    document.getElementById("form-universo").querySelector(".btn-submit").innerText = "Atualizar Universo";
+
+    renderizarChecklistLivros(id);
+    document.getElementById("nome-universo").scrollIntoView({ behavior: "smooth" });
+}
+
+function resetarFormularioUniverso() {
+    idUniversoEdicao = null;
+    document.getElementById("form-universo").reset();
+    document.getElementById("titulo-form-universo").innerText = "Novo Universo";
+    document.getElementById("form-universo").querySelector(".btn-submit").innerText = "Criar Universo";
+    document.getElementById("preview-wrapper-universo").style.display = "none";
+    document.getElementById("url-capa-universo").value = "";
+    renderizarChecklistLivros(null);
+}
+
+async function excluirUniverso(id) {
+    if (!confirm("Excluir este universo? Os livros vinculados a ele não serão apagados, só perdem essa conexão.")) return;
+
+    const batch = writeBatch(db);
+
+    livrosCache
+        .filter(l => l.universoId === id)
+        .forEach(livro => {
+            batch.update(doc(db, "livros", livro.id), { universoId: null, universoNome: null, universo: "" });
+        });
+
+    batch.delete(doc(db, "universos", id));
+
+    await batch.commit();
+
+    if (idUniversoEdicao === id) resetarFormularioUniverso();
+}
+
+document.getElementById("form-universo")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const btnSubmit = e.target.querySelector(".btn-submit");
+    const arquivoCapa = document.getElementById("arquivo-capa-universo").files[0];
+    const nome = document.getElementById("nome-universo").value.trim();
+    const idsMarcados = Array.from(document.querySelectorAll(".checkbox-livro-universo:checked")).map(cb => cb.value);
+
+    btnSubmit.disabled = true;
+    btnSubmit.innerText = "Salvando...";
+
+    try {
+        let urlCapaFinal = document.getElementById("url-capa-universo").value;
+        if (arquivoCapa) {
+            urlCapaFinal = await uploadImagem(arquivoCapa, "universos", "progresso-upload-universo");
+        }
+
+        const dadosUniverso = {
+            nome,
+            descricao: document.getElementById("descricao-universo").value.trim(),
+            corTema: document.getElementById("cor-universo").value,
+            capa: urlCapaFinal || ""
+        };
+
+        let idUniverso = idUniversoEdicao;
+
+        if (idUniverso) {
+            await updateDoc(doc(db, "universos", idUniverso), dadosUniverso);
+        } else {
+            dadosUniverso.data_criacao = new Date().toISOString();
+            const novoDoc = await addDoc(collection(db, "universos"), dadosUniverso);
+            idUniverso = novoDoc.id;
+        }
+
+        // Sincroniza os livros: vincula os marcados, desvincula os que foram desmarcados,
+        // e atualiza o nome exibido nos livros já vinculados caso o universo tenha sido renomeado.
+        const batch = writeBatch(db);
+
+        livrosCache.forEach(livro => {
+            const estavaVinculado = livro.universoId === idUniverso;
+            const deveEstarVinculado = idsMarcados.includes(livro.id);
+
+            if (deveEstarVinculado && !estavaVinculado) {
+                batch.update(doc(db, "livros", livro.id), { universoId: idUniverso, universoNome: nome, universo: nome });
+            } else if (!deveEstarVinculado && estavaVinculado) {
+                batch.update(doc(db, "livros", livro.id), { universoId: null, universoNome: null, universo: "" });
+            } else if (deveEstarVinculado && estavaVinculado && livro.universoNome !== nome) {
+                batch.update(doc(db, "livros", livro.id), { universoNome: nome, universo: nome });
+            }
+        });
+
+        await batch.commit();
+
+        alert(idUniversoEdicao ? "Universo atualizado com sucesso!" : "Universo criado com sucesso!");
+        resetarFormularioUniverso();
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao salvar universo.");
+    } finally {
+        btnSubmit.disabled = false;
+        if (btnSubmit.innerText === "Salvando...") {
+            btnSubmit.innerText = idUniversoEdicao ? "Atualizar Universo" : "Criar Universo";
+        }
+    }
 });
