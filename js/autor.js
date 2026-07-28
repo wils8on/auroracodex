@@ -2,7 +2,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, doc, getDoc, setDoc, onSnapshot, deleteDoc, updateDoc, orderBy, query, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPFNgtGch_nWL6gDNmXzGuwWtd4X4QDgs",
@@ -16,7 +15,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
+
+// =====================================================
+// CONFIGURAÇÃO DO CLOUDINARY (upload de imagens gratuito)
+// =====================================================
+// Troque pelos valores do SEU painel do Cloudinary (Dashboard > Cloud name / Settings > Upload > presets)
+const CLOUDINARY_CLOUD_NAME = "ffril2cr";
+const CLOUDINARY_UPLOAD_PRESET = "qrtn86gx";
 
 let idLivroEdicao = null;
 
@@ -24,33 +29,43 @@ let idLivroEdicao = null;
 // UPLOAD DE IMAGENS (Firebase Storage)
 // =====================================================
 
-// Faz upload de um arquivo para uma pasta do Storage e retorna a URL pública.
-// Atualiza um elemento de texto (id do elemento) com o progresso em %.
+// Faz upload de um arquivo para o Cloudinary e retorna a URL pública.
+// Atualiza um elemento de texto (id do elemento) com o status do envio.
 function uploadImagem(arquivo, pasta, idElementoProgresso) {
-    return new Promise((resolve, reject) => {
-        const nomeUnico = `${Date.now()}_${arquivo.name}`;
-        const caminhoRef = ref(storage, `${pasta}/${nomeUnico}`);
-        const tarefa = uploadBytesResumable(caminhoRef, arquivo);
+    const elementoProgresso = document.getElementById(idElementoProgresso);
+    if (elementoProgresso) elementoProgresso.innerText = "Enviando imagem...";
 
-        const elementoProgresso = document.getElementById(idElementoProgresso);
+    const formData = new FormData();
+    formData.append("file", arquivo);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    formData.append("folder", pasta); // organiza em pastas dentro do Cloudinary (capas / personagens)
 
-        tarefa.on(
-            "state_changed",
-            (snapshot) => {
-                const percentual = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                if (elementoProgresso) elementoProgresso.innerText = `Enviando: ${percentual}%`;
-            },
-            (erro) => {
-                if (elementoProgresso) elementoProgresso.innerText = "Erro no upload.";
-                reject(erro);
-            },
-            async () => {
-                const url = await getDownloadURL(tarefa.snapshot.ref);
-                if (elementoProgresso) elementoProgresso.innerText = "Upload concluído ✔";
-                resolve(url);
-            }
-        );
+    const requisicao = fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: "POST",
+        body: formData
+    }).then(async (resposta) => {
+        if (!resposta.ok) {
+            const detalhe = await resposta.text();
+            throw new Error(`Falha no upload (status ${resposta.status}): ${detalhe}`);
+        }
+        const dados = await resposta.json();
+        if (elementoProgresso) elementoProgresso.innerText = "Upload concluído ✔";
+        return dados.secure_url;
+    }).catch((erro) => {
+        if (elementoProgresso) elementoProgresso.innerText = "Erro no upload.";
+        throw erro;
     });
+
+    // Proteção extra: nunca deixa a tela travada esperando pra sempre
+    return comTimeout(requisicao, 30000, "O upload demorou demais e foi cancelado. Verifique sua internet e tente de novo.");
+}
+
+// Cancela uma promessa (e mostra um erro) se ela demorar mais que "ms" milissegundos
+function comTimeout(promessa, ms, mensagemErro) {
+    return Promise.race([
+        promessa,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(mensagemErro)), ms))
+    ]);
 }
 
 // Mostra uma pré-visualização local imediata (antes mesmo do upload) ao escolher um arquivo
