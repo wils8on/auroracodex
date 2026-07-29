@@ -81,6 +81,7 @@
             <button class="tab-btn" onclick="alternarAba('aba-personagens')">Cadastrar Personagens</button>
             <button class="tab-btn" onclick="alternarAba('aba-taxonomias')">Gêneros &amp; Tags</button>
             <button class="tab-btn" onclick="alternarAba('aba-universos')">Universos</button>
+            <button class="tab-btn" onclick="alternarAba('aba-galeria')">Galeria</button>
         </div>
 
         <!-- ABA 1: CADASTRO/EDIÇÃO DE LIVRO -->
@@ -353,6 +354,79 @@
                     <div id="lista-universos-config"></div>
                 </div>
 
+            </div>
+        </div>
+        <!-- ABA 7: GALERIA DE IMAGENS E VÍDEOS -->
+        <div id="aba-galeria" class="tab-content">
+            <h2 class="autor-title">Galeria de Imagens e Vídeos</h2>
+            <div class="form-wrapper">
+                <div class="form-group">
+                    <label for="select-livro-galeria">Livro</label>
+                    <select id="select-livro-galeria" required></select>
+                </div>
+
+                <h3 id="titulo-form-galeria" style="color:#FFF; font-size:1rem; margin: 20px 0 15px 0;">Adicionar Item</h3>
+
+                <form id="form-galeria" style="display:flex; flex-direction:column; gap:16px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="titulo-galeria">Título (opcional)</label>
+                            <input type="text" id="titulo-galeria" placeholder="Ex: Mapa da Cidade">
+                        </div>
+                        <div class="form-group">
+                            <label for="tipo-galeria">Tipo</label>
+                            <select id="tipo-galeria">
+                                <option value="imagem">Imagem</option>
+                                <option value="video">Vídeo (YouTube)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="categoria-galeria">Categoria</label>
+                            <select id="categoria-galeria">
+                                <option value="Arte">Arte</option>
+                                <option value="Mapa">Mapa</option>
+                                <option value="Personagem">Personagem</option>
+                                <option value="Referência">Referência</option>
+                                <option value="Trailer">Trailer</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="campo-upload-imagem-galeria">
+                        <label>Imagem</label>
+                        <input type="file" id="arquivo-imagem-galeria" accept="image/*">
+                        <input type="hidden" id="url-imagem-galeria">
+                        <div id="preview-wrapper-galeria" style="margin-top:10px; display:none;">
+                            <img id="preview-imagem-galeria" style="width:90px; height:90px; object-fit:cover; border-radius:6px; border:1px solid #29292E;">
+                            <div id="progresso-upload-galeria" style="font-size:0.8rem; color:#8C8C8C; margin-top:6px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="campo-url-video-galeria" style="display:none;">
+                        <label for="url-video-galeria">URL do YouTube</label>
+                        <input type="url" id="url-video-galeria" placeholder="https://youtube.com/watch?v=...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descricao-galeria">Descrição</label>
+                        <textarea id="descricao-galeria" rows="3" placeholder="Descrição..."></textarea>
+                    </div>
+
+                    <div class="form-group" style="max-width:150px;">
+                        <label for="ordem-galeria">Ordem</label>
+                        <input type="number" id="ordem-galeria" value="0" min="0">
+                    </div>
+
+                    <button type="submit" class="btn-submit">Adicionar</button>
+                </form>
+            </div>
+
+            <div class="form-wrapper" style="margin-top:25px;">
+                <h3 style="color:#8C8C8C; font-size:0.85rem; text-transform:uppercase; margin-bottom:15px;">Itens desta obra</h3>
+                <div id="lista-galeria-itens">
+                    <p style="color:#737373; font-size:0.9rem;">Selecione um livro acima para ver os itens já cadastrados.</p>
+                </div>
             </div>
         </div>
     </main>

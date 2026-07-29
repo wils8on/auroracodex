@@ -121,6 +121,7 @@ onAuthStateChanged(auth, async (user) => {
         inicializarPreviewImagens();
         inicializarCatalogoConfig();
         inicializarDadosUniversos();
+        inicializarDadosGaleria();
     }
 });
 
@@ -131,10 +132,12 @@ function inicializarDadosAutor() {
         const tbody = document.getElementById("tabela-gerenciar-livros");
         const selectLivro = document.getElementById("select-livro-capitulo");
         const selectLivroPersonagem = document.getElementById("select-livro-personagem");
+        const selectLivroGaleria = document.getElementById("select-livro-galeria");
 
         if (tbody) tbody.innerHTML = "";
         if (selectLivro) selectLivro.innerHTML = '<option value="">Selecione a Obra...</option>';
         if (selectLivroPersonagem) selectLivroPersonagem.innerHTML = '<option value="">Selecione a Obra...</option>';
+        if (selectLivroGaleria) selectLivroGaleria.innerHTML = '<option value="">Selecione a Obra...</option>';
 
         snapshot.forEach((docSnap) => {
             const id = docSnap.id;
@@ -166,6 +169,13 @@ function inicializarDadosAutor() {
                 optP.value = id;
                 optP.innerText = livro.titulo;
                 selectLivroPersonagem.appendChild(optP);
+            }
+
+            if (selectLivroGaleria) {
+                const optG = document.createElement("option");
+                optG.value = id;
+                optG.innerText = livro.titulo;
+                selectLivroGaleria.appendChild(optG);
             }
         });
 
@@ -921,6 +931,226 @@ document.getElementById("form-universo")?.addEventListener("submit", async (e) =
         btnSubmit.disabled = false;
         if (btnSubmit.innerText === "Salvando...") {
             btnSubmit.innerText = idUniversoEdicao ? "Atualizar Universo" : "Criar Universo";
+        }
+    }
+});
+
+// =====================================================
+// GALERIA DE IMAGENS E VÍDEOS (subcoleção por livro)
+// =====================================================
+
+let idGaleriaEdicao = null;
+let unsubscribeGaleria = null;
+
+function inicializarDadosGaleria() {
+    const selectLivroGaleria = document.getElementById("select-livro-galeria");
+    if (!selectLivroGaleria) return;
+
+    selectLivroGaleria.addEventListener("change", () => {
+        resetarFormularioGaleria();
+        carregarGaleriaDaObra(selectLivroGaleria.value);
+    });
+
+    // Alterna entre o campo de upload de imagem e o campo de URL do YouTube
+    document.getElementById("tipo-galeria")?.addEventListener("change", (e) => {
+        const ehImagem = e.target.value === "imagem";
+        document.getElementById("campo-upload-imagem-galeria").style.display = ehImagem ? "flex" : "none";
+        document.getElementById("campo-url-video-galeria").style.display = ehImagem ? "none" : "flex";
+    });
+
+    // Preview instantâneo ao escolher um arquivo de imagem
+    document.getElementById("arquivo-imagem-galeria")?.addEventListener("change", (e) => {
+        if (e.target.files && e.target.files[0]) {
+            document.getElementById("preview-imagem-galeria").src = URL.createObjectURL(e.target.files[0]);
+            document.getElementById("preview-wrapper-galeria").style.display = "block";
+            document.getElementById("progresso-upload-galeria").innerText = "";
+        }
+    });
+}
+
+function resetarFormularioGaleria() {
+    idGaleriaEdicao = null;
+    const form = document.getElementById("form-galeria");
+    if (!form) return;
+
+    form.reset();
+    document.getElementById("titulo-form-galeria").innerText = "Adicionar Item";
+    form.querySelector(".btn-submit").innerText = "Adicionar";
+    document.getElementById("preview-wrapper-galeria").style.display = "none";
+    document.getElementById("url-imagem-galeria").value = "";
+    document.getElementById("campo-upload-imagem-galeria").style.display = "flex";
+    document.getElementById("campo-url-video-galeria").style.display = "none";
+}
+
+function carregarGaleriaDaObra(livroId) {
+    const listaContainer = document.getElementById("lista-galeria-itens");
+    if (!listaContainer) return;
+
+    if (unsubscribeGaleria) {
+        unsubscribeGaleria();
+        unsubscribeGaleria = null;
+    }
+
+    if (!livroId) {
+        listaContainer.innerHTML = "";
+        return;
+    }
+
+    const galeriaRef = collection(db, "livros", livroId, "galeria");
+    const q = query(galeriaRef, orderBy("ordem", "asc"));
+
+    unsubscribeGaleria = onSnapshot(q, (snapshot) => {
+        listaContainer.innerHTML = "";
+
+        if (snapshot.empty) {
+            listaContainer.innerHTML = '<p style="color:#737373; font-size:0.9rem;">Nenhum item cadastrado para esta obra ainda.</p>';
+            return;
+        }
+
+        snapshot.forEach((docSnap) => {
+            const item = docSnap.data();
+            const id = docSnap.id;
+
+            const miniatura = item.tipo === "video"
+                ? `<div style="width:56px; height:56px; border-radius:6px; background:#1A1A1E; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">▶</div>`
+                : `<img src="${item.url}" style="width:56px; height:56px; object-fit:cover; border-radius:6px;">`;
+
+            const row = document.createElement("div");
+            row.style.cssText = "display:flex; gap:15px; align-items:center; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; padding:12px; margin-bottom:10px;";
+            row.innerHTML = `
+                ${miniatura}
+                <div style="flex-grow:1;">
+                    <strong style="color:#FFF;">${item.titulo || '(sem título)'}</strong>
+                    <p style="color:#8C8C8C; font-size:0.8rem;">${item.categoria} • Ordem ${item.ordem ?? 0}</p>
+                </div>
+                <button class="btn-editar-galeria" data-id="${id}" style="background:#29292E; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
+                <button class="btn-excluir-galeria" data-id="${id}" style="background:#E50914; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
+            `;
+            listaContainer.appendChild(row);
+        });
+
+        vincularEventosGaleria(livroId);
+    });
+}
+
+function vincularEventosGaleria(livroId) {
+    document.querySelectorAll(".btn-editar-galeria").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            const id = e.target.getAttribute("data-id");
+            const docSnap = await getDoc(doc(db, "livros", livroId, "galeria", id));
+            if (!docSnap.exists()) return;
+
+            const item = docSnap.data();
+            idGaleriaEdicao = id;
+
+            document.getElementById("titulo-galeria").value = item.titulo || "";
+            document.getElementById("tipo-galeria").value = item.tipo;
+            document.getElementById("categoria-galeria").value = item.categoria;
+            document.getElementById("descricao-galeria").value = item.descricao || "";
+            document.getElementById("ordem-galeria").value = item.ordem ?? 0;
+            document.getElementById("arquivo-imagem-galeria").value = "";
+
+            const ehImagem = item.tipo === "imagem";
+            document.getElementById("campo-upload-imagem-galeria").style.display = ehImagem ? "flex" : "none";
+            document.getElementById("campo-url-video-galeria").style.display = ehImagem ? "none" : "flex";
+
+            if (ehImagem) {
+                document.getElementById("url-imagem-galeria").value = item.url || "";
+                if (item.url) {
+                    document.getElementById("preview-imagem-galeria").src = item.url;
+                    document.getElementById("preview-wrapper-galeria").style.display = "block";
+                    document.getElementById("progresso-upload-galeria").innerText = "Imagem atual (envie um novo arquivo para substituir)";
+                }
+                document.getElementById("url-video-galeria").value = "";
+            } else {
+                document.getElementById("url-video-galeria").value = item.url || "";
+                document.getElementById("preview-wrapper-galeria").style.display = "none";
+            }
+
+            document.getElementById("titulo-form-galeria").innerText = "Editar Item";
+            document.getElementById("form-galeria").querySelector(".btn-submit").innerText = "Atualizar Item";
+            document.getElementById("titulo-galeria").scrollIntoView({ behavior: "smooth" });
+        });
+    });
+
+    document.querySelectorAll(".btn-excluir-galeria").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            const id = e.target.getAttribute("data-id");
+            if (confirm("Excluir este item da galeria?")) {
+                await deleteDoc(doc(db, "livros", livroId, "galeria", id));
+                if (idGaleriaEdicao === id) resetarFormularioGaleria();
+            }
+        });
+    });
+}
+
+document.getElementById("form-galeria")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const livroId = document.getElementById("select-livro-galeria").value;
+    if (!livroId) {
+        alert("Selecione o livro ao qual este item pertence.");
+        return;
+    }
+
+    const tipo = document.getElementById("tipo-galeria").value;
+    const btnSubmit = e.target.querySelector(".btn-submit");
+    btnSubmit.disabled = true;
+    btnSubmit.innerText = "Salvando...";
+
+    try {
+        let urlFinal = "";
+
+        if (tipo === "imagem") {
+            const arquivoImagem = document.getElementById("arquivo-imagem-galeria").files[0];
+            urlFinal = document.getElementById("url-imagem-galeria").value;
+
+            if (arquivoImagem) {
+                urlFinal = await uploadImagem(arquivoImagem, "galeria", "progresso-upload-galeria");
+            }
+
+            if (!urlFinal) {
+                alert("Selecione uma imagem para adicionar.");
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = idGaleriaEdicao ? "Atualizar Item" : "Adicionar";
+                return;
+            }
+        } else {
+            urlFinal = document.getElementById("url-video-galeria").value.trim();
+            if (!urlFinal) {
+                alert("Informe a URL do vídeo do YouTube.");
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = idGaleriaEdicao ? "Atualizar Item" : "Adicionar";
+                return;
+            }
+        }
+
+        const dadosItem = {
+            titulo: document.getElementById("titulo-galeria").value.trim(),
+            tipo,
+            categoria: document.getElementById("categoria-galeria").value,
+            url: urlFinal,
+            descricao: document.getElementById("descricao-galeria").value.trim(),
+            ordem: parseInt(document.getElementById("ordem-galeria").value) || 0
+        };
+
+        if (idGaleriaEdicao) {
+            await updateDoc(doc(db, "livros", livroId, "galeria", idGaleriaEdicao), dadosItem);
+            alert("Item atualizado com sucesso!");
+        } else {
+            dadosItem.data_criacao = new Date().toISOString();
+            await addDoc(collection(db, "livros", livroId, "galeria"), dadosItem);
+            alert("Item adicionado à galeria!");
+        }
+
+        resetarFormularioGaleria();
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao salvar item da galeria.");
+    } finally {
+        btnSubmit.disabled = false;
+        if (btnSubmit.innerText === "Salvando...") {
+            btnSubmit.innerText = idGaleriaEdicao ? "Atualizar Item" : "Adicionar";
         }
     }
 });
