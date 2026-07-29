@@ -1,0 +1,90 @@
+.oraculo-post {
+    background-color: #181818;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.oraculo-post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.oraculo-tipo-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tipo-reflexão { background: rgba(124, 58, 237, 0.18); color: #B48CFF; }
+.tipo-curiosidade { background: rgba(59, 130, 246, 0.18); color: #6EA8FE; }
+.tipo-bastidor { background: rgba(235, 156, 15, 0.18); color: #eb9c0f; }
+.tipo-mensagem { background: rgba(229, 9, 20, 0.18); color: #FF6B6B; }
+.tipo-outro { background: rgba(255,255,255, 0.08); color: #D4D4D4; }
+
+.oraculo-data {
+    color: #737373;
+    font-size: 0.82rem;
+}
+
+.oraculo-post h3 {
+    font-family: 'Cinzel', serif;
+    color: #FFFFFF;
+    font-size: 1.4rem;
+    margin-bottom: 14px;
+}
+
+.oraculo-conteudo {
+    color: #D4D4D4;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    margin-bottom: 16px;
+}
+
+.oraculo-imagem {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.oraculo-livros-relacionados {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.oraculo-chip-livro {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #D4D4D4;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.oraculo-chip-livro:hover {
+    border-color: #E50914;
+    color: #FFF;
+}
+
+@media (max-width: 768px) {
+    .oraculo-post {
+        padding: 18px;
+    }
+
+    .oraculo-post h3 {
+        font-size: 1.15rem;
+    }
+}

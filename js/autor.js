@@ -20,8 +20,8 @@ const db = getFirestore(app);
 // CONFIGURAÇÃO DO CLOUDINARY (upload de imagens gratuito)
 // =====================================================
 // Troque pelos valores do SEU painel do Cloudinary (Dashboard > Cloud name / Settings > Upload > presets)
-const CLOUDINARY_CLOUD_NAME = "ffril2cr";
-const CLOUDINARY_UPLOAD_PRESET = "qrtn86gx";
+const CLOUDINARY_CLOUD_NAME = "COLOQUE_SEU_CLOUD_NAME_AQUI";
+const CLOUDINARY_UPLOAD_PRESET = "COLOQUE_SEU_UPLOAD_PRESET_AQUI";
 
 let idLivroEdicao = null;
 let livrosCache = [];
@@ -122,6 +122,7 @@ onAuthStateChanged(auth, async (user) => {
         inicializarCatalogoConfig();
         inicializarDadosUniversos();
         inicializarDadosGaleria();
+        inicializarDadosOraculo();
     }
 });
 
@@ -753,6 +754,7 @@ function inicializarDadosUniversos() {
 function atualizarUIUniversos() {
     renderizarChecklistLivros(idUniversoEdicao);
     renderizarListaUniversos();
+    if (typeof renderizarChipsLivrosOraculo === "function") renderizarChipsLivrosOraculo();
 }
 
 function renderizarChecklistLivros(idUniversoAtual) {
@@ -1151,6 +1153,230 @@ document.getElementById("form-galeria")?.addEventListener("submit", async (e) =>
         btnSubmit.disabled = false;
         if (btnSubmit.innerText === "Salvando...") {
             btnSubmit.innerText = idGaleriaEdicao ? "Atualizar Item" : "Adicionar";
+        }
+    }
+});
+
+// =====================================================
+// ORÁCULO DO AUTOR (mural de posts do autor)
+// =====================================================
+
+let idOraculoEdicao = null;
+let livrosSelecionadosOraculo = new Set();
+
+function inicializarDadosOraculo() {
+    const checkboxPublicarAgora = document.getElementById("publicar-agora-oraculo");
+    checkboxPublicarAgora?.addEventListener("change", (e) => {
+        document.getElementById("campo-agendar-oraculo").style.display = e.target.checked ? "none" : "block";
+    });
+
+    document.getElementById("arquivo-imagem-oraculo")?.addEventListener("change", (e) => {
+        if (e.target.files && e.target.files[0]) {
+            document.getElementById("preview-imagem-oraculo").src = URL.createObjectURL(e.target.files[0]);
+            document.getElementById("preview-wrapper-oraculo").style.display = "block";
+            document.getElementById("progresso-upload-oraculo").innerText = "";
+        }
+    });
+
+    onSnapshot(collection(db, "oraculo"), (snapshot) => {
+        const posts = snapshot.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => new Date(b.dataPublicacao) - new Date(a.dataPublicacao));
+
+        renderizarListaOraculo(posts);
+    });
+
+    renderizarChipsLivrosOraculo();
+}
+
+// Reconstrói os chips de livros (chamado na inicialização e sempre que a lista de livros mudar)
+function renderizarChipsLivrosOraculo() {
+    const container = document.getElementById("chips-livros-oraculo");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (livrosCache.length === 0) {
+        container.innerHTML = '<p style="color:#737373; font-size:0.85rem;">Cadastre um livro primeiro.</p>';
+        return;
+    }
+
+    livrosCache.forEach(livro => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        const marcado = livrosSelecionadosOraculo.has(livro.id);
+        chip.style.cssText = `background:${marcado ? '#E50914' : 'rgba(255,255,255,0.05)'}; border:1px solid ${marcado ? '#E50914' : 'rgba(255,255,255,0.15)'}; color:#FFF; padding:6px 14px; border-radius:20px; font-size:0.85rem; cursor:pointer;`;
+        chip.innerText = livro.titulo;
+        chip.onclick = () => {
+            if (livrosSelecionadosOraculo.has(livro.id)) {
+                livrosSelecionadosOraculo.delete(livro.id);
+            } else {
+                livrosSelecionadosOraculo.add(livro.id);
+            }
+            renderizarChipsLivrosOraculo();
+        };
+        container.appendChild(chip);
+    });
+}
+
+function renderizarListaOraculo(posts) {
+    const container = document.getElementById("lista-oraculo-posts");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (posts.length === 0) {
+        container.innerHTML = '<p style="color:#737373; font-size:0.85rem;">Nenhuma publicação ainda.</p>';
+        return;
+    }
+
+    const agora = new Date();
+
+    posts.forEach(post => {
+        const agendado = new Date(post.dataPublicacao) > agora;
+        const dataFormatada = new Date(post.dataPublicacao).toLocaleString("pt-BR", { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        const row = document.createElement("div");
+        row.style.cssText = "padding:12px; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; margin-bottom:10px;";
+        row.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                <div>
+                    <strong style="color:#FFF;">${post.titulo || '(sem título)'}</strong>
+                    <p style="color:#8C8C8C; font-size:0.8rem; margin-top:2px;">
+                        ${post.tipo} • ${agendado ? 'Agendado para ' : 'Publicado em '}${dataFormatada}
+                    </p>
+                </div>
+                <div style="display:flex; gap:8px; flex-shrink:0;">
+                    <button class="btn-editar-oraculo" data-id="${post.id}" style="background:#29292E; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Editar</button>
+                    <button class="btn-excluir-oraculo" data-id="${post.id}" style="background:#E50914; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+
+    document.querySelectorAll(".btn-editar-oraculo").forEach(btn => {
+        btn.addEventListener("click", () => carregarPostParaEdicao(btn.getAttribute("data-id"), posts));
+    });
+
+    document.querySelectorAll(".btn-excluir-oraculo").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            const id = e.target.getAttribute("data-id");
+            if (confirm("Excluir esta publicação do Oráculo?")) {
+                await deleteDoc(doc(db, "oraculo", id));
+                if (idOraculoEdicao === id) resetarFormularioOraculo();
+            }
+        });
+    });
+}
+
+function carregarPostParaEdicao(id, posts) {
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+
+    idOraculoEdicao = id;
+    document.getElementById("titulo-oraculo").value = post.titulo || "";
+    document.getElementById("tipo-oraculo").value = post.tipo;
+    document.getElementById("conteudo-oraculo").value = post.conteudo;
+    document.getElementById("url-imagem-oraculo").value = post.imagem || "";
+    document.getElementById("arquivo-imagem-oraculo").value = "";
+
+    if (post.imagem) {
+        document.getElementById("preview-imagem-oraculo").src = post.imagem;
+        document.getElementById("preview-wrapper-oraculo").style.display = "block";
+        document.getElementById("progresso-upload-oraculo").innerText = "Imagem atual (envie um novo arquivo para substituir)";
+    } else {
+        document.getElementById("preview-wrapper-oraculo").style.display = "none";
+    }
+
+    livrosSelecionadosOraculo = new Set(post.livrosRelacionados || []);
+    renderizarChipsLivrosOraculo();
+
+    const jaPublicado = new Date(post.dataPublicacao) <= new Date();
+    document.getElementById("publicar-agora-oraculo").checked = jaPublicado;
+    document.getElementById("campo-agendar-oraculo").style.display = jaPublicado ? "none" : "block";
+    if (!jaPublicado) {
+        // Formata pro input datetime-local (precisa do formato AAAA-MM-DDTHH:mm)
+        const d = new Date(post.dataPublicacao);
+        const offset = d.getTimezoneOffset();
+        const dLocal = new Date(d.getTime() - offset * 60000);
+        document.getElementById("data-agendada-oraculo").value = dLocal.toISOString().slice(0, 16);
+    }
+
+    document.getElementById("titulo-form-oraculo").innerText = "Editar Publicação";
+    document.getElementById("form-oraculo").querySelector(".btn-submit").innerText = "Atualizar Publicação";
+    document.getElementById("titulo-oraculo").scrollIntoView({ behavior: "smooth" });
+}
+
+function resetarFormularioOraculo() {
+    idOraculoEdicao = null;
+    livrosSelecionadosOraculo = new Set();
+    document.getElementById("form-oraculo").reset();
+    document.getElementById("publicar-agora-oraculo").checked = true;
+    document.getElementById("campo-agendar-oraculo").style.display = "none";
+    document.getElementById("titulo-form-oraculo").innerText = "Nova Publicação";
+    document.getElementById("form-oraculo").querySelector(".btn-submit").innerText = "Criar Publicação";
+    document.getElementById("preview-wrapper-oraculo").style.display = "none";
+    document.getElementById("url-imagem-oraculo").value = "";
+    renderizarChipsLivrosOraculo();
+}
+
+document.getElementById("form-oraculo")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const btnSubmit = e.target.querySelector(".btn-submit");
+    const arquivoImagem = document.getElementById("arquivo-imagem-oraculo").files[0];
+    const publicarAgora = document.getElementById("publicar-agora-oraculo").checked;
+
+    btnSubmit.disabled = true;
+    btnSubmit.innerText = "Salvando...";
+
+    try {
+        let urlImagemFinal = document.getElementById("url-imagem-oraculo").value;
+        if (arquivoImagem) {
+            urlImagemFinal = await uploadImagem(arquivoImagem, "oraculo", "progresso-upload-oraculo");
+        }
+
+        let dataPublicacao;
+        if (publicarAgora) {
+            dataPublicacao = new Date().toISOString();
+        } else {
+            const valorData = document.getElementById("data-agendada-oraculo").value;
+            if (!valorData) {
+                alert("Escolha uma data para agendar a publicação.");
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = idOraculoEdicao ? "Atualizar Publicação" : "Criar Publicação";
+                return;
+            }
+            dataPublicacao = new Date(valorData).toISOString();
+        }
+
+        const dadosPost = {
+            titulo: document.getElementById("titulo-oraculo").value.trim(),
+            tipo: document.getElementById("tipo-oraculo").value,
+            conteudo: document.getElementById("conteudo-oraculo").value.trim(),
+            livrosRelacionados: Array.from(livrosSelecionadosOraculo),
+            imagem: urlImagemFinal || "",
+            dataPublicacao
+        };
+
+        if (idOraculoEdicao) {
+            await updateDoc(doc(db, "oraculo", idOraculoEdicao), dadosPost);
+            alert("Publicação atualizada com sucesso!");
+        } else {
+            dadosPost.data_criacao = new Date().toISOString();
+            await addDoc(collection(db, "oraculo"), dadosPost);
+            alert(publicarAgora ? "Publicação criada com sucesso!" : "Publicação agendada com sucesso!");
+        }
+
+        resetarFormularioOraculo();
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao salvar publicação.");
+    } finally {
+        btnSubmit.disabled = false;
+        if (btnSubmit.innerText === "Salvando...") {
+            btnSubmit.innerText = idOraculoEdicao ? "Atualizar Publicação" : "Criar Publicação";
         }
     }
 });
