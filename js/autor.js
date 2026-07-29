@@ -20,8 +20,8 @@ const db = getFirestore(app);
 // CONFIGURAÇÃO DO CLOUDINARY (upload de imagens gratuito)
 // =====================================================
 // Troque pelos valores do SEU painel do Cloudinary (Dashboard > Cloud name / Settings > Upload > presets)
-const CLOUDINARY_CLOUD_NAME = "COLOQUE_SEU_CLOUD_NAME_AQUI";
-const CLOUDINARY_UPLOAD_PRESET = "COLOQUE_SEU_UPLOAD_PRESET_AQUI";
+const CLOUDINARY_CLOUD_NAME = "ffril2cr";
+const CLOUDINARY_UPLOAD_PRESET = "qrtn86gx";
 
 let idLivroEdicao = null;
 let livrosCache = [];
