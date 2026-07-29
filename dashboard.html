@@ -81,29 +81,6 @@
             </div>
         </section>
 
-        <!-- Fileira 2: Seção do Oráculo (Cards de Inspiração/Moodboard) -->
-        <section class="row">
-            <h3 class="row-title">Galeria de Ambientes & Inspirações</h3>
-            <div class="row-posters visual-gallery">
-                
-                <div class="gallery-card">
-                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=500" alt="Ambiente">
-                    <span class="gallery-label">Mansão Claes</span>
-                </div>
-
-                <div class="gallery-card">
-                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=500" alt="Ambiente">
-                    <span class="gallery-label">Distrito Tecnológico</span>
-                </div>
-
-                <div class="gallery-card">
-                    <img src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=500" alt="Ambiente">
-                    <span class="gallery-label">Sala Escura de Leitura</span>
-                </div>
-
-            </div>
-        </section>
-
     </main>
 
     <!-- Modal Estilo Netflix Otimizado e Responsivo -->
@@ -132,6 +109,12 @@
                     <div id="modal-lista-capitulos" style="display: flex; flex-direction: column; gap: 10px;">
                         <!-- Injetado dinamicamente via JS -->
                     </div>
+                </div>
+
+                <!-- Seção de Galeria (só aparece se o livro tiver itens cadastrados) -->
+                <div id="modal-galeria-secao" style="display:none;">
+                    <h3 style="font-family: 'Cinzel', serif; border-bottom: 2px solid #404040; padding-bottom: 10px; margin-bottom: 15px;">Galeria</h3>
+                    <div id="modal-galeria-grid" style="display: flex; flex-wrap: wrap; gap: 12px;"></div>
                 </div>
             </div>
         </div>

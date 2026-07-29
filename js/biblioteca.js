@@ -247,4 +247,75 @@ async function abrirModalNetflix(idLivro, livro) {
             listaCapitulosContainer.innerHTML = '<p style="color: #E50914;">Erro ao carregar lista de episódios.</p>';
         }
     }
+
+    carregarGaleriaModal(idLivro);
+}
+
+// Busca os itens de galeria do livro e renderiza miniaturas (imagem ou vídeo)
+async function carregarGaleriaModal(idLivro) {
+    const secao = document.getElementById("modal-galeria-secao");
+    const grid = document.getElementById("modal-galeria-grid");
+    if (!secao || !grid) return;
+
+    grid.innerHTML = "";
+    secao.style.display = "none";
+
+    try {
+        const galeriaRef = collection(db, "livros", idLivro, "galeria");
+        const q = query(galeriaRef, orderBy("ordem", "asc"));
+        const snap = await getDocs(q);
+
+        if (snap.empty) return;
+
+        secao.style.display = "block";
+
+        snap.forEach((docSnap) => {
+            const item = docSnap.data();
+            const card = document.createElement("div");
+            card.style.cssText = "width:110px; cursor:pointer;";
+
+            let thumbSrc = item.url;
+            let iconePlay = "";
+            if (item.tipo === "video") {
+                const videoId = extrairYoutubeId(item.url);
+                thumbSrc = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                iconePlay = `<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:#FFF; text-shadow:0 2px 6px rgba(0,0,0,0.8);">▶</div>`;
+            }
+
+            card.innerHTML = `
+                <div style="position:relative; width:110px; height:110px; border-radius:6px; overflow:hidden; background:#1A1A1A;">
+                    <img src="${thumbSrc}" style="width:100%; height:100%; object-fit:cover;">
+                    ${iconePlay}
+                </div>
+                <p style="color:#D4D4D4; font-size:0.75rem; margin-top:6px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.categoria}</p>
+            `;
+            card.onclick = () => abrirLightboxGaleria(item.url, item.tipo);
+            grid.appendChild(card);
+        });
+    } catch (err) {
+        console.error("Erro ao carregar galeria:", err);
+    }
+}
+
+function extrairYoutubeId(url) {
+    if (!url) return "";
+    if (url.includes("youtu.be/")) return url.split("youtu.be/")[1].split("?")[0];
+    if (url.includes("v=")) return url.split("v=")[1].split("&")[0];
+    return "";
+}
+
+// Lightbox simples em tela cheia pra ver imagem/vídeo da galeria em tamanho maior
+function abrirLightboxGaleria(url, tipo) {
+    const overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px;";
+    overlay.onclick = () => overlay.remove();
+
+    if (tipo === "video") {
+        const videoId = extrairYoutubeId(url);
+        overlay.innerHTML = `<iframe width="800" height="450" style="max-width:90vw; max-height:80vh; border:none; border-radius:8px;" src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    } else {
+        overlay.innerHTML = `<img src="${url}" style="max-width:90vw; max-height:85vh; border-radius:8px; box-shadow:0 20px 60px rgba(0,0,0,0.6);">`;
+    }
+
+    document.body.appendChild(overlay);
 }
