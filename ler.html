@@ -45,37 +45,60 @@
                 </p>
             </section>
 
-            <!-- Rodapé do Capítulo (Interações) -->
+            <!-- Área de Interações do Capítulo -->
             <footer class="chapter-interactions">
                 <button class="btn-like" id="btn-like">
-                    <svg viewBox="0 0 24 24" class="icon-heart"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    <span id="like-count">42</span> Curtidas
+                    <svg viewBox="0 0 24 24" class="icon-heart">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    <span id="like-count">0</span> Curtidas
                 </button>
             </footer>
 
-            <!-- Área de Comentários Integrada -->
+            <!-- Seção de Comentários Integrada -->
             <section class="comments-section">
                 <h3>Comentários sobre o Capítulo</h3>
                 <div class="comment-input-box">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100" alt="Sua foto" class="comment-avatar">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100" alt="Sua foto" class="comment-avatar" id="user-comment-avatar">
                     <div class="input-wrapper">
-                        <textarea placeholder="O que você achou dessa cena? Comente como no Wattpad..."></textarea>
-                        <button class="btn-comment-submit">Publicar</button>
+                        <textarea id="input-comentario" placeholder="O que achou deste capítulo? Deixe sua opinião..."></textarea>
+                        <button class="btn-comment-submit" id="btn-enviar-comentario">Publicar</button>
                     </div>
+                </div>
+                
+                <div class="comments-list" id="lista-comentarios">
+                    <p style="color: #737373; font-size: 0.9rem;">Carregando comentários...</p>
                 </div>
 
-                <div class="comments-list">
-                    <div class="comment-item">
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100" alt="Leitor" class="comment-avatar">
-                        <div class="comment-body">
-                            <div class="comment-meta"><strong>Hugo Supporter</strong> <span>Há 2 horas</span></div>
-                            <p class="comment-text">Essa tensão entre a Zuri e o Hugo logo no primeiro capítulo está absurda! A descrição estética do ambiente ficou perfeita.</p>
-                        </div>
-                    </div>
+                <!-- Botão de Carregar Mais Comentários -->
+                <div id="container-carregar-mais" style="text-align: center; margin-top: 20px; display: none;">
+                    <button id="btn-carregar-mais-comentarios" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #FFF; padding: 10px 20px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                        Carregar mais comentários
+                    </button>
                 </div>
             </section>
-        </article>
-    </main>
+
+            <!-- Dock Fixo de Trilha Sonora -->
+            <div class="audio-player-dock">
+                <div class="player-track-info">
+                    <div class="track-icon">🎵</div>
+                    <div class="track-text">
+                        <span class="track-title" id="player-track-title">Trilha Sonora do Capítulo</span>
+                        <span class="track-author" id="player-track-author">Aguardando mídia...</span>
+                    </div>
+                </div>
+                
+                <div class="player-controls" id="media-player-container">
+                    <!-- Player dinâmico (Áudio nativo, YouTube ou Spotify) será injetado via ler.js -->
+                    <audio id="chapter-audio" style="display: none;"></audio>
+                    <button class="btn-play-pause" id="play-pause-btn" style="display: none;">
+                        <svg viewBox="0 0 24 24" id="play-icon"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                    <div class="progress-bar-container" id="progress-container" style="display: none;">
+                        <div class="progress-bar" id="audio-progress"></div>
+                    </div>
+                </div>
+            </div>
 
     <!-- Sidebar do Oráculo / Fichas de Personagem (Escondida por Padrão) -->
     <aside class="oracle-sidebar" id="oracle-sidebar">
