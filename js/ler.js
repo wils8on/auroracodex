@@ -58,17 +58,39 @@ async function carregarConteudoCapitulo(user) {
             if (txtTitulo) txtTitulo.innerText = dadosCap.titulo.toUpperCase();
             
             if (txtConteudo) {
-                txtConteudo.innerHTML = dadosCap.conteudo.split('\n').map(paragrafo => {
-                    if (paragrafo.trim() === "") return "";
-                    return `<p style="line-height: 1.8; margin-bottom: 20px; font-size: 1.15rem; color: #D2D2D2; text-align: justify;">${paragrafo}</p>`;
-                }).join('');
+                const conteudoBruto = dadosCap.conteudo || "";
+                // Capítulos escritos no editor rico já vêm em HTML; capítulos antigos são texto puro com quebras de linha
+                const pareceHtml = /<\/?[a-z][\s\S]*>/i.test(conteudoBruto);
+
+                if (pareceHtml) {
+                    txtConteudo.innerHTML = conteudoBruto;
+                } else {
+                    txtConteudo.innerHTML = conteudoBruto.split('\n').map(paragrafo => {
+                        if (paragrafo.trim() === "") return "";
+                        return `<p style="line-height: 1.8; margin-bottom: 20px; font-size: 1.15rem; color: #D2D2D2; text-align: justify;">${paragrafo}</p>`;
+                    }).join('');
+                }
+            }
+
+            // Capa de destaque e cor de cena do capítulo (opcionais, definidos pelo autor)
+            const bannerCapitulo = document.getElementById("capitulo-banner-capa");
+            if (bannerCapitulo) {
+                if (dadosCap.capa) {
+                    bannerCapitulo.style.backgroundImage = `url('${dadosCap.capa}')`;
+                    bannerCapitulo.style.display = "block";
+                } else {
+                    bannerCapitulo.style.display = "none";
+                }
+            }
+            if (dadosCap.corCena && txtNumero) {
+                txtNumero.style.color = dadosCap.corCena;
             }
 
             // 2. CONFIGURAÇÃO DINÂMICA DA TRILHA SONORA (PLAYER NO RODAPÉ)
             configurarPlayerTrilha(dadosCap.trilhaSonora, dadosCap.titulo);
 
             // 2.5 REGISTRA O PROGRESSO DE LEITURA (usado no Dashboard de Leitores do admin)
-            registrarProgressoLeitura(user, livroId, dadosLivro.titulo, dadosCap);
+            registrarProgressoLeitura(user, livroId, dadosLivro.titulo, dadosCap, dadosLivro.capa);
 
             // 3. BUSCA OS PERSONAGENS REAIS DO CÓDICE PARA ESSE LIVRO
             const sidebarContent = document.querySelector(".sidebar-content");
@@ -164,7 +186,7 @@ function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
 
 // Cria/atualiza um registro por (usuário, livro). Detecta automaticamente conclusão
 // quando o capítulo lido é o último publicado da obra.
-async function registrarProgressoLeitura(user, livroId, tituloLivro, dadosCap) {
+async function registrarProgressoLeitura(user, livroId, tituloLivro, dadosCap, capaLivro) {
     try {
         const registroId = `${user.uid}_${livroId}`;
         const registroRef = doc(db, "progresso_leitura", registroId);
@@ -184,8 +206,10 @@ async function registrarProgressoLeitura(user, livroId, tituloLivro, dadosCap) {
             nomeUsuario: user.displayName || "",
             livroId,
             livroTitulo: tituloLivro,
+            livroCapa: capaLivro || "",
             ultimoCapituloNumero: dadosCap.numero,
             ultimoCapituloTitulo: dadosCap.titulo,
+            ultimoCapituloId: capituloId,
             status: (jaEstavaConcluido || terminouAgora) ? "concluida" : "ativa",
             dataUltimaLeitura: new Date().toISOString()
         };

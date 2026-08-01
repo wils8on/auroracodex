@@ -46,6 +46,7 @@
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin-bottom: 8px;
@@ -82,7 +83,7 @@
     border-radius: 10px;
     background-size: cover;
     background-position: center;
-    background-color: #1A1A1A;
+    background-color: #1E1A30;
     display: flex;
     align-items: flex-end;
     position: relative;
@@ -99,7 +100,7 @@
 
 .universo-tag {
     display: inline-block;
-    color: #E50914;
+    color: #F97316;
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 2px;

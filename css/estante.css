@@ -1,0 +1,66 @@
+.estante-secao {
+    margin-bottom: 45px;
+}
+
+.estante-titulo-secao {
+    font-family: 'Cinzel', serif;
+    font-size: 1.15rem;
+    color: #FFFFFF;
+    margin-bottom: 18px;
+    letter-spacing: 0.5px;
+}
+
+/* --- CARD DE "CONTINUAR LEITURA" --- */
+.continuar-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background-color: #1C1830;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.continuar-card:hover {
+    border-color: #F97316;
+    transform: translateY(-2px);
+}
+
+.continuar-card img {
+    width: 58px;
+    height: 82px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.continuar-card-info {
+    flex-grow: 1;
+}
+
+.continuar-card-info h4 {
+    color: #FFFFFF;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+}
+
+.continuar-card-info p {
+    color: #A3A3A3;
+    font-size: 0.85rem;
+}
+
+.continuar-card-cta {
+    color: #F97316;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* Selo de progresso sobre o card da biblioteca (usado nas seções Lendo/Concluídos) */
+.biblioteca-card-info .progresso-label {
+    font-size: 0.75rem;
+    color: #8C8C8C;
+    margin-top: 4px;
+}

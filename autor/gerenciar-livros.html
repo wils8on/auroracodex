@@ -30,29 +30,29 @@
         .tabs-nav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
         .tab-btn { background: transparent; border: none; color: #8C8C8C; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
         .tab-btn:hover { color: #FFF; background-color: rgba(255,255,255,0.05); }
-        .tab-btn.active { color: #FFF; background-color: #E50914; }
+        .tab-btn.active { color: #FFF; background-color: #F97316; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
-        .form-wrapper { background-color: #121214; border: 1px solid #202024; border-radius: 8px; padding: 30px; }
+        .form-wrapper { background-color: #121214; border: 1px solid #2A2440; border-radius: 8px; padding: 30px; }
         .form-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
         .form-group { flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
         .form-group label { color: #8C8C8C; font-size: 0.85rem; text-transform: uppercase; font-weight: 500; }
-        .form-group input, .form-group textarea, .form-group select { background-color: #1A1A1E; color: #FFF; border: 1px solid #29292E; padding: 12px; border-radius: 6px; font-family: inherit; font-size: 0.95rem; }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #E50914; outline: none; }
+        .form-group input, .form-group textarea, .form-group select { background-color: #1E1A30; color: #FFF; border: 1px solid #332C4D; padding: 12px; border-radius: 6px; font-family: inherit; font-size: 0.95rem; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #F97316; outline: none; }
         
         /* Grid de Subgêneros (Tags Clicáveis) */
         .subgeneros-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
         .tag-checkbox { display: none; }
-        .tag-label { background: #1A1A1E; border: 1px solid #29292E; color: #8C8C8C; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; user-select: none; }
-        .tag-checkbox:checked + .tag-label { background: rgba(229, 9, 20, 0.15); border-color: #E50914; color: #FFF; }
+        .tag-label { background: #1E1A30; border: 1px solid #332C4D; color: #8C8C8C; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; user-select: none; }
+        .tag-checkbox:checked + .tag-label { background: rgba(249, 115, 22, 0.15); border-color: #F97316; color: #FFF; }
 
         /* Meta de informações do capítulo */
         .cap-meta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #8C8C8C; font-size: 0.9rem; }
 
-        .btn-submit { background-color: #E50914; color: #FFF; border: none; padding: 14px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; transition: background 0.2s; }
-        .btn-submit:hover { background-color: #B81D24; }
+        .btn-submit { background-color: #F97316; color: #FFF; border: none; padding: 14px; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; transition: background 0.2s; }
+        .btn-submit:hover { background-color: #EA580C; }
 
         table { width: 100%; border-collapse: collapse; text-align: left; color: #FFF; }
         th, td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -114,7 +114,7 @@
 
                     <div class="form-group">
                         <label>Universo</label>
-                        <p id="universo-atual-label" style="color:#D4D4D4; font-size:0.9rem; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; padding:12px; margin:0;">
+                        <p id="universo-atual-label" style="color:#D4D4D4; font-size:0.9rem; background:#1E1A30; border:1px solid #332C4D; border-radius:6px; padding:12px; margin:0;">
                             Nenhum — vincule na aba <strong>Universos</strong>
                         </p>
                     </div>
@@ -138,7 +138,7 @@
                             <input type="file" id="arquivo-capa" accept="image/*">
                             <input type="hidden" id="url-capa">
                             <div id="preview-wrapper-capa" style="margin-top: 10px; display: none;">
-                                <img id="preview-capa" style="width: 90px; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #29292E;">
+                                <img id="preview-capa" style="width: 90px; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #332C4D;">
                                 <div id="progresso-upload-capa" style="font-size: 0.8rem; color: #8C8C8C; margin-top: 6px;"></div>
                             </div>
                         </div>
@@ -178,14 +178,27 @@
 
         <!-- ABA 3: ESCRITA E CADASTRO DE CAPÍTULOS -->
         <div id="aba-capitulos" class="tab-content">
-            <h2 class="autor-title">Escrever Capítulo</h2>
+            <div class="editor-topbar">
+                <div>
+                    <h2 class="autor-title" style="margin-bottom: 4px;">Escrever Capítulo</h2>
+                    <span id="editor-obra-label" style="color:#8C8C8C; font-size:0.85rem;">Selecione a obra abaixo</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <select id="status-capitulo" title="Status do capítulo">
+                        <option value="publicado" selected>Publicado</option>
+                        <option value="rascunho">Rascunho</option>
+                    </select>
+                    <button type="button" id="btn-cancelar-edicao-capitulo" class="tag-label" style="cursor:pointer; padding:10px 16px; display:none;">Cancelar Edição</button>
+                </div>
+            </div>
+
             <div class="form-wrapper">
                 <form id="form-cadastrar-capitulo">
-                    
+
                     <div class="cap-meta-header">
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <span>Cap. nº</span>
-                            <input type="number" id="numero-capitulo" min="1" value="1" style="width: 70px; background: #1A1A1E; border: 1px solid #29292E; color: #FFF; padding: 6px; border-radius: 4px; text-align: center;">
+                            <input type="number" id="numero-capitulo" min="1" value="1" style="width: 70px; background: #1E1A30; border: 1px solid #332C4D; color: #FFF; padding: 6px; border-radius: 4px; text-align: center;">
                         </div>
                         <div>
                             <span id="contador-palavras">0</span> palavras
@@ -199,20 +212,61 @@
 
                     <div class="form-group">
                         <label for="titulo-capitulo">Título do Capítulo</label>
-                        <input type="text" id="titulo-capitulo" placeholder="Ex: O Começo de Tudo" required>
+                        <input type="text" id="titulo-capitulo" placeholder="Título do capítulo..." required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="trilha-sonora">🎵 Trilha Sonora — Link do Spotify ou YouTube (Opcional)</label>
+                            <input type="url" id="trilha-sonora" placeholder="https://open.spotify.com/track/...">
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="align-items: flex-end;">
+                        <div class="form-group">
+                            <label for="capa-capitulo">🖼️ URL da imagem de destaque (opcional)</label>
+                            <input type="url" id="capa-capitulo" placeholder="https://...">
+                        </div>
+                        <div class="form-group" style="max-width: 150px; min-width: 120px;">
+                            <label for="cor-cena-capitulo">🎨 Cor da cena</label>
+                            <input type="color" id="cor-cena-capitulo" value="#f97316" style="height: 45px; padding: 2px; cursor: pointer;">
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="trilha-sonora">Trilha Sonora — Link do Spotify ou YouTube (Opcional)</label>
-                        <input type="url" id="trilha-sonora" placeholder="https://open.spotify.com/track/...">
+                        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <label for="importar-arquivo-capitulo" style="background:#2A2440; border:1px solid #332C4D; color:#FFF; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:0.85rem; display:inline-flex; align-items:center; gap:8px; margin:0;">
+                                📄 Importar .txt / .html
+                            </label>
+                            <input type="file" id="importar-arquivo-capitulo" accept=".txt,.html" style="display:none;">
+                            <span style="color:#737373; font-size:0.8rem;">Substitui o conteúdo atual</span>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="conteudo-capitulo">Conteúdo Narrativo</label>
-                        <textarea id="conteudo-capitulo" rows="18" placeholder="Escreva o capítulo aqui..." style="line-height: 1.6; font-size: 1.05rem;" required></textarea>
+                        <label>Conteúdo Narrativo</label>
+                        <div class="rt-toolbar" id="rt-toolbar">
+                            <button type="button" class="rt-btn" data-cmd="undo" title="Desfazer">↶</button>
+                            <button type="button" class="rt-btn" data-cmd="redo" title="Refazer">↷</button>
+                            <div class="rt-sep"></div>
+                            <button type="button" class="rt-btn" data-cmd="bold" title="Negrito"><strong>B</strong></button>
+                            <button type="button" class="rt-btn" data-cmd="italic" title="Itálico"><em>I</em></button>
+                            <button type="button" class="rt-btn" data-cmd="underline" title="Sublinhado"><u>S</u></button>
+                            <button type="button" class="rt-btn" data-cmd="strikeThrough" title="Tachado"><s>T</s></button>
+                            <div class="rt-sep"></div>
+                            <button type="button" class="rt-btn" data-cmd="justifyLeft" title="Alinhar à esquerda">≡</button>
+                            <button type="button" class="rt-btn" data-cmd="justifyCenter" title="Centralizar">≡</button>
+                            <button type="button" class="rt-btn" data-cmd="justifyRight" title="Alinhar à direita">≡</button>
+                            <button type="button" class="rt-btn" data-cmd="justifyFull" title="Justificar">☰</button>
+                            <div class="rt-sep"></div>
+                            <button type="button" class="rt-btn" data-cmd="formatBlock" data-value="H2" title="Título">H2</button>
+                            <button type="button" class="rt-btn" data-cmd="formatBlock" data-value="BLOCKQUOTE" title="Citação">❝</button>
+                            <button type="button" class="rt-btn" data-cmd="formatBlock" data-value="P" title="Parágrafo normal">¶</button>
+                        </div>
+                        <div class="rt-editor" id="conteudo-capitulo" contenteditable="true" data-placeholder="Escreva o capítulo aqui..."></div>
                     </div>
 
-                    <button type="submit" class="btn-submit">Publicar Capítulo</button>
+                    <button type="submit" class="btn-submit" id="btn-submit-capitulo">Publicar Capítulo</button>
                 </form>
             </div>
 
@@ -261,7 +315,7 @@
                         <input type="file" id="arquivo-avatar-personagem" accept="image/*">
                         <input type="hidden" id="url-avatar-personagem">
                         <div id="preview-wrapper-personagem" style="margin-top: 10px; display: none;">
-                            <img id="preview-avatar-personagem" style="width: 70px; height: 70px; object-fit: cover; border-radius: 50%; border: 1px solid #29292E;">
+                            <img id="preview-avatar-personagem" style="width: 70px; height: 70px; object-fit: cover; border-radius: 50%; border: 1px solid #332C4D;">
                             <div id="progresso-upload-personagem" style="font-size: 0.8rem; color: #8C8C8C; margin-top: 6px;"></div>
                         </div>
                     </div>
@@ -288,7 +342,7 @@
                 <div class="form-wrapper" style="flex:1; min-width:280px;">
                     <h3 style="color:#FFF; font-size:1rem; margin-bottom:15px;">Gêneros Principais</h3>
                     <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <input type="text" id="novo-genero" placeholder="Ex: Suspense Psicológico" style="flex-grow:1; background:#1A1A1E; border:1px solid #29292E; color:#FFF; padding:10px 12px; border-radius:6px; font-family:inherit;">
+                        <input type="text" id="novo-genero" placeholder="Ex: Suspense Psicológico" style="flex-grow:1; background:#1E1A30; border:1px solid #332C4D; color:#FFF; padding:10px 12px; border-radius:6px; font-family:inherit;">
                         <button type="button" id="btn-add-genero" class="btn-submit" style="width:auto; padding:10px 20px;">Adicionar</button>
                     </div>
                     <div id="lista-generos-config"></div>
@@ -297,7 +351,7 @@
                 <div class="form-wrapper" style="flex:1; min-width:280px;">
                     <h3 style="color:#FFF; font-size:1rem; margin-bottom:15px;">Subgêneros / Tags</h3>
                     <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <input type="text" id="nova-tag" placeholder="Ex: BL (Boys Love)" style="flex-grow:1; background:#1A1A1E; border:1px solid #29292E; color:#FFF; padding:10px 12px; border-radius:6px; font-family:inherit;">
+                        <input type="text" id="nova-tag" placeholder="Ex: BL (Boys Love)" style="flex-grow:1; background:#1E1A30; border:1px solid #332C4D; color:#FFF; padding:10px 12px; border-radius:6px; font-family:inherit;">
                         <button type="button" id="btn-add-tag" class="btn-submit" style="width:auto; padding:10px 20px;">Adicionar</button>
                     </div>
                     <div id="lista-tags-config"></div>
@@ -336,7 +390,7 @@
                             <input type="file" id="arquivo-capa-universo" accept="image/*">
                             <input type="hidden" id="url-capa-universo">
                             <div id="preview-wrapper-universo" style="margin-top:10px; display:none;">
-                                <img id="preview-capa-universo" style="width:90px; height:90px; object-fit:cover; border-radius:6px; border:1px solid #29292E;">
+                                <img id="preview-capa-universo" style="width:90px; height:90px; object-fit:cover; border-radius:6px; border:1px solid #332C4D;">
                                 <div id="progresso-upload-universo" style="font-size:0.8rem; color:#8C8C8C; margin-top:6px;"></div>
                             </div>
                         </div>
@@ -399,7 +453,7 @@
                         <input type="file" id="arquivo-imagem-galeria" accept="image/*">
                         <input type="hidden" id="url-imagem-galeria">
                         <div id="preview-wrapper-galeria" style="margin-top:10px; display:none;">
-                            <img id="preview-imagem-galeria" style="width:90px; height:90px; object-fit:cover; border-radius:6px; border:1px solid #29292E;">
+                            <img id="preview-imagem-galeria" style="width:90px; height:90px; object-fit:cover; border-radius:6px; border:1px solid #332C4D;">
                             <div id="progresso-upload-galeria" style="font-size:0.8rem; color:#8C8C8C; margin-top:6px;"></div>
                         </div>
                     </div>
@@ -469,7 +523,7 @@
                             <input type="file" id="arquivo-imagem-oraculo" accept="image/*">
                             <input type="hidden" id="url-imagem-oraculo">
                             <div id="preview-wrapper-oraculo" style="margin-top:10px; display:none;">
-                                <img id="preview-imagem-oraculo" style="width:110px; height:70px; object-fit:cover; border-radius:6px; border:1px solid #29292E;">
+                                <img id="preview-imagem-oraculo" style="width:110px; height:70px; object-fit:cover; border-radius:6px; border:1px solid #332C4D;">
                                 <div id="progresso-upload-oraculo" style="font-size:0.8rem; color:#8C8C8C; margin-top:6px;"></div>
                             </div>
                         </div>
@@ -509,14 +563,56 @@
             }
         }
 
-        // Lógica do Contador de Palavras Real-time
-        const txArea = document.getElementById('conteudo-capitulo');
+        // Lógica do Contador de Palavras Real-time (agora sobre o editor rico contentEditable)
+        const editorConteudo = document.getElementById('conteudo-capitulo');
         const contador = document.getElementById('contador-palavras');
-        if(txArea && contador) {
-            txArea.addEventListener('input', () => {
-                const texto = txArea.value.trim();
-                const palavras = texto === "" ? 0 : texto.split(/\s+/).length;
-                contador.innerText = palavras;
+        function atualizarContadorPalavras() {
+            const texto = (editorConteudo.innerText || "").trim();
+            const palavras = texto === "" ? 0 : texto.split(/\s+/).length;
+            contador.innerText = palavras;
+        }
+        if (editorConteudo && contador) {
+            editorConteudo.addEventListener('input', atualizarContadorPalavras);
+        }
+
+        // Barra de formatação de texto rico (negrito, itálico, alinhamento, título, citação...)
+        const rtToolbar = document.getElementById('rt-toolbar');
+        if (rtToolbar && editorConteudo) {
+            rtToolbar.querySelectorAll('.rt-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    editorConteudo.focus();
+                    const cmd = btn.getAttribute('data-cmd');
+                    const valor = btn.getAttribute('data-value') || undefined;
+                    document.execCommand(cmd, false, valor);
+                    atualizarContadorPalavras();
+                });
+            });
+        }
+
+        // Importar conteúdo de um arquivo .txt ou .html (substitui o conteúdo atual do editor)
+        const inputImportar = document.getElementById('importar-arquivo-capitulo');
+        if (inputImportar && editorConteudo) {
+            inputImportar.addEventListener('change', () => {
+                const arquivo = inputImportar.files[0];
+                if (!arquivo) return;
+
+                const leitor = new FileReader();
+                leitor.onload = () => {
+                    const texto = leitor.result;
+                    const ehHtml = arquivo.name.toLowerCase().endsWith('.html');
+
+                    if (ehHtml) {
+                        editorConteudo.innerHTML = texto;
+                    } else {
+                        editorConteudo.innerHTML = texto
+                            .split(/\r?\n/)
+                            .map(linha => linha.trim() === "" ? "" : `<p>${linha}</p>`)
+                            .join("");
+                    }
+                    atualizarContadorPalavras();
+                    inputImportar.value = "";
+                };
+                leitor.readAsText(arquivo);
             });
         }
     </script>

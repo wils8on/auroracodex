@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #111111; /* Fundo ligeiramente mais escuro para focar no texto */
+    background-color: #120F1E; /* Fundo ligeiramente mais escuro para focar no texto */
     color: #E5E5E5;
     padding-top: 70px;
     padding-bottom: 90px; /* Margem para não cobrir o texto com o player */
@@ -19,7 +19,7 @@ body {
     top: 0;
     width: 100%;
     height: 70px;
-    background-color: rgba(20, 20, 20, 0.95);
+    background-color: rgba(21, 17, 31, 0.95);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     justify-content: space-between;
@@ -78,8 +78,8 @@ body {
 }
 
 .btn-sidebar-toggle:hover {
-    background-color: #E50914;
-    border-color: #E50914;
+    background-color: #F97316;
+    border-color: #F97316;
 }
 
 /* --- CONTAINER DO TEXTO PRINCIPAL --- */
@@ -101,7 +101,7 @@ body {
 
 .chapter-number {
     font-family: 'Cinzel', serif;
-    color: #E50914;
+    color: #F97316;
     font-size: 0.9rem;
     letter-spacing: 3px;
     margin-bottom: 10px;
@@ -166,14 +166,14 @@ body {
 }
 
 .btn-like:hover {
-    background: rgba(229, 9, 20, 0.15);
-    border-color: #E50914;
+    background: rgba(249, 115, 22, 0.15);
+    border-color: #F97316;
 }
 
 .btn-like.liked {
-    background: #E50914;
-    border-color: #E50914;
-    box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+    background: #F97316;
+    border-color: #F97316;
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
 }
 
 .btn-like.liked .icon-heart {
@@ -184,7 +184,7 @@ body {
 /* Comentários estilo Wattpad */
 .comments-section {
     margin-top: 60px;
-    background-color: rgba(20, 20, 20, 0.5);
+    background-color: rgba(21, 17, 31, 0.5);
     padding: 30px;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.03);
@@ -219,7 +219,7 @@ body {
 .input-wrapper textarea {
     width: 100%;
     height: 80px;
-    background-color: #1A1A1A;
+    background-color: #1E1A30;
     border: 1px solid #333;
     border-radius: 6px;
     padding: 12px;
@@ -230,11 +230,11 @@ body {
 
 .input-wrapper textarea:focus {
     outline: none;
-    border-color: #E50914;
+    border-color: #F97316;
 }
 
 .btn-comment-submit {
-    background-color: #E50914;
+    background-color: #F97316;
     color: #FFF;
     border: none;
     padding: 8px 20px;
@@ -273,7 +273,7 @@ body {
     right: -400px; /* Oculto por padrão */
     width: 400px;
     height: 100vh;
-    background-color: #141414;
+    background-color: #15111F;
     z-index: 15;
     box-shadow: -10px 0 30px rgba(0,0,0,0.5);
     border-left: 1px solid rgba(255,255,255,0.05);
@@ -333,7 +333,7 @@ body {
 
 .char-role {
     font-size: 0.75rem;
-    color: #E50914;
+    color: #F97316;
     font-weight: 600;
     margin-bottom: 6px;
 }
@@ -351,7 +351,7 @@ body {
     left: 0;
     width: 100%;
     min-height: 75px;
-    background-color: #181818;
+    background-color: #1C1830;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 10;
     display: flex;
@@ -431,7 +431,7 @@ body {
 .progress-bar {
     height: 100%;
     width: 0%;
-    background-color: #E50914;
+    background-color: #F97316;
     border-radius: 2px;
     transition: width 0.1s linear;
 }
@@ -516,5 +516,23 @@ body {
 
     .track-author {
         font-size: 0.75rem !important;
+    }
+}
+/* --- BANNER DE CAPA DO CAPÍTULO (opcional, definido pelo autor) --- */
+.capitulo-banner-capa {
+    display: none;
+    width: 100%;
+    height: 320px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 768px) {
+    .capitulo-banner-capa {
+        height: 200px;
+        margin-bottom: 24px;
     }
 }

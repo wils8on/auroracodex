@@ -183,16 +183,17 @@ async function abrirModalNetflix(idLivro, livro) {
         const capsRef = collection(db, "livros", idLivro, "capitulos");
         const q = query(capsRef, orderBy("numero", "asc"));
         const capsSnap = await getDocs(q);
+        const capitulosVisiveis = capsSnap.docs.filter(d => d.data().status !== "rascunho");
 
         if (listaCapitulosContainer) {
             listaCapitulosContainer.innerHTML = "";
 
-            if (capsSnap.empty) {
+            if (capitulosVisiveis.length === 0) {
                 listaCapitulosContainer.innerHTML = '<p style="color: #737373;">Nenhum capítulo publicado para esta obra ainda.</p>';
                 return;
             }
 
-            capsSnap.forEach((capSnap) => {
+            capitulosVisiveis.forEach((capSnap) => {
                 const cap = capSnap.data();
                 const item = document.createElement('div');
                 item.style.cssText = "background: #2f2f2f; padding: 16px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;";
@@ -207,7 +208,7 @@ async function abrirModalNetflix(idLivro, livro) {
 
                 item.innerHTML = `
                     <div>
-                        <span style="color: #E50914; font-weight: 600; margin-right: 10px;">Episódio ${cap.numero}</span>
+                        <span style="color: #F97316; font-weight: 600; margin-right: 10px;">Episódio ${cap.numero}</span>
                         <strong style="color: #FFF;">${cap.titulo}</strong>
                     </div>
                     <span style="color: #8C8C8C; font-size: 0.85rem;">Ler Agora &rarr;</span>
@@ -218,7 +219,7 @@ async function abrirModalNetflix(idLivro, livro) {
     } catch (err) {
         console.error("Erro ao carregar capítulos:", err);
         if (listaCapitulosContainer) {
-            listaCapitulosContainer.innerHTML = '<p style="color: #E50914;">Erro ao carregar lista de episódios.</p>';
+            listaCapitulosContainer.innerHTML = '<p style="color: #F97316;">Erro ao carregar lista de episódios.</p>';
         }
     }
 
@@ -257,7 +258,7 @@ async function carregarGaleriaModal(idLivro) {
             }
 
             card.innerHTML = `
-                <div style="position:relative; width:110px; height:110px; border-radius:6px; overflow:hidden; background:#1A1A1A;">
+                <div style="position:relative; width:110px; height:110px; border-radius:6px; overflow:hidden; background:#1E1A30;">
                     <img src="${thumbSrc}" style="width:100%; height:100%; object-fit:cover;">
                     ${iconePlay}
                 </div>
@@ -337,5 +338,5 @@ async function atualizarBotaoFavorito(idLivro) {
 
 function renderizarBotaoFavorito(btn, favoritado) {
     btn.innerHTML = favoritado ? "&#9829;" : "&#9825;";
-    btn.style.color = favoritado ? "#E50914" : "#FFF";
+    btn.style.color = favoritado ? "#F97316" : "#FFF";
 }

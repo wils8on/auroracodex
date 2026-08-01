@@ -1,5 +1,5 @@
 .oraculo-post {
-    background-color: #181818;
+    background-color: #1C1830;
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 10px;
     padding: 28px;
@@ -25,7 +25,7 @@
 .tipo-reflexão { background: rgba(124, 58, 237, 0.18); color: #B48CFF; }
 .tipo-curiosidade { background: rgba(59, 130, 246, 0.18); color: #6EA8FE; }
 .tipo-bastidor { background: rgba(235, 156, 15, 0.18); color: #eb9c0f; }
-.tipo-mensagem { background: rgba(229, 9, 20, 0.18); color: #FF6B6B; }
+.tipo-mensagem { background: rgba(249, 115, 22, 0.18); color: #FF6B6B; }
 .tipo-outro { background: rgba(255,255,255, 0.08); color: #D4D4D4; }
 
 .oraculo-data {
@@ -75,7 +75,7 @@
 }
 
 .oraculo-chip-livro:hover {
-    border-color: #E50914;
+    border-color: #F97316;
     color: #FFF;
 }
 

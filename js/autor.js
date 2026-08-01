@@ -151,8 +151,8 @@ function inicializarDadosAutor() {
                     <td><strong>${livro.titulo}</strong><br><span style="color:#737373; font-size:0.8rem;">${livro.status || 'Pendente'}</span></td>
                     <td>${livro.genero || 'Não Informado'}</td>
                     <td style="text-align: right;">
-                        <button class="btn-editar" data-id="${id}" style="background: #29292E; color: #FFF; border: none; padding: 6px 12px; margin-right: 8px; border-radius: 4px; cursor: pointer;">Editar</button>
-                        <button class="btn-excluir" data-id="${id}" style="background: #E50914; color: #FFF; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Excluir</button>
+                        <button class="btn-editar" data-id="${id}" style="background: #332C4D; color: #FFF; border: none; padding: 6px 12px; margin-right: 8px; border-radius: 4px; cursor: pointer;">Editar</button>
+                        <button class="btn-excluir" data-id="${id}" style="background: #F97316; color: #FFF; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Excluir</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -317,7 +317,33 @@ function inicializarDadosCapitulos() {
     selectLivro.addEventListener("change", () => {
         resetarFormularioCapitulo(); // evita salvar edição de um capítulo de outra obra por engano
         carregarCapitulosDaObra(selectLivro.value);
+        atualizarRotuloObraEditor();
     });
+
+    document.getElementById("btn-cancelar-edicao-capitulo")?.addEventListener("click", () => {
+        resetarFormularioCapitulo();
+    });
+
+    document.getElementById("status-capitulo")?.addEventListener("change", (e) => {
+        const btn = document.getElementById("btn-submit-capitulo");
+        if (!btn) return;
+        const editando = !!idCapituloEdicao;
+        if (e.target.value === "rascunho") {
+            btn.innerText = editando ? "Atualizar Rascunho" : "Salvar Rascunho";
+        } else {
+            btn.innerText = editando ? "Atualizar Capítulo" : "Publicar Capítulo";
+        }
+    });
+}
+
+// Mostra o nome da obra selecionada no topo do editor (estilo "estúdio")
+function atualizarRotuloObraEditor() {
+    const label = document.getElementById("editor-obra-label");
+    const select = document.getElementById("select-livro-capitulo");
+    if (!label || !select) return;
+
+    const opcaoSelecionada = select.options[select.selectedIndex];
+    label.innerText = (opcaoSelecionada && opcaoSelecionada.value) ? opcaoSelecionada.text : "Selecione a obra abaixo";
 }
 
 function resetarFormularioCapitulo() {
@@ -327,8 +353,26 @@ function resetarFormularioCapitulo() {
         const idLivroAtual = document.getElementById("select-livro-capitulo").value;
         form.reset();
         document.getElementById("select-livro-capitulo").value = idLivroAtual;
+
+        const editor = document.getElementById("conteudo-capitulo");
+        if (editor) editor.innerHTML = "";
+
+        const capaInput = document.getElementById("capa-capitulo");
+        if (capaInput) capaInput.value = "";
+
+        const corInput = document.getElementById("cor-cena-capitulo");
+        if (corInput) corInput.value = "#f97316";
+
+        const statusSelect = document.getElementById("status-capitulo");
+        if (statusSelect) statusSelect.value = "publicado";
+
         form.querySelector(".btn-submit").innerText = "Publicar Capítulo";
         document.getElementById("contador-palavras").innerText = "0";
+
+        const btnCancelar = document.getElementById("btn-cancelar-edicao-capitulo");
+        if (btnCancelar) btnCancelar.style.display = "none";
+
+        atualizarRotuloObraEditor();
     }
 }
 
@@ -362,15 +406,16 @@ function carregarCapitulosDaObra(livroId) {
             const id = docSnap.id;
 
             const item = document.createElement("div");
-            item.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; padding:12px 15px; margin-bottom:10px;";
+            item.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#1E1A30; border:1px solid #332C4D; border-radius:6px; padding:12px 15px; margin-bottom:10px;";
             item.innerHTML = `
                 <div>
-                    <span style="color:#E50914; font-weight:600; margin-right:10px;">Cap. ${cap.numero}</span>
+                    <span style="color:#F97316; font-weight:600; margin-right:10px;">Cap. ${cap.numero}</span>
                     <strong style="color:#FFF;">${cap.titulo}</strong>
+                    ${cap.status === 'rascunho' ? '<span class="badge-rascunho-capitulo">Rascunho</span>' : ''}
                 </div>
                 <div>
-                    <button class="btn-editar-capitulo" data-id="${id}" style="background:#29292E; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
-                    <button class="btn-excluir-capitulo" data-id="${id}" style="background:#E50914; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
+                    <button class="btn-editar-capitulo" data-id="${id}" style="background:#332C4D; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
+                    <button class="btn-excluir-capitulo" data-id="${id}" style="background:#F97316; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
                 </div>
             `;
             listaContainer.appendChild(item);
@@ -392,12 +437,25 @@ function vincularEventosCapitulos(livroId) {
                 document.getElementById("numero-capitulo").value = cap.numero;
                 document.getElementById("titulo-capitulo").value = cap.titulo;
                 document.getElementById("trilha-sonora").value = cap.trilhaSonora || "";
-                document.getElementById("conteudo-capitulo").value = cap.conteudo;
+                document.getElementById("capa-capitulo").value = cap.capa || "";
+                document.getElementById("cor-cena-capitulo").value = cap.corCena || "#f97316";
+                document.getElementById("status-capitulo").value = cap.status === "rascunho" ? "rascunho" : "publicado";
 
-                const palavras = cap.conteudo.trim() === "" ? 0 : cap.conteudo.trim().split(/\s+/).length;
-                document.getElementById("contador-palavras").innerText = palavras;
+                // Conteúdo pode ter sido salvo como HTML (editor rico) ou como texto puro (capítulos antigos)
+                const editor = document.getElementById("conteudo-capitulo");
+                const conteudoBruto = cap.conteudo || "";
+                const pareceHtml = /<\/?[a-z][\s\S]*>/i.test(conteudoBruto);
+                editor.innerHTML = pareceHtml
+                    ? conteudoBruto
+                    : conteudoBruto.split(/\r?\n/).map(l => l.trim() === "" ? "" : `<p>${l}</p>`).join("");
+
+                const textoPlano = (editor.innerText || "").trim();
+                document.getElementById("contador-palavras").innerText = textoPlano === "" ? 0 : textoPlano.split(/\s+/).length;
 
                 document.getElementById("form-cadastrar-capitulo").querySelector(".btn-submit").innerText = "Atualizar Capítulo";
+                const btnCancelar = document.getElementById("btn-cancelar-edicao-capitulo");
+                if (btnCancelar) btnCancelar.style.display = "inline-block";
+
                 document.getElementById("titulo-capitulo").scrollIntoView({ behavior: "smooth" });
             }
         });
@@ -425,12 +483,22 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
         return;
     }
 
+    const editorConteudo = document.getElementById("conteudo-capitulo");
+
     const capituloDados = {
         numero: parseInt(document.getElementById("numero-capitulo").value),
         titulo: document.getElementById("titulo-capitulo").value,
         trilhaSonora: document.getElementById("trilha-sonora").value || "",
-        conteudo: document.getElementById("conteudo-capitulo").value
+        capa: document.getElementById("capa-capitulo").value || "",
+        corCena: document.getElementById("cor-cena-capitulo").value || "#f97316",
+        status: document.getElementById("status-capitulo").value || "publicado",
+        conteudo: editorConteudo ? editorConteudo.innerHTML.trim() : ""
     };
+
+    if (!capituloDados.conteudo || capituloDados.conteudo === "") {
+        alert("Escreva o conteúdo do capítulo antes de salvar.");
+        return;
+    }
 
     const btnSubmit = e.target.querySelector(".btn-submit");
     btnSubmit.disabled = true;
@@ -500,15 +568,15 @@ function carregarPersonagensDaObra(livroId) {
             const id = docSnap.id;
 
             const card = document.createElement("div");
-            card.style.cssText = "display:flex; gap:15px; align-items:center; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; padding:12px; margin-bottom:10px;";
+            card.style.cssText = "display:flex; gap:15px; align-items:center; background:#1E1A30; border:1px solid #332C4D; border-radius:6px; padding:12px; margin-bottom:10px;";
             card.innerHTML = `
                 <img src="${p.foto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100'}" style="width:48px; height:48px; object-fit:cover; border-radius:4px;">
                 <div style="flex-grow:1;">
                     <strong style="color:#FFF;">${p.nome}</strong>
                     <p style="color:#8C8C8C; font-size:0.8rem;">${p.papel || p.funcao || 'Sem papel definido'}${p.primeiraAparicao ? ' • ' + p.primeiraAparicao : ''}</p>
                 </div>
-                <button class="btn-editar-personagem" data-id="${id}" style="background:#29292E; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
-                <button class="btn-excluir-personagem" data-id="${id}" style="background:#E50914; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
+                <button class="btn-editar-personagem" data-id="${id}" style="background:#332C4D; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
+                <button class="btn-excluir-personagem" data-id="${id}" style="background:#F97316; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
             `;
             listaContainer.appendChild(card);
         });
@@ -697,10 +765,10 @@ function renderizarListaConfig(idContainer, lista, aoRemover) {
 
     lista.forEach(item => {
         const row = document.createElement("div");
-        row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; margin-bottom:8px;";
+        row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#1E1A30; border:1px solid #332C4D; border-radius:6px; margin-bottom:8px;";
         row.innerHTML = `
             <span style="color:#FFF; font-size:0.9rem;">${item}</span>
-            <button type="button" style="background:transparent; border:none; color:#E50914; font-size:1.2rem; line-height:1; cursor:pointer; padding:0 4px;" title="Remover">&times;</button>
+            <button type="button" style="background:transparent; border:none; color:#F97316; font-size:1.2rem; line-height:1; cursor:pointer; padding:0 4px;" title="Remover">&times;</button>
         `;
         row.querySelector("button").addEventListener("click", () => aoRemover(item));
         container.appendChild(row);
@@ -795,15 +863,15 @@ function renderizarListaUniversos() {
         const qtdLivros = livrosCache.filter(l => l.universoId === u.id).length;
 
         const row = document.createElement("div");
-        row.style.cssText = "display:flex; align-items:center; gap:12px; padding:12px; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; margin-bottom:10px;";
+        row.style.cssText = "display:flex; align-items:center; gap:12px; padding:12px; background:#1E1A30; border:1px solid #332C4D; border-radius:6px; margin-bottom:10px;";
         row.innerHTML = `
             <div style="width:40px; height:40px; border-radius:6px; background-color:${u.corTema || '#7c3aed'}; background-image:${u.capa ? `url('${u.capa}')` : 'none'}; background-size:cover; background-position:center; flex-shrink:0;"></div>
             <div style="flex-grow:1;">
                 <strong style="color:#FFF;">${u.nome}</strong>
                 <p style="color:#8C8C8C; font-size:0.8rem;">${qtdLivros} livro(s)</p>
             </div>
-            <button type="button" class="btn-editar-universo" data-id="${u.id}" style="background:#29292E; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Editar</button>
-            <button type="button" class="btn-excluir-universo" data-id="${u.id}" style="background:#E50914; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
+            <button type="button" class="btn-editar-universo" data-id="${u.id}" style="background:#332C4D; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Editar</button>
+            <button type="button" class="btn-excluir-universo" data-id="${u.id}" style="background:#F97316; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
         `;
         container.appendChild(row);
     });
@@ -1014,19 +1082,19 @@ function carregarGaleriaDaObra(livroId) {
             const id = docSnap.id;
 
             const miniatura = item.tipo === "video"
-                ? `<div style="width:56px; height:56px; border-radius:6px; background:#1A1A1E; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">▶</div>`
+                ? `<div style="width:56px; height:56px; border-radius:6px; background:#1E1A30; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">▶</div>`
                 : `<img src="${item.url}" style="width:56px; height:56px; object-fit:cover; border-radius:6px;">`;
 
             const row = document.createElement("div");
-            row.style.cssText = "display:flex; gap:15px; align-items:center; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; padding:12px; margin-bottom:10px;";
+            row.style.cssText = "display:flex; gap:15px; align-items:center; background:#1E1A30; border:1px solid #332C4D; border-radius:6px; padding:12px; margin-bottom:10px;";
             row.innerHTML = `
                 ${miniatura}
                 <div style="flex-grow:1;">
                     <strong style="color:#FFF;">${item.titulo || '(sem título)'}</strong>
                     <p style="color:#8C8C8C; font-size:0.8rem;">${item.categoria} • Ordem ${item.ordem ?? 0}</p>
                 </div>
-                <button class="btn-editar-galeria" data-id="${id}" style="background:#29292E; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
-                <button class="btn-excluir-galeria" data-id="${id}" style="background:#E50914; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
+                <button class="btn-editar-galeria" data-id="${id}" style="background:#332C4D; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
+                <button class="btn-excluir-galeria" data-id="${id}" style="background:#F97316; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
             `;
             listaContainer.appendChild(row);
         });
@@ -1205,7 +1273,7 @@ function renderizarChipsLivrosOraculo() {
         const chip = document.createElement("button");
         chip.type = "button";
         const marcado = livrosSelecionadosOraculo.has(livro.id);
-        chip.style.cssText = `background:${marcado ? '#E50914' : 'rgba(255,255,255,0.05)'}; border:1px solid ${marcado ? '#E50914' : 'rgba(255,255,255,0.15)'}; color:#FFF; padding:6px 14px; border-radius:20px; font-size:0.85rem; cursor:pointer;`;
+        chip.style.cssText = `background:${marcado ? '#F97316' : 'rgba(255,255,255,0.05)'}; border:1px solid ${marcado ? '#F97316' : 'rgba(255,255,255,0.15)'}; color:#FFF; padding:6px 14px; border-radius:20px; font-size:0.85rem; cursor:pointer;`;
         chip.innerText = livro.titulo;
         chip.onclick = () => {
             if (livrosSelecionadosOraculo.has(livro.id)) {
@@ -1237,7 +1305,7 @@ function renderizarListaOraculo(posts) {
         const dataFormatada = new Date(post.dataPublicacao).toLocaleString("pt-BR", { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
         const row = document.createElement("div");
-        row.style.cssText = "padding:12px; background:#1A1A1E; border:1px solid #29292E; border-radius:6px; margin-bottom:10px;";
+        row.style.cssText = "padding:12px; background:#1E1A30; border:1px solid #332C4D; border-radius:6px; margin-bottom:10px;";
         row.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
                 <div>
@@ -1247,8 +1315,8 @@ function renderizarListaOraculo(posts) {
                     </p>
                 </div>
                 <div style="display:flex; gap:8px; flex-shrink:0;">
-                    <button class="btn-editar-oraculo" data-id="${post.id}" style="background:#29292E; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Editar</button>
-                    <button class="btn-excluir-oraculo" data-id="${post.id}" style="background:#E50914; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
+                    <button class="btn-editar-oraculo" data-id="${post.id}" style="background:#332C4D; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Editar</button>
+                    <button class="btn-excluir-oraculo" data-id="${post.id}" style="background:#F97316; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
                 </div>
             </div>
         `;

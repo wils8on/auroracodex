@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aurora Codex - Universos</title>
+    <title>Aurora Codex - Minha Estante</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/biblioteca.css">
-    <link rel="stylesheet" href="css/universos.css">
+    <link rel="stylesheet" href="css/estante.css">
 </head>
 <body class="biblioteca-body">
 
-    <!-- Navbar -->
+    <!-- Navbar (idêntica ao restante do site, com "Estante" ativa) -->
     <nav class="navbar nav-black" id="main-nav">
         <div class="nav-left">
             <h1 class="nav-logo" style="cursor:pointer;" onclick="window.location.href='dashboard.html'">AURORA CODEX</h1>
             <ul class="nav-links">
                 <li><a href="dashboard.html">Início</a></li>
                 <li><a href="biblioteca.html">Biblioteca</a></li>
-                <li><a href="universos.html" class="active">Universos</a></li>
-                <li><a href="estante.html">Estante</a></li>
+                <li><a href="universos.html">Universos</a></li>
+                <li><a href="estante.html" class="active">Estante</a></li>
                 <li><a href="autor/gerenciar-livros.html">Meus Livros</a></li>
                 <li><a href="oraculo.html">O Oráculo</a></li>
             </ul>
@@ -37,46 +37,44 @@
     </nav>
 
     <main class="biblioteca-container">
+        <header class="biblioteca-header">
+            <h2>Minha Estante</h2>
+            <p>Seus livros e progresso de leitura</p>
+        </header>
 
-        <!-- VISTA 1: Lista de todos os universos -->
-        <div id="vista-lista-universos">
-            <header class="biblioteca-header">
-                <h2>Universos</h2>
-                <p>Histórias conectadas, contadas em várias obras</p>
-            </header>
+        <!-- Continuar Leitura -->
+        <section class="estante-secao" id="secao-continuar" style="display:none;">
+            <h3 class="estante-titulo-secao">🕓 Continuar Leitura</h3>
+            <div id="card-continuar-leitura"></div>
+        </section>
 
-            <div class="universos-grid" id="universos-grid">
-                <p style="color:#737373; padding: 20px;">Carregando universos...</p>
-            </div>
+        <!-- Favoritos -->
+        <section class="estante-secao" id="secao-favoritos" style="display:none;">
+            <h3 class="estante-titulo-secao">♡ Favoritos</h3>
+            <div class="biblioteca-grid" id="grid-favoritos"></div>
+        </section>
 
-            <p id="universos-vazio" style="display:none; color:#737373; text-align:center; padding: 60px 20px;">
-                Nenhum universo cadastrado ainda. Assim que o autor conectar livros a um universo, ele aparece aqui.
-            </p>
-        </div>
+        <!-- Lendo -->
+        <section class="estante-secao" id="secao-lendo" style="display:none;">
+            <h3 class="estante-titulo-secao">📖 Lendo</h3>
+            <div class="biblioteca-grid" id="grid-lendo"></div>
+        </section>
 
-        <!-- VISTA 2: Detalhe de um universo específico -->
-        <div id="vista-detalhe-universo" style="display:none;">
-            <a href="universos.html" class="universo-voltar">&larr; Todos os Universos</a>
+        <!-- Concluídos -->
+        <section class="estante-secao" id="secao-concluidos" style="display:none;">
+            <h3 class="estante-titulo-secao">✅ Concluídos</h3>
+            <div class="biblioteca-grid" id="grid-concluidos"></div>
+        </section>
 
-            <header class="universo-banner" id="universo-banner">
-                <div class="universo-banner-overlay">
-                    <span class="universo-tag">UNIVERSO</span>
-                    <h2 id="universo-nome-detalhe">Carregando...</h2>
-                    <p id="universo-descricao-detalhe"></p>
-                </div>
-            </header>
-
-            <h3 class="row-title" style="margin: 35px 4% 15px 4%;">Obras deste Universo</h3>
-            <div class="biblioteca-grid" id="universo-livros-grid" style="padding: 0 4%;"></div>
-        </div>
-
+        <p id="estante-vazio" style="display:none; color:#737373; text-align:center; padding: 80px 20px;">
+            Sua estante ainda está vazia. Explore a <a href="biblioteca.html" style="color:#F97316;">Biblioteca</a> e comece a favoritar ou ler alguma obra!
+        </p>
     </main>
 
-    <!-- Modal Estilo Netflix (mesmo padrão da Home/Biblioteca) -->
+    <!-- Modal Estilo Netflix (mesmo padrão usado no resto do site) -->
     <div id="netflix-modal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 9999; overflow-y: auto; backdrop-filter: blur(5px); padding: 20px 10px;">
         <div style="background: #1C1830; width: 100%; max-width: 750px; margin: 20px auto; border-radius: 8px; overflow: hidden; color: #FFF; position: relative; border: 1px solid rgba(255,255,255,0.05);">
             <button onclick="fecharModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: none; color: #FFF; font-size: 1.5rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10;">&times;</button>
-            <button id="modal-btn-favoritar" style="position: absolute; top: 20px; right: 70px; background: rgba(0,0,0,0.6); border: none; color: #FFF; font-size: 1.3rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10;">&#9825;</button>
             <div id="modal-banner" style="width:100%; height: 45vh; max-height: 380px; min-height: 250px; background-size: cover; background-position: top center; position: relative;">
                 <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 150px; background: linear-gradient(to top, #1C1830, transparent);"></div>
                 <h2 id="modal-titulo" style="position: absolute; bottom: 20px; left: 20px; right: 20px; font-family: 'Cinzel', serif; font-size: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.9); line-height: 1.2;"></h2>
@@ -90,13 +88,8 @@
                     <p id="modal-sinopse" style="color: #D2D2D2; font-size: 1.05rem; line-height: 1.6; margin-top: 10px; text-align: justify;"></p>
                 </div>
                 <div>
-                    <h3 style="font-family: 'Cinzel', serif; border-bottom: 2px solid #404040; padding-bottom: 10px; margin-bottom: 15px;">Capítulos Disponíveis</h3>
+                    <h3 style="font-family: 'Cinzel', serif; border-bottom: 2px solid #332C4D; padding-bottom: 10px; margin-bottom: 15px;">Capítulos Disponíveis</h3>
                     <div id="modal-lista-capitulos" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                </div>
-
-                <div id="modal-galeria-secao" style="display:none;">
-                    <h3 style="font-family: 'Cinzel', serif; border-bottom: 2px solid #404040; padding-bottom: 10px; margin-bottom: 15px;">Galeria</h3>
-                    <div id="modal-galeria-grid" style="display: flex; flex-wrap: wrap; gap: 12px;"></div>
                 </div>
             </div>
         </div>
@@ -110,6 +103,6 @@
         }
     </script>
 
-    <script type="module" src="js/universos.js"></script>
+    <script type="module" src="js/estante.js"></script>
 </body>
 </html>
