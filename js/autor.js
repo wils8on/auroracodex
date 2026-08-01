@@ -70,6 +70,38 @@ function comTimeout(promessa, ms, mensagemErro) {
     ]);
 }
 
+// Upload genérico pro Cloudinary. Serve tanto pra imagens quanto pra áudio —
+// o Cloudinary não tem um "resource_type" separado pra áudio, ele usa "video" pra isso.
+function uploadArquivo(arquivo, pasta, idElementoProgresso, resourceType = "image") {
+    const elementoProgresso = document.getElementById(idElementoProgresso);
+    if (elementoProgresso) elementoProgresso.innerText = "Enviando arquivo...";
+
+    const formData = new FormData();
+    formData.append("file", arquivo);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    formData.append("folder", pasta);
+
+    const requisicao = fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`, {
+        method: "POST",
+        body: formData
+    }).then(async (resposta) => {
+        if (!resposta.ok) {
+            const detalhe = await resposta.text();
+            throw new Error(`Falha no upload (status ${resposta.status}): ${detalhe}`);
+        }
+        const dados = await resposta.json();
+        if (elementoProgresso) elementoProgresso.innerText = "Upload concluído ✔";
+        return dados.secure_url;
+    }).catch((erro) => {
+        if (elementoProgresso) elementoProgresso.innerText = "Erro no upload.";
+        throw erro;
+    });
+
+    // Uploads de áudio podem demorar mais que imagens, então damos mais tempo
+    const tempoLimite = resourceType === "video" ? 60000 : 30000;
+    return comTimeout(requisicao, tempoLimite, "O upload demorou demais e foi cancelado. Verifique sua internet e tente de novo.");
+}
+
 // Mostra uma pré-visualização local imediata (antes mesmo do upload) ao escolher um arquivo
 function inicializarPreviewImagens() {
     const inputCapa = document.getElementById("arquivo-capa");
@@ -97,6 +129,30 @@ function inicializarPreviewImagens() {
                 wrapperPersonagem.style.display = "block";
                 document.getElementById("progresso-upload-personagem").innerText = "";
             }
+        });
+    }
+
+    const inputCapaCapitulo = document.getElementById("arquivo-capa-capitulo");
+    const previewCapaCapitulo = document.getElementById("preview-capa-capitulo");
+    const wrapperCapaCapitulo = document.getElementById("preview-wrapper-capa-capitulo");
+
+    if (inputCapaCapitulo) {
+        inputCapaCapitulo.addEventListener("change", () => {
+            if (inputCapaCapitulo.files && inputCapaCapitulo.files[0]) {
+                previewCapaCapitulo.src = URL.createObjectURL(inputCapaCapitulo.files[0]);
+                wrapperCapaCapitulo.style.display = "block";
+                document.getElementById("progresso-upload-capa-capitulo").innerText = "";
+            }
+        });
+    }
+
+    // Alterna entre "Link" e "Upload de Áudio" pra trilha sonora do capítulo
+    const tipoTrilha = document.getElementById("tipo-trilha-capitulo");
+    if (tipoTrilha) {
+        tipoTrilha.addEventListener("change", (e) => {
+            const ehLink = e.target.value === "link";
+            document.getElementById("campo-trilha-link").style.display = ehLink ? "block" : "none";
+            document.getElementById("campo-trilha-upload").style.display = ehLink ? "none" : "block";
         });
     }
 }
@@ -359,6 +415,21 @@ function resetarFormularioCapitulo() {
 
         const capaInput = document.getElementById("capa-capitulo");
         if (capaInput) capaInput.value = "";
+        const wrapperCapaCapitulo = document.getElementById("preview-wrapper-capa-capitulo");
+        if (wrapperCapaCapitulo) wrapperCapaCapitulo.style.display = "none";
+        const progressoCapaCapitulo = document.getElementById("progresso-upload-capa-capitulo");
+        if (progressoCapaCapitulo) progressoCapaCapitulo.innerText = "";
+
+        const tipoTrilha = document.getElementById("tipo-trilha-capitulo");
+        if (tipoTrilha) tipoTrilha.value = "link";
+        const campoTrilhaLink = document.getElementById("campo-trilha-link");
+        const campoTrilhaUpload = document.getElementById("campo-trilha-upload");
+        if (campoTrilhaLink) campoTrilhaLink.style.display = "block";
+        if (campoTrilhaUpload) campoTrilhaUpload.style.display = "none";
+        const trilhaUploadInput = document.getElementById("trilha-sonora-upload");
+        if (trilhaUploadInput) trilhaUploadInput.value = "";
+        const progressoTrilha = document.getElementById("progresso-upload-trilha");
+        if (progressoTrilha) progressoTrilha.innerText = "";
 
         const corInput = document.getElementById("cor-cena-capitulo");
         if (corInput) corInput.value = "#f97316";
@@ -436,10 +507,31 @@ function vincularEventosCapitulos(livroId) {
 
                 document.getElementById("numero-capitulo").value = cap.numero;
                 document.getElementById("titulo-capitulo").value = cap.titulo;
-                document.getElementById("trilha-sonora").value = cap.trilhaSonora || "";
-                document.getElementById("capa-capitulo").value = cap.capa || "";
                 document.getElementById("cor-cena-capitulo").value = cap.corCena || "#f97316";
                 document.getElementById("status-capitulo").value = cap.status === "rascunho" ? "rascunho" : "publicado";
+
+                // Capa do capítulo: guarda a URL já existente e mostra o preview
+                document.getElementById("capa-capitulo").value = cap.capa || "";
+                document.getElementById("arquivo-capa-capitulo").value = "";
+                const wrapperCapaCapitulo = document.getElementById("preview-wrapper-capa-capitulo");
+                if (cap.capa) {
+                    document.getElementById("preview-capa-capitulo").src = cap.capa;
+                    wrapperCapaCapitulo.style.display = "block";
+                    document.getElementById("progresso-upload-capa-capitulo").innerText = "Imagem atual (envie um novo arquivo para substituir)";
+                } else {
+                    wrapperCapaCapitulo.style.display = "none";
+                }
+
+                // Trilha sonora: detecta se é um áudio que fizemos upload (Cloudinary) ou um link externo
+                const trilhaAtual = cap.trilhaSonora || "";
+                const ehUploadProprio = trilhaAtual.includes("res.cloudinary.com");
+                document.getElementById("tipo-trilha-capitulo").value = ehUploadProprio ? "upload" : "link";
+                document.getElementById("campo-trilha-link").style.display = ehUploadProprio ? "none" : "block";
+                document.getElementById("campo-trilha-upload").style.display = ehUploadProprio ? "block" : "none";
+                document.getElementById("trilha-sonora").value = ehUploadProprio ? "" : trilhaAtual;
+                document.getElementById("trilha-sonora-upload").value = ehUploadProprio ? trilhaAtual : "";
+                document.getElementById("arquivo-trilha-capitulo").value = "";
+                document.getElementById("progresso-upload-trilha").innerText = ehUploadProprio ? "Áudio atual (envie um novo arquivo para substituir)" : "";
 
                 // Conteúdo pode ter sido salvo como HTML (editor rico) ou como texto puro (capítulos antigos)
                 const editor = document.getElementById("conteudo-capitulo");
@@ -484,26 +576,49 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
     }
 
     const editorConteudo = document.getElementById("conteudo-capitulo");
+    const conteudoHtml = editorConteudo ? editorConteudo.innerHTML.trim() : "";
 
-    const capituloDados = {
-        numero: parseInt(document.getElementById("numero-capitulo").value),
-        titulo: document.getElementById("titulo-capitulo").value,
-        trilhaSonora: document.getElementById("trilha-sonora").value || "",
-        capa: document.getElementById("capa-capitulo").value || "",
-        corCena: document.getElementById("cor-cena-capitulo").value || "#f97316",
-        status: document.getElementById("status-capitulo").value || "publicado",
-        conteudo: editorConteudo ? editorConteudo.innerHTML.trim() : ""
-    };
-
-    if (!capituloDados.conteudo || capituloDados.conteudo === "") {
+    if (!conteudoHtml) {
         alert("Escreva o conteúdo do capítulo antes de salvar.");
         return;
     }
 
     const btnSubmit = e.target.querySelector(".btn-submit");
     btnSubmit.disabled = true;
+    const textoOriginalBotao = btnSubmit.innerText;
+    btnSubmit.innerText = "Salvando...";
 
     try {
+        // 1) Capa do capítulo: só faz upload se um novo arquivo foi escolhido
+        let urlCapaFinal = document.getElementById("capa-capitulo").value || "";
+        const arquivoCapaCapitulo = document.getElementById("arquivo-capa-capitulo").files[0];
+        if (arquivoCapaCapitulo) {
+            urlCapaFinal = await uploadArquivo(arquivoCapaCapitulo, "capitulos", "progresso-upload-capa-capitulo", "image");
+        }
+
+        // 2) Trilha sonora: link digitado OU arquivo de áudio enviado
+        const tipoTrilha = document.getElementById("tipo-trilha-capitulo").value;
+        let trilhaFinal = "";
+        if (tipoTrilha === "upload") {
+            trilhaFinal = document.getElementById("trilha-sonora-upload").value || "";
+            const arquivoTrilha = document.getElementById("arquivo-trilha-capitulo").files[0];
+            if (arquivoTrilha) {
+                trilhaFinal = await uploadArquivo(arquivoTrilha, "trilhas", "progresso-upload-trilha", "video");
+            }
+        } else {
+            trilhaFinal = document.getElementById("trilha-sonora").value || "";
+        }
+
+        const capituloDados = {
+            numero: parseInt(document.getElementById("numero-capitulo").value),
+            titulo: document.getElementById("titulo-capitulo").value,
+            trilhaSonora: trilhaFinal,
+            capa: urlCapaFinal,
+            corCena: document.getElementById("cor-cena-capitulo").value || "#f97316",
+            status: document.getElementById("status-capitulo").value || "publicado",
+            conteudo: conteudoHtml
+        };
+
         if (idCapituloEdicao) {
             await updateDoc(doc(db, "livros", idLivro, "capitulos", idCapituloEdicao), capituloDados);
             alert(`Capítulo ${capituloDados.numero} atualizado com sucesso!`);
@@ -515,9 +630,10 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
         resetarFormularioCapitulo();
     } catch (err) {
         console.error(err);
-        alert("Erro ao salvar capítulo.");
+        alert("Erro ao salvar capítulo. " + (err && err.message ? err.message : ""));
     } finally {
         btnSubmit.disabled = false;
+        if (btnSubmit.innerText === "Salvando...") btnSubmit.innerText = textoOriginalBotao;
     }
 });
 

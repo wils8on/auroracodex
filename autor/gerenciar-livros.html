@@ -215,17 +215,33 @@
                         <input type="text" id="titulo-capitulo" placeholder="Título do capítulo..." required>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="trilha-sonora">🎵 Trilha Sonora — Link do Spotify ou YouTube (Opcional)</label>
+                    <div class="form-group">
+                        <label>🎵 Trilha Sonora do Capítulo (opcional)</label>
+                        <select id="tipo-trilha-capitulo" style="max-width: 260px; margin-bottom: 12px;">
+                            <option value="link" selected>Link (Spotify / YouTube)</option>
+                            <option value="upload">Upload de Áudio (MP3)</option>
+                        </select>
+
+                        <div id="campo-trilha-link">
                             <input type="url" id="trilha-sonora" placeholder="https://open.spotify.com/track/...">
+                        </div>
+
+                        <div id="campo-trilha-upload" style="display:none;">
+                            <input type="file" id="arquivo-trilha-capitulo" accept="audio/*">
+                            <input type="hidden" id="trilha-sonora-upload">
+                            <div id="progresso-upload-trilha" style="font-size: 0.8rem; color: #8C8C8C; margin-top: 6px;"></div>
                         </div>
                     </div>
 
-                    <div class="form-row" style="align-items: flex-end;">
+                    <div class="form-row" style="align-items: flex-start;">
                         <div class="form-group">
-                            <label for="capa-capitulo">🖼️ URL da imagem de destaque (opcional)</label>
-                            <input type="url" id="capa-capitulo" placeholder="https://...">
+                            <label for="arquivo-capa-capitulo">🖼️ Imagem de Destaque do Capítulo (opcional)</label>
+                            <input type="file" id="arquivo-capa-capitulo" accept="image/*">
+                            <input type="hidden" id="capa-capitulo">
+                            <div id="preview-wrapper-capa-capitulo" style="margin-top: 10px; display: none;">
+                                <img id="preview-capa-capitulo" style="width: 130px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid #332C4D;">
+                                <div id="progresso-upload-capa-capitulo" style="font-size: 0.8rem; color: #8C8C8C; margin-top: 6px;"></div>
+                            </div>
                         </div>
                         <div class="form-group" style="max-width: 150px; min-width: 120px;">
                             <label for="cor-cena-capitulo">🎨 Cor da cena</label>
@@ -246,18 +262,18 @@
                     <div class="form-group">
                         <label>Conteúdo Narrativo</label>
                         <div class="rt-toolbar" id="rt-toolbar">
-                            <button type="button" class="rt-btn" data-cmd="undo" title="Desfazer">↶</button>
-                            <button type="button" class="rt-btn" data-cmd="redo" title="Refazer">↷</button>
+                            <button type="button" class="rt-btn" data-cmd="undo" title="Desfazer"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+                            <button type="button" class="rt-btn" data-cmd="redo" title="Refazer"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
                             <div class="rt-sep"></div>
                             <button type="button" class="rt-btn" data-cmd="bold" title="Negrito"><strong>B</strong></button>
                             <button type="button" class="rt-btn" data-cmd="italic" title="Itálico"><em>I</em></button>
-                            <button type="button" class="rt-btn" data-cmd="underline" title="Sublinhado"><u>S</u></button>
+                            <button type="button" class="rt-btn" data-cmd="underline" title="Sublinhado"><u>U</u></button>
                             <button type="button" class="rt-btn" data-cmd="strikeThrough" title="Tachado"><s>T</s></button>
                             <div class="rt-sep"></div>
-                            <button type="button" class="rt-btn" data-cmd="justifyLeft" title="Alinhar à esquerda">≡</button>
-                            <button type="button" class="rt-btn" data-cmd="justifyCenter" title="Centralizar">≡</button>
-                            <button type="button" class="rt-btn" data-cmd="justifyRight" title="Alinhar à direita">≡</button>
-                            <button type="button" class="rt-btn" data-cmd="justifyFull" title="Justificar">☰</button>
+                            <button type="button" class="rt-btn" data-cmd="justifyLeft" title="Alinhar à esquerda"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg></button>
+                            <button type="button" class="rt-btn" data-cmd="justifyCenter" title="Centralizar"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
+                            <button type="button" class="rt-btn" data-cmd="justifyRight" title="Alinhar à direita"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg></button>
+                            <button type="button" class="rt-btn" data-cmd="justifyFull" title="Justificar"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
                             <div class="rt-sep"></div>
                             <button type="button" class="rt-btn" data-cmd="formatBlock" data-value="H2" title="Título">H2</button>
                             <button type="button" class="rt-btn" data-cmd="formatBlock" data-value="BLOCKQUOTE" title="Citação">❝</button>

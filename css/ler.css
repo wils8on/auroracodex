@@ -436,6 +436,13 @@ body {
     transition: width 0.1s linear;
 }
 
+.track-time {
+    font-size: 0.75rem;
+    color: #A3A3A3;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
 /* Responsividade de Leitura */
 @media (max-width: 768px) {
     .oracle-sidebar { width: 100%; right: -100%; }

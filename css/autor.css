@@ -285,33 +285,50 @@
     border-color: #F97316;
 }
 
-/* --- BARRA DE FORMATAÇÃO DE TEXTO RICO --- */
+/* --- BARRA DE FORMATAÇÃO DE TEXTO RICO (menu único, dentro da própria caixa) --- */
 .rt-toolbar {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     background-color: #1E1A30;
     border: 1px solid #332C4D;
-    border-bottom: none;
+    border-bottom: 1px solid #2A2440;
     border-radius: 6px 6px 0 0;
-    padding: 8px;
+    padding: 6px 8px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.rt-toolbar::-webkit-scrollbar {
+    height: 4px;
 }
 
 .rt-btn {
     background: transparent;
     border: none;
-    color: #D4D4D4;
-    min-width: 34px;
-    height: 34px;
-    padding: 0 8px;
+    color: #B8B2CC;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 7px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     transition: all 0.15s ease;
+}
+
+.rt-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
 }
 
 .rt-btn:hover {
@@ -326,9 +343,10 @@
 
 .rt-sep {
     width: 1px;
-    align-self: stretch;
+    height: 20px;
+    flex-shrink: 0;
     background-color: #332C4D;
-    margin: 4px 4px;
+    margin: 0 5px;
 }
 
 .rt-editor {

@@ -1,7 +1,7 @@
 // js/ler.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Credenciais Oficiais
 const firebaseConfig = { 
@@ -89,6 +89,9 @@ async function carregarConteudoCapitulo(user) {
             // 2. CONFIGURAÇÃO DINÂMICA DA TRILHA SONORA (PLAYER NO RODAPÉ)
             configurarPlayerTrilha(dadosCap.trilhaSonora, dadosCap.titulo);
 
+            // 2.4 CONFIGURA O BOTÃO DE CURTIDAS (persistido no Firestore, por usuário)
+            configurarBotaoLike(user, livroId, capituloId, dadosCap);
+
             // 2.5 REGISTRA O PROGRESSO DE LEITURA (usado no Dashboard de Leitores do admin)
             registrarProgressoLeitura(user, livroId, dadosLivro.titulo, dadosCap, dadosLivro.capa);
 
@@ -128,23 +131,36 @@ async function carregarConteudoCapitulo(user) {
     }
 }
 
-// Trata o link do capítulo e embuti o áudio/vídeo do YouTube direto no rodapé
+// Trata o link/arquivo do capítulo e injeta o player correto no rodapé
 function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
     const trackTitle = document.getElementById("player-track-title");
     const trackAuthor = document.getElementById("player-track-author");
     const container = document.getElementById("media-player-container");
-    const audio = document.getElementById("chapter-audio");
+
+    // Sempre restaura a estrutura padrão do player antes de decidir o que exibir,
+    // pois o container pode ter sido substituído por um iframe do YouTube antes.
+    if (container) {
+        container.innerHTML = `
+            <audio id="chapter-audio" style="display: none;"></audio>
+            <button class="btn-play-pause" id="play-pause-btn" style="display: none;">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="progress-bar-container" id="progress-container" style="display: none;">
+                <div class="progress-bar" id="audio-progress"></div>
+            </div>
+            <span class="track-time" id="track-time" style="display: none;">0:00</span>
+        `;
+    }
 
     if (!urlTrilha || urlTrilha.trim() === "") {
         if (trackTitle) trackTitle.innerText = "Sem Trilha Sonora";
-        if (trackAuthor) trackAuthor.innerText = "Capítulo Silencioso";
-        if (container) container.innerHTML = `<span style="color: #737373; font-size: 0.85rem;">-</span>`;
+        if (trackAuthor) trackAuthor.innerText = "Capítulo silencioso";
         return;
     }
 
-    if (trackAuthor) trackAuthor.innerText = `Trilha: ${tituloCapitulo}`;
+    if (trackTitle) trackTitle.innerText = tituloCapitulo || "Trilha Sonora";
 
-    // SE FOR LINK DO YOUTUBE: Injeta o iFrame do mini-player na própria página
+    // SE FOR LINK DO YOUTUBE: injeta o iFrame do mini-player
     if (urlTrilha.includes("youtube.com") || urlTrilha.includes("youtu.be")) {
         let videoId = "";
         if (urlTrilha.includes("youtu.be/")) {
@@ -153,33 +169,131 @@ function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
             videoId = urlTrilha.split("v=")[1].split("&")[0];
         }
 
-        if (trackTitle) trackTitle.innerText = "Trilha do YouTube";
+        if (trackAuthor) trackAuthor.innerText = "Reproduzindo via YouTube";
 
-        // Substitui o botão padrão pelo player embutido compacto do YouTube
         if (container) {
             container.innerHTML = `
-                <iframe 
-                    width="200" 
-                    height="40" 
-                    src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0" 
-                    title="Trilha do Capítulo" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                <iframe
+                    width="220"
+                    height="40"
+                    src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0"
+                    title="Trilha do Capítulo"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     style="border-radius: 20px; filter: invert(0.9) hue-rotate(180deg);"
                     allowfullscreen>
                 </iframe>
             `;
         }
-    } 
-    else {
-        // Se for um arquivo de áudio direto (ex: MP3/Stream)
-        if (audio) {
-            audio.src = urlTrilha;
-            audio.style.display = "none;"
-            if (trackTitle) trackTitle.innerText = "Trilha Oficial do Capítulo";
+        return;
+    }
+
+    // SE FOR LINK DO SPOTIFY: não dá pra tocar embutido sem o SDK deles, então oferece o link direto
+    if (urlTrilha.includes("open.spotify.com")) {
+        if (trackAuthor) trackAuthor.innerText = "Disponível no Spotify";
+        if (container) {
+            container.innerHTML = `<a href="${urlTrilha}" target="_blank" rel="noopener" style="color:#F97316; font-size:0.85rem; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:6px;">🎧 Abrir no Spotify</a>`;
         }
+        return;
+    }
+
+    // ÁUDIO DIRETO (upload próprio via Cloudinary ou link de mp3/stream): player nativo com progresso e tempo
+    if (trackAuthor) trackAuthor.innerText = "Trilha oficial do capítulo";
+
+    const audio = document.getElementById("chapter-audio");
+    const playBtn = document.getElementById("play-pause-btn");
+    const progressContainer = document.getElementById("progress-container");
+    const progressBar = document.getElementById("audio-progress");
+    const trackTime = document.getElementById("track-time");
+    if (!audio || !playBtn) return;
+
+    audio.src = urlTrilha;
+    playBtn.style.display = "flex";
+    if (progressContainer) progressContainer.style.display = "block";
+    if (trackTime) trackTime.style.display = "inline-block";
+
+    const iconPlay = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+    const iconPause = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    playBtn.innerHTML = iconPlay;
+
+    playBtn.onclick = () => {
+        if (audio.paused) {
+            audio.play().catch(() => console.log("Aguardando ação de mídia do usuário."));
+            playBtn.innerHTML = iconPause;
+        } else {
+            audio.pause();
+            playBtn.innerHTML = iconPlay;
+        }
+    };
+
+    audio.ontimeupdate = () => {
+        if (audio.duration && progressBar) {
+            progressBar.style.width = (audio.currentTime / audio.duration) * 100 + "%";
+        }
+        if (trackTime) {
+            trackTime.innerText = `${formatarTempo(audio.currentTime)} / ${formatarTempo(audio.duration)}`;
+        }
+    };
+
+    audio.onended = () => { playBtn.innerHTML = iconPlay; };
+
+    if (progressContainer) {
+        progressContainer.onclick = (e) => {
+            if (!audio.duration) return;
+            const rect = progressContainer.getBoundingClientRect();
+            const pct = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+            audio.currentTime = pct * audio.duration;
+        };
     }
 }
+
+function formatarTempo(segundos) {
+    if (!isFinite(segundos) || isNaN(segundos)) return "0:00";
+    const min = Math.floor(segundos / 60);
+    const seg = Math.floor(segundos % 60).toString().padStart(2, "0");
+    return `${min}:${seg}`;
+}
+
+// =====================================================
+// CURTIDAS DO CAPÍTULO (persistidas no Firestore, por usuário)
+// =====================================================
+function configurarBotaoLike(user, livroId, capituloId, dadosCap) {
+    const btnLike = document.getElementById("btn-like");
+    const likeCountEl = document.getElementById("like-count");
+    if (!btnLike || !likeCountEl) return;
+
+    let curtidasUids = Array.isArray(dadosCap.curtidasUids) ? [...dadosCap.curtidasUids] : [];
+    likeCountEl.innerText = curtidasUids.length;
+    btnLike.classList.toggle("liked", curtidasUids.includes(user.uid));
+
+    btnLike.onclick = async () => {
+        const jaCurtiu = btnLike.classList.contains("liked");
+        const capRef = doc(db, "livros", livroId, "capitulos", capituloId);
+
+        // Atualização otimista: a interface responde na hora, o Firestore é gravado em seguida
+        curtidasUids = jaCurtiu
+            ? curtidasUids.filter(uid => uid !== user.uid)
+            : [...curtidasUids, user.uid];
+
+        btnLike.classList.toggle("liked", !jaCurtiu);
+        likeCountEl.innerText = curtidasUids.length;
+
+        try {
+            await updateDoc(capRef, {
+                curtidasUids: jaCurtiu ? arrayRemove(user.uid) : arrayUnion(user.uid)
+            });
+        } catch (err) {
+            console.error("Erro ao curtir capítulo:", err);
+            // Reverte a interface se a gravação no banco falhar
+            curtidasUids = jaCurtiu
+                ? [...curtidasUids, user.uid]
+                : curtidasUids.filter(uid => uid !== user.uid);
+            btnLike.classList.toggle("liked", jaCurtiu);
+            likeCountEl.innerText = curtidasUids.length;
+        }
+    };
+}
+
 // =====================================================
 // PROGRESSO DE LEITURA (usado no Dashboard de Leitores do admin)
 // =====================================================
