@@ -89,6 +89,7 @@
             
             <!-- Botão de fechar flutuante -->
             <button onclick="fecharModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: none; color: #FFF; font-size: 1.5rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10;">&times;</button>
+            <button id="modal-btn-favoritar" style="position: absolute; top: 20px; right: 70px; background: rgba(0,0,0,0.6); border: none; color: #FFF; font-size: 1.3rem; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10;">&#9825;</button>
             
             <!-- Banner do modal com ajuste de foco superior e altura fluida -->
             <div id="modal-banner" style="width:100%; height: 45vh; max-height: 380px; min-height: 250px; background-size: cover; background-position: top center; position: relative;">
@@ -99,7 +100,10 @@
             <!-- Conteúdo estrutural adaptável -->
             <div style="padding: 30px 20px; display: flex; flex-direction: column; gap: 24px;">
                 <div>
-                    <span id="modal-universo" style="color: #E50914; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;"></span>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:15px;">
+                        <span id="modal-universo" style="color: #E50914; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;"></span>
+                        <button id="modal-btn-favoritar" style="flex-shrink:0; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #FFF; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space:nowrap;">🤍 Favoritar</button>
+                    </div>
                     <p id="modal-sinopse" style="color: #D2D2D2; font-size: 1.05rem; line-height: 1.6; margin-top: 10px; text-align: justify;"></p>
                 </div>
 

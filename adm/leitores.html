@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Codex - Dashboard de Leitores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .adm-container { max-width: 1100px; margin: 100px auto; padding: 0 20px; }
+        .adm-title { font-family: 'Cinzel', serif; color: #FFF; margin-bottom: 30px; letter-spacing: 1px; display:flex; justify-content:space-between; align-items:center; }
+        .adm-title a { font-size: 0.85rem; color: #8C8C8C; font-family: 'Inter', sans-serif; letter-spacing: normal; font-weight: 500; }
+
+        .stats-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:20px; margin-bottom: 35px; }
+        .stat-card { background-color: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 24px; text-align:center; backdrop-filter: blur(8px); }
+        .stat-card .stat-icon { font-size: 1.6rem; margin-bottom: 8px; }
+        .stat-card .stat-numero { font-size: 2rem; font-weight: 700; color: #FFF; }
+        .stat-card .stat-label { font-size: 0.85rem; color: #8C8C8C; margin-top: 4px; }
+
+        .tabs-leitores { display:flex; gap:10px; border-bottom: 1px solid #262626; margin-bottom: 25px; }
+        .tab-leitores-btn { background:transparent; border:none; color:#A3A3A3; padding: 12px 20px; font-size:0.95rem; font-weight:500; cursor:pointer; position:relative; }
+        .tab-leitores-btn.active { color:#E50914; font-weight:600; }
+        .tab-leitores-btn.active::after { content:''; position:absolute; bottom:-1px; left:0; width:100%; height:3px; background-color:#E50914; }
+
+        .busca-leitor { width:100%; max-width: 400px; background-color:#1A1A1A; border:1px solid #333; border-radius:6px; padding:12px 16px; color:#FFF; font-family:inherit; margin-bottom: 20px; }
+        .busca-leitor:focus { outline:none; border-color:#E50914; }
+
+        .table-wrapper { background-color: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 20px; backdrop-filter: blur(8px); }
+        table { width:100%; border-collapse: collapse; text-align:left; }
+        th, td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+        th { color:#8C8C8C; font-weight:500; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.5px; }
+        .badge-mini { padding:3px 9px; border-radius:4px; font-size:0.72rem; font-weight:600; }
+        .badge-ativa { background: rgba(59,130,246,0.18); color:#6EA8FE; }
+        .badge-concluida { background: rgba(70,211,105,0.18); color:#46d369; }
+        .badge-favorito { background: rgba(229,9,20,0.18); color:#FF6B6B; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar nav-black">
+        <div class="nav-left">
+            <h1 class="nav-logo" style="cursor:pointer;" onclick="window.location.href='../dashboard.html'">AURORA CODEX</h1>
+            <ul class="nav-links">
+                <li><a href="painel-usuarios.html">&larr; Painel Admin</a></li>
+                <li class="active"><a href="#">Dashboard de Leitores</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="adm-container animate-fade-in">
+        <h2 class="adm-title">
+            Dashboard de Leitores
+        </h2>
+        <p style="color:#8C8C8C; margin-top:-20px; margin-bottom:30px;">Acompanhe o engajamento e progresso do seu público</p>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-numero" id="stat-leitores-unicos">0</div>
+                <div class="stat-label">Leitores únicos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📖</div>
+                <div class="stat-numero" id="stat-leituras-ativas">0</div>
+                <div class="stat-label">Leituras ativas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-numero" id="stat-favoritados">0</div>
+                <div class="stat-label">Favoritados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-numero" id="stat-concluiram">0</div>
+                <div class="stat-label">Concluíram</div>
+            </div>
+        </div>
+
+        <div class="tabs-leitores">
+            <button class="tab-leitores-btn active" id="tab-btn-leitor" onclick="window.__alternarAbaLeitores('leitor')">Por Leitor</button>
+            <button class="tab-leitores-btn" id="tab-btn-livro" onclick="window.__alternarAbaLeitores('livro')">Por Livro</button>
+        </div>
+
+        <div id="vista-por-leitor">
+            <input type="text" id="busca-email" class="busca-leitor" placeholder="Buscar por e-mail...">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Leitor</th>
+                            <th>E-mail</th>
+                            <th>Ativas</th>
+                            <th>Concluídas</th>
+                            <th>Favoritos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-por-leitor">
+                        <tr><td colspan="5" style="text-align:center; color:#737373;">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="vista-por-livro" style="display:none;">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Livro</th>
+                            <th>Leitores Ativos</th>
+                            <th>Concluíram</th>
+                            <th>Favoritos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-por-livro">
+                        <tr><td colspan="4" style="text-align:center; color:#737373;">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        window.__alternarAbaLeitores = function(aba) {
+            document.getElementById('vista-por-leitor').style.display = aba === 'leitor' ? 'block' : 'none';
+            document.getElementById('vista-por-livro').style.display = aba === 'livro' ? 'block' : 'none';
+            document.getElementById('tab-btn-leitor').classList.toggle('active', aba === 'leitor');
+            document.getElementById('tab-btn-livro').classList.toggle('active', aba === 'livro');
+        };
+    </script>
+
+    <script type="module" src="../js/adm-leitores.js"></script>
+</body>
+</html>

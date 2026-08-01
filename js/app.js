@@ -1,7 +1,7 @@
 // js/app.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Credenciais Oficiais
 const firebaseConfig = { 
@@ -219,6 +219,8 @@ async function abrirModalNetflix(idLivro, livro) {
     if (universo) universo.innerText = filtrarNomeUniverso(livro.universo);
     if (sinopse) sinopse.innerText = livro.sinopse;
 
+    atualizarBotaoFavorito(idLivro);
+
     if (listaCapitulosContainer) {
         listaCapitulosContainer.innerHTML = '<p style="color: #737373;">Carregando índice de capítulos...</p>';
     }
@@ -357,4 +359,49 @@ if (btnLogout) {
             window.location.href = "index.html";
         }).catch((err) => console.error("Erro ao sair:", err));
     });
+}
+
+// =====================================================
+// FAVORITAR (usado no Dashboard de Leitores do admin)
+// =====================================================
+
+async function atualizarBotaoFavorito(idLivro) {
+    const btn = document.getElementById("modal-btn-favoritar");
+    if (!btn || !auth.currentUser) return;
+
+    const uid = auth.currentUser.uid;
+    const registroRef = doc(db, "progresso_leitura", `${uid}_${idLivro}`);
+
+    let favoritoAtual = false;
+    try {
+        const snap = await getDoc(registroRef);
+        favoritoAtual = snap.exists() && snap.data().favorito === true;
+    } catch (err) {
+        console.error("Erro ao verificar favorito:", err);
+    }
+
+    renderizarBotaoFavorito(btn, favoritoAtual);
+
+    btn.onclick = async (e) => {
+        e.stopPropagation();
+        favoritoAtual = !favoritoAtual;
+        renderizarBotaoFavorito(btn, favoritoAtual);
+
+        try {
+            await setDoc(registroRef, {
+                uid,
+                emailUsuario: auth.currentUser.email || "",
+                nomeUsuario: auth.currentUser.displayName || "",
+                livroId: idLivro,
+                favorito: favoritoAtual
+            }, { merge: true });
+        } catch (err) {
+            console.error("Erro ao favoritar:", err);
+        }
+    };
+}
+
+function renderizarBotaoFavorito(btn, favoritado) {
+    btn.innerHTML = favoritado ? "&#9829;" : "&#9825;";
+    btn.style.color = favoritado ? "#E50914" : "#FFF";
 }
