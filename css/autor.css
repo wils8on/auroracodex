@@ -305,8 +305,12 @@
 }
 
 .rt-btn {
+    -webkit-appearance: none;
+    appearance: none;
     background: transparent;
     border: none;
+    outline: none;
+    box-shadow: none;
     color: #B8B2CC;
     min-width: 32px;
     height: 32px;
