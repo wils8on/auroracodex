@@ -201,6 +201,7 @@ onAuthStateChanged(auth, async (user) => {
 
 function inicializarDadosAutor() {
     const livrosRef = collection(db, "livros");
+    document.getElementById("busca-obras")?.addEventListener("input", atualizarFiltroObras);
     
     onSnapshot(livrosRef, (snapshot) => {
         const tbody = document.getElementById("tabela-gerenciar-livros");
@@ -223,10 +224,12 @@ function inicializarDadosAutor() {
 
             if (tbody) {
                 const tr = document.createElement("tr");
+                tr.dataset.search = normalizarBusca(`${livro.titulo || ""} ${livro.genero || ""} ${livro.status || ""}`);
+                const capaSegura = safeUrl(livro.capa);
                 tr.innerHTML = `
-                    <td><img src="${livro.capa}" style="width: 45px; height: 55px; object-fit: cover; border-radius: 4px;"></td>
-                    <td><strong>${livro.titulo}</strong><br><span style="color:#737373; font-size:0.8rem;">${livro.status || 'Pendente'}</span></td>
-                    <td>${livro.genero || 'Não Informado'}</td>
+                    <td>${capaSegura ? `<img src="${capaSegura}" alt="Capa de ${escapeHtml(livro.titulo || "obra")}" style="width: 45px; height: 55px; object-fit: cover; border-radius: 4px;">` : '<span aria-label="Sem capa">—</span>'}</td>
+                    <td><strong>${escapeHtml(livro.titulo || "Sem título")}</strong><br><span style="color:#737373; font-size:0.8rem;">${escapeHtml(livro.status || 'Pendente')}</span></td>
+                    <td>${escapeHtml(livro.genero || 'Não informado')}</td>
                     <td style="text-align: right;">
                         <button class="btn-editar" data-id="${id}" style="background: #332C4D; color: #FFF; border: none; padding: 6px 12px; margin-right: 8px; border-radius: 4px; cursor: pointer;">Editar</button>
                         <button class="btn-excluir" data-id="${id}" style="background: #F97316; color: #FFF; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Excluir</button>
@@ -268,6 +271,7 @@ function inicializarDadosAutor() {
         );
         atualizarUIUniversos();
         oferecerRecuperacaoRascunho();
+        atualizarFiltroObras();
 
          VincularEventosObras();
     });
@@ -401,6 +405,30 @@ let temporizadorRascunho = null;
 
 function chaveRascunhoCapitulo() {
     return usuarioAtual?.uid ? `aurora-codex:rascunho-capitulo:${usuarioAtual.uid}` : null;
+}
+
+function normalizarBusca(value) {
+    return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function atualizarFiltroObras() {
+    const tbody = document.getElementById("tabela-gerenciar-livros");
+    const contador = document.getElementById("contador-obras");
+    const estado = document.getElementById("estado-filtro-obras");
+    if (!tbody) return;
+    const termo = normalizarBusca(document.getElementById("busca-obras")?.value.trim());
+    const rows = [...tbody.querySelectorAll("tr[data-search]")];
+    let visiveis = 0;
+    rows.forEach(row => {
+        const corresponde = !termo || row.dataset.search.includes(termo);
+        row.hidden = !corresponde;
+        if (corresponde) visiveis += 1;
+    });
+    if (contador) contador.textContent = `${visiveis} de ${rows.length} obra${rows.length === 1 ? "" : "s"}`;
+    if (estado) {
+        estado.hidden = visiveis > 0;
+        estado.textContent = rows.length === 0 ? "Nenhuma obra cadastrada ainda." : "Nenhuma obra corresponde a esta busca.";
+    }
 }
 
 function atualizarStatusRascunho(message) {
