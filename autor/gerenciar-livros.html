@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/autor.css">
+    <link rel="stylesheet" href="../css/ux.css">
     <style>
         /* CORREÇÃO DE OVERFLOW: Força a rolagem vertical nativa e impede cortes de tela */
         html, body {
@@ -63,6 +64,7 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
 
     <nav class="navbar nav-black">
         <div class="nav-left">
@@ -74,7 +76,7 @@
         </div>
     </nav>
 
-    <main class="autor-container">
+    <main class="autor-container" id="conteudo-principal" tabindex="-1">
         <div class="tabs-nav">
             <button class="tab-btn active" onclick="alternarAba('aba-cadastrar')">Editar/Criar Livro</button>
             <button class="tab-btn" onclick="alternarAba('aba-gerenciar')">Suas Obras</button>

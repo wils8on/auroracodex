@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/ux.css">
     <style>
         /* CORREÇÃO DE OVERFLOW: o style.css da tela de login trava o body em 100vh sem rolagem.
            Aqui a página pode ter mais conteúdo que a viewport, então liberamos o scroll nativo. */
@@ -36,6 +37,7 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
 
     <!-- Menu Superior Administrativo -->
     <nav class="navbar nav-black">
@@ -48,7 +50,7 @@
         </div>
     </nav>
 
-    <main class="adm-container animate-fade-in">
+    <main class="adm-container animate-fade-in" id="conteudo-principal" tabindex="-1">
         <h2 class="adm-title" style="display:flex; justify-content:space-between; align-items:center;">
             Controle de Credenciais
             <a href="leitores.html" style="font-size: 0.85rem; color: #F97316; font-family: 'Inter', sans-serif; letter-spacing: normal; font-weight: 600;">Ver Dashboard de Leitores &rarr;</a>
@@ -75,7 +77,6 @@
     </main>
 
     <!-- Scripts corrigidos com espaçamento adequado -->
-    <script type="module" src="../js/auth.js"></script>
     <script type="module" src="../js/adm.js"></script>
 </body>
 </html>
