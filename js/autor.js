@@ -4,10 +4,16 @@ import { collection, addDoc, doc, getDoc, setDoc, onSnapshot, deleteDoc, updateD
 import { auth, db } from "./firebase.js";
 import { loadUserProfile, hasProfile } from "./user-service.js";
 import { sanitizeRichHtml } from "./security.js";
-import { showToast } from "./feedback.js";
+import { setButtonBusy, showToast } from "./feedback.js";
 
 const LEGACY_OWNER_EMAIL = "wilsononole@gmail.com";
 let usuarioAtual = null;
+
+document.querySelectorAll('[id^="progresso-upload-"]').forEach(region => {
+    region.setAttribute("role", "status");
+    region.setAttribute("aria-live", "polite");
+    region.setAttribute("aria-atomic", "true");
+});
 let perfilAtual = null;
 
 // =====================================================
@@ -335,8 +341,7 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
         tagsSelecionadas.push(cb.value);
     });
 
-    btnSubmit.disabled = true;
-    btnSubmit.innerText = "Salvando...";
+    setButtonBusy(btnSubmit, true, arquivoCapa ? "Enviando capa..." : "Salvando obra...");
 
     try {
         let urlCapaFinal = document.getElementById("url-capa").value;
@@ -361,7 +366,6 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
             await updateDoc(doc(db, "livros", idLivroEdicao), dados);
             showToast("Configurações do livro atualizadas com sucesso!", "success");
             idLivroEdicao = null;
-            btnSubmit.innerText = "Salvar Livro";
         } else {
             dados.autorId = usuarioAtual.uid;
             dados.criadoPor = usuarioAtual.uid;
@@ -370,6 +374,8 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
             showToast("Nova obra catalogada com sucesso!", "success");
         }
 
+        setButtonBusy(btnSubmit, false);
+        btnSubmit.innerText = "Salvar Livro";
         e.target.reset();
         document.querySelectorAll(".tag-checkbox").forEach(cb => cb.checked = false);
         document.getElementById("preview-wrapper-capa").style.display = "none";
@@ -378,8 +384,7 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
         console.error(err);
         showToast("Erro ao salvar a obra. Verifique sua conexão e tente novamente.", "error");
     } finally {
-        btnSubmit.disabled = false;
-        if (btnSubmit.innerText === "Salvando...") btnSubmit.innerText = "Salvar Livro";
+        setButtonBusy(btnSubmit, false);
     }
 });
 
@@ -401,6 +406,7 @@ function inicializarDadosCapitulos() {
     });
 
     document.getElementById("btn-cancelar-edicao-capitulo")?.addEventListener("click", () => {
+        setButtonBusy(btnSubmit, false);
         resetarFormularioCapitulo();
     });
 
@@ -608,9 +614,7 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
     }
 
     const btnSubmit = e.target.querySelector(".btn-submit");
-    btnSubmit.disabled = true;
-    const textoOriginalBotao = btnSubmit.innerText;
-    btnSubmit.innerText = "Salvando...";
+    setButtonBusy(btnSubmit, true, "Salvando capítulo...");
 
     try {
         // 1) Capa do capítulo: só faz upload se um novo arquivo foi escolhido
@@ -656,8 +660,7 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
         console.error(err);
         showToast("Erro ao salvar capítulo. " + (err && err.message ? err.message : ""), "error", 6500);
     } finally {
-        btnSubmit.disabled = false;
-        if (btnSubmit.innerText === "Salvando...") btnSubmit.innerText = textoOriginalBotao;
+        setButtonBusy(btnSubmit, false);
     }
 });
 
@@ -775,8 +778,7 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
     const btnSubmit = e.target.querySelector(".btn-submit");
     const arquivoFoto = document.getElementById("arquivo-avatar-personagem").files[0];
 
-    btnSubmit.disabled = true;
-    btnSubmit.innerText = "Salvando...";
+    setButtonBusy(btnSubmit, true, arquivoFoto ? "Enviando imagem..." : "Salvando personagem...");
 
     try {
         let urlFotoFinal = document.getElementById("url-avatar-personagem").value;
@@ -797,6 +799,7 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
             await updateDoc(doc(db, "livros", livroId, "personagens", idPersonagemEdicao), dadosPersonagem);
             showToast("Personagem atualizado com sucesso!", "success");
             idPersonagemEdicao = null;
+            setButtonBusy(btnSubmit, false);
             btnSubmit.innerText = "Adicionar ao Códice";
         } else {
             await addDoc(collection(db, "livros", livroId, "personagens"), dadosPersonagem);
@@ -809,8 +812,7 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
         console.error(err);
         showToast("Erro ao salvar personagem.", "error");
     } finally {
-        btnSubmit.disabled = false;
-        if (btnSubmit.innerText === "Salvando...") btnSubmit.innerText = "Adicionar ao Códice";
+        setButtonBusy(btnSubmit, false);
     }
 });
 
@@ -1095,8 +1097,7 @@ document.getElementById("form-universo")?.addEventListener("submit", async (e) =
     const nome = document.getElementById("nome-universo").value.trim();
     const idsMarcados = Array.from(document.querySelectorAll(".checkbox-livro-universo:checked")).map(cb => cb.value);
 
-    btnSubmit.disabled = true;
-    btnSubmit.innerText = "Salvando...";
+    setButtonBusy(btnSubmit, true, arquivoCapa ? "Enviando capa..." : "Salvando universo...");
 
     try {
         let urlCapaFinal = document.getElementById("url-capa-universo").value;
@@ -1142,15 +1143,13 @@ document.getElementById("form-universo")?.addEventListener("submit", async (e) =
         await batch.commit();
 
         showToast(idUniversoEdicao ? "Universo atualizado com sucesso!" : "Universo criado com sucesso!", "success");
+        setButtonBusy(btnSubmit, false);
         resetarFormularioUniverso();
     } catch (err) {
         console.error(err);
         showToast("Erro ao salvar universo.", "error");
     } finally {
-        btnSubmit.disabled = false;
-        if (btnSubmit.innerText === "Salvando...") {
-            btnSubmit.innerText = idUniversoEdicao ? "Atualizar Universo" : "Criar Universo";
-        }
+        setButtonBusy(btnSubmit, false);
     }
 });
 
@@ -1166,6 +1165,7 @@ function inicializarDadosGaleria() {
     if (!selectLivroGaleria) return;
 
     selectLivroGaleria.addEventListener("change", () => {
+        setButtonBusy(btnSubmit, false);
         resetarFormularioGaleria();
         carregarGaleriaDaObra(selectLivroGaleria.value);
     });
@@ -1314,8 +1314,7 @@ document.getElementById("form-galeria")?.addEventListener("submit", async (e) =>
 
     const tipo = document.getElementById("tipo-galeria").value;
     const btnSubmit = e.target.querySelector(".btn-submit");
-    btnSubmit.disabled = true;
-    btnSubmit.innerText = "Salvando...";
+    setButtonBusy(btnSubmit, true, tipo === "imagem" ? "Salvando imagem..." : "Salvando vídeo...");
 
     try {
         let urlFinal = "";
@@ -1330,16 +1329,12 @@ document.getElementById("form-galeria")?.addEventListener("submit", async (e) =>
 
             if (!urlFinal) {
                 showToast("Selecione uma imagem para adicionar.", "info");
-                btnSubmit.disabled = false;
-                btnSubmit.innerText = idGaleriaEdicao ? "Atualizar Item" : "Adicionar";
                 return;
             }
         } else {
             urlFinal = document.getElementById("url-video-galeria").value.trim();
             if (!urlFinal) {
                 showToast("Informe a URL do vídeo do YouTube.", "info");
-                btnSubmit.disabled = false;
-                btnSubmit.innerText = idGaleriaEdicao ? "Atualizar Item" : "Adicionar";
                 return;
             }
         }
@@ -1367,10 +1362,7 @@ document.getElementById("form-galeria")?.addEventListener("submit", async (e) =>
         console.error(err);
         showToast("Erro ao salvar item da galeria.", "error");
     } finally {
-        btnSubmit.disabled = false;
-        if (btnSubmit.innerText === "Salvando...") {
-            btnSubmit.innerText = idGaleriaEdicao ? "Atualizar Item" : "Adicionar";
-        }
+        setButtonBusy(btnSubmit, false);
     }
 });
 
@@ -1545,8 +1537,7 @@ document.getElementById("form-oraculo")?.addEventListener("submit", async (e) =>
     const arquivoImagem = document.getElementById("arquivo-imagem-oraculo").files[0];
     const publicarAgora = document.getElementById("publicar-agora-oraculo").checked;
 
-    btnSubmit.disabled = true;
-    btnSubmit.innerText = "Salvando...";
+    setButtonBusy(btnSubmit, true, arquivoImagem ? "Enviando imagem..." : "Salvando publicação...");
 
     try {
         let urlImagemFinal = document.getElementById("url-imagem-oraculo").value;
@@ -1561,8 +1552,6 @@ document.getElementById("form-oraculo")?.addEventListener("submit", async (e) =>
             const valorData = document.getElementById("data-agendada-oraculo").value;
             if (!valorData) {
                 showToast("Escolha uma data para agendar a publicação.", "info");
-                btnSubmit.disabled = false;
-                btnSubmit.innerText = idOraculoEdicao ? "Atualizar Publicação" : "Criar Publicação";
                 return;
             }
             dataPublicacao = new Date(valorData).toISOString();
@@ -1586,14 +1575,12 @@ document.getElementById("form-oraculo")?.addEventListener("submit", async (e) =>
             showToast(publicarAgora ? "Publicação criada com sucesso!" : "Publicação agendada com sucesso!", "success");
         }
 
+        setButtonBusy(btnSubmit, false);
         resetarFormularioOraculo();
     } catch (err) {
         console.error(err);
         showToast("Erro ao salvar publicação.", "error");
     } finally {
-        btnSubmit.disabled = false;
-        if (btnSubmit.innerText === "Salvando...") {
-            btnSubmit.innerText = idOraculoEdicao ? "Atualizar Publicação" : "Criar Publicação";
-        }
+        setButtonBusy(btnSubmit, false);
     }
 });
