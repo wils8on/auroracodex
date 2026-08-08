@@ -267,6 +267,7 @@ function inicializarDadosAutor() {
             perfilAtual === "admin" || livro.autorId === usuarioAtual?.uid || (!livro.autorId && usuarioAtual?.email === LEGACY_OWNER_EMAIL)
         );
         atualizarUIUniversos();
+        oferecerRecuperacaoRascunho();
 
          VincularEventosObras();
     });
@@ -395,6 +396,102 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
 
 let idCapituloEdicao = null;
 let unsubscribeCapitulos = null;
+let rascunhoRecuperado = false;
+let temporizadorRascunho = null;
+
+function chaveRascunhoCapitulo() {
+    return usuarioAtual?.uid ? `aurora-codex:rascunho-capitulo:${usuarioAtual.uid}` : null;
+}
+
+function atualizarStatusRascunho(message) {
+    const status = document.getElementById("status-rascunho-local");
+    if (status) status.textContent = message;
+}
+
+function lerRascunhoLocal() {
+    const chave = chaveRascunhoCapitulo();
+    if (!chave) return null;
+    try { return JSON.parse(localStorage.getItem(chave) || "null"); } catch { return null; }
+}
+
+function limparRascunhoLocal() {
+    window.clearTimeout(temporizadorRascunho);
+    const chave = chaveRascunhoCapitulo();
+    if (chave) localStorage.removeItem(chave);
+    atualizarStatusRascunho("Rascunho local limpo.");
+}
+
+function salvarRascunhoLocal() {
+    const chave = chaveRascunhoCapitulo();
+    const editor = document.getElementById("conteudo-capitulo");
+    if (!chave || !editor) return;
+    const conteudo = editor.innerHTML.trim();
+    const titulo = document.getElementById("titulo-capitulo")?.value.trim() || "";
+    if (!conteudo && !titulo) return;
+    const dadosRascunho = {
+        livroId: document.getElementById("select-livro-capitulo")?.value || "",
+        capituloId: idCapituloEdicao,
+        numero: document.getElementById("numero-capitulo")?.value || "",
+        titulo,
+        status: document.getElementById("status-capitulo")?.value || "publicado",
+        corCena: document.getElementById("cor-cena-capitulo")?.value || "#f97316",
+        conteudo,
+        salvoEm: new Date().toISOString()
+    };
+    try {
+        localStorage.setItem(chave, JSON.stringify(dadosRascunho));
+    } catch {
+        atualizarStatusRascunho("Não foi possível salvar o rascunho neste navegador.");
+        return;
+    }
+    const horario = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    atualizarStatusRascunho(`Rascunho salvo neste navegador às ${horario}.`);
+}
+
+function agendarRascunhoLocal() {
+    window.clearTimeout(temporizadorRascunho);
+    atualizarStatusRascunho("Salvando rascunho local...");
+    temporizadorRascunho = window.setTimeout(salvarRascunhoLocal, 700);
+}
+
+async function oferecerRecuperacaoRascunho() {
+    if (rascunhoRecuperado) return;
+    rascunhoRecuperado = true;
+    const rascunho = lerRascunhoLocal();
+    if (!rascunho?.conteudo && !rascunho?.titulo) return;
+    const recuperar = await confirmAction({
+        title: "Recuperar rascunho local?",
+        message: "Há um capítulo não salvo neste navegador. Você pode recuperá-lo agora ou mantê-lo para depois.",
+        confirmLabel: "Recuperar rascunho",
+        cancelLabel: "Agora não"
+    });
+    if (!recuperar) {
+        atualizarStatusRascunho("Rascunho mantido neste navegador para recuperação posterior.");
+        return;
+    }
+
+    const selectLivro = document.getElementById("select-livro-capitulo");
+    if (rascunho.livroId && [...selectLivro.options].some(option => option.value === rascunho.livroId)) {
+        selectLivro.value = rascunho.livroId;
+        carregarCapitulosDaObra(rascunho.livroId);
+    }
+    idCapituloEdicao = rascunho.capituloId || null;
+    document.getElementById("numero-capitulo").value = rascunho.numero || "";
+    document.getElementById("titulo-capitulo").value = rascunho.titulo || "";
+    document.getElementById("status-capitulo").value = rascunho.status || "publicado";
+    document.getElementById("cor-cena-capitulo").value = rascunho.corCena || "#f97316";
+    document.getElementById("conteudo-capitulo").innerHTML = rascunho.conteudo || "";
+    const texto = document.getElementById("conteudo-capitulo").innerText.trim();
+    document.getElementById("contador-palavras").innerText = texto ? texto.split(/\s+/).length : 0;
+    const botaoSalvar = document.getElementById("btn-submit-capitulo");
+    botaoSalvar.innerText = idCapituloEdicao
+        ? (rascunho.status === "rascunho" ? "Atualizar Rascunho" : "Atualizar Capítulo")
+        : (rascunho.status === "rascunho" ? "Salvar Rascunho" : "Publicar Capítulo");
+    document.getElementById("btn-cancelar-edicao-capitulo").style.display = idCapituloEdicao ? "inline-block" : "none";
+    atualizarRotuloObraEditor();
+    atualizarStatusRascunho("Rascunho recuperado. Salve o capítulo para confirmar as alterações.");
+    document.querySelector('[onclick="alternarAba(\'aba-capitulos\')"]')?.click();
+}
 
 function inicializarDadosCapitulos() {
     const selectLivro = document.getElementById("select-livro-capitulo");
@@ -406,8 +503,13 @@ function inicializarDadosCapitulos() {
         atualizarRotuloObraEditor();
     });
 
-    document.getElementById("btn-cancelar-edicao-capitulo")?.addEventListener("click", () => {
-        setButtonBusy(btnSubmit, false);
+    document.getElementById("form-cadastrar-capitulo")?.addEventListener("input", agendarRascunhoLocal);
+    window.addEventListener("pagehide", salvarRascunhoLocal);
+
+    document.getElementById("btn-cancelar-edicao-capitulo")?.addEventListener("click", async () => {
+        const descartar = await confirmAction({ title: "Descartar alterações?", message: "O texto não salvo deste capítulo será removido deste navegador.", confirmLabel: "Descartar alterações" });
+        if (!descartar) return;
+        limparRascunhoLocal();
         resetarFormularioCapitulo();
     });
 
@@ -656,6 +758,7 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
             await addDoc(collection(db, "livros", idLivro, "capitulos"), capituloDados);
             showToast(`Capítulo ${capituloDados.numero} publicado no Codex!`, "success");
         }
+        limparRascunhoLocal();
         resetarFormularioCapitulo();
     } catch (err) {
         console.error(err);
