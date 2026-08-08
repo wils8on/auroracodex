@@ -41,6 +41,14 @@
                 <div class="author-signature">Por Ison W. Lone</div>
             </header>
 
+            <div class="reader-preferences" role="group" aria-label="Preferências de leitura">
+                <span>Aparência do texto</span>
+                <button type="button" id="diminuir-fonte" aria-label="Diminuir tamanho do texto">A−</button>
+                <button type="button" id="aumentar-fonte" aria-label="Aumentar tamanho do texto">A+</button>
+                <button type="button" id="alternar-largura" aria-pressed="false">Texto amplo</button>
+                <span id="status-preferencias" class="sr-only" role="status" aria-live="polite"></span>
+            </div>
+
             <!-- O Texto usa a fonte Lora. Toda a narrativa gerada pelo Firebase entrará aqui dentro -->
             <section class="chapter-text" id="capitulo-texto-exibicao">
                 <p style="color: #737373; font-style: italic; text-align: center; padding: 40px 0;">
@@ -81,11 +89,14 @@
                 </div>
             </section>
 
+        </article>
+    </main>
+
     <!-- Sidebar do Oráculo / Fichas de Personagem (Escondida por Padrão) -->
-    <aside class="oracle-sidebar" id="oracle-sidebar">
+    <aside class="oracle-sidebar" id="oracle-sidebar" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="titulo-codice">
         <div class="sidebar-header">
-            <h3>Códice do Universo</h3>
-            <button class="btn-close-sidebar" id="close-oracle">×</button>
+            <h3 id="titulo-codice">Códice do Universo</h3>
+            <button type="button" class="btn-close-sidebar" id="close-oracle" aria-label="Fechar Códice">×</button>
         </div>
         <div class="sidebar-content">
             <h4>Personagens em Cena</h4>
@@ -143,8 +154,21 @@
         const openOracle = document.getElementById('open-oracle');
         const closeOracle = document.getElementById('close-oracle');
 
-        if (openOracle && sidebar) openOracle.addEventListener('click', () => sidebar.classList.add('active'));
-        if (closeOracle && sidebar) closeOracle.addEventListener('click', () => sidebar.classList.remove('active'));
+        const abrirCodice = () => {
+            sidebar.classList.add('active');
+            sidebar.setAttribute('aria-hidden', 'false');
+            closeOracle.focus();
+        };
+        const fecharCodice = () => {
+            sidebar.classList.remove('active');
+            sidebar.setAttribute('aria-hidden', 'true');
+            openOracle.focus();
+        };
+        if (openOracle && sidebar) openOracle.addEventListener('click', abrirCodice);
+        if (closeOracle && sidebar) closeOracle.addEventListener('click', fecharCodice);
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && sidebar.classList.contains('active')) fecharCodice();
+        });
 
         // OBS: o player de áudio e o botão de curtidas agora são controlados pelo js/ler.js,
         // pois precisam ler/gravar dados no Firestore (progresso, curtidas persistidas por usuário).

@@ -4,6 +4,43 @@ import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, collection, ge
 import { auth, db } from "./firebase.js";
 import { escapeHtml, sanitizeRichHtml, safeUrl } from "./security.js";
 import { APPROVED_PROFILES, loadUserProfile, hasProfile } from "./user-service.js";
+import { renderContentState, showToast } from "./feedback.js";
+
+const READER_PREFERENCES_KEY = "aurora-codex:preferencias-leitura";
+
+function configurarPreferenciasLeitura() {
+    const core = document.querySelector(".reading-core");
+    const chapterText = document.getElementById("capitulo-texto-exibicao");
+    const status = document.getElementById("status-preferencias");
+    if (!core || !chapterText) return;
+    let preferences = { fontSize: 1.25, wide: false };
+    try { preferences = { ...preferences, ...JSON.parse(localStorage.getItem(READER_PREFERENCES_KEY) || "{}") }; } catch { /* usa padrões */ }
+
+    const apply = message => {
+        preferences.fontSize = Math.min(1.6, Math.max(1, Number(preferences.fontSize) || 1.25));
+        core.style.setProperty("--reader-font-size", `${preferences.fontSize}rem`);
+        core.classList.toggle("reader-wide", !!preferences.wide);
+        document.getElementById("alternar-largura")?.setAttribute("aria-pressed", String(!!preferences.wide));
+        try { localStorage.setItem(READER_PREFERENCES_KEY, JSON.stringify(preferences)); } catch { /* preferência não persistida */ }
+        if (status && message) status.textContent = message;
+    };
+
+    document.getElementById("diminuir-fonte")?.addEventListener("click", () => {
+        preferences.fontSize -= 0.1;
+        apply(`Tamanho do texto: ${Math.round(preferences.fontSize * 100)}%.`);
+    });
+    document.getElementById("aumentar-fonte")?.addEventListener("click", () => {
+        preferences.fontSize += 0.1;
+        apply(`Tamanho do texto: ${Math.round(preferences.fontSize * 100)}%.`);
+    });
+    document.getElementById("alternar-largura")?.addEventListener("click", () => {
+        preferences.wide = !preferences.wide;
+        apply(preferences.wide ? "Largura de leitura ampliada." : "Largura de leitura confortável.");
+    });
+    apply();
+}
+
+configurarPreferenciasLeitura();
 
 // Credenciais Oficiais
 
@@ -27,8 +64,8 @@ async function carregarConteudoCapitulo(user) {
     const capituloId = urlParams.get('capituloId');
 
     if (!livroId || !capituloId) {
-        alert("Capítulo não especificado.");
-        window.location.href = "dashboard.html";
+        renderContentState(document.getElementById("capitulo-texto-exibicao"), { type: "error", title: "Capítulo não especificado", message: "Volte ao catálogo e escolha um capítulo para iniciar a leitura." });
+        showToast("Não foi possível identificar o capítulo.", "error");
         return;
     }
 
@@ -118,11 +155,13 @@ async function carregarConteudoCapitulo(user) {
             }
 
         } else {
-            alert("O conteúdo deste capítulo não foi localizado no Codex.");
-            window.location.href = "dashboard.html";
+            renderContentState(document.getElementById("capitulo-texto-exibicao"), { type: "error", title: "Capítulo não encontrado", message: "Este conteúdo pode ter sido removido ou ainda não está disponível." });
+            showToast("Capítulo não encontrado.", "error");
         }
     } catch (err) {
         console.error("Erro ao carregar leitura:", err);
+        renderContentState(document.getElementById("capitulo-texto-exibicao"), { type: "error", title: "Leitura indisponível", message: "Não foi possível carregar o capítulo. Verifique sua conexão e tente novamente." });
+        showToast("Falha ao carregar o capítulo.", "error");
     }
 }
 
@@ -210,35 +249,55 @@ function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
     const iconPlay = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
     const iconPause = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
     playBtn.innerHTML = iconPlay;
+    playBtn.setAttribute("aria-label", "Reproduzir trilha sonora");
 
     playBtn.onclick = () => {
         if (audio.paused) {
             audio.play().catch(() => console.log("Aguardando ação de mídia do usuário."));
             playBtn.innerHTML = iconPause;
+            playBtn.setAttribute("aria-label", "Pausar trilha sonora");
         } else {
             audio.pause();
             playBtn.innerHTML = iconPlay;
+            playBtn.setAttribute("aria-label", "Reproduzir trilha sonora");
         }
     };
 
     audio.ontimeupdate = () => {
         if (audio.duration && progressBar) {
-            progressBar.style.width = (audio.currentTime / audio.duration) * 100 + "%";
+            const progresso = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = progresso + "%";
+            progressContainer?.setAttribute("aria-valuenow", String(Math.round(progresso)));
+            progressContainer?.setAttribute("aria-valuetext", `${formatarTempo(audio.currentTime)} de ${formatarTempo(audio.duration)}`);
         }
         if (trackTime) {
             trackTime.innerText = `${formatarTempo(audio.currentTime)} / ${formatarTempo(audio.duration)}`;
         }
     };
 
-    audio.onended = () => { playBtn.innerHTML = iconPlay; };
+    audio.onended = () => {
+        playBtn.innerHTML = iconPlay;
+        playBtn.setAttribute("aria-label", "Reproduzir trilha sonora");
+    };
 
     if (progressContainer) {
+        progressContainer.tabIndex = 0;
+        progressContainer.setAttribute("role", "slider");
+        progressContainer.setAttribute("aria-label", "Posição da trilha sonora");
+        progressContainer.setAttribute("aria-valuemin", "0");
+        progressContainer.setAttribute("aria-valuemax", "100");
         progressContainer.onclick = (e) => {
             if (!audio.duration) return;
             const rect = progressContainer.getBoundingClientRect();
             const pct = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
             audio.currentTime = pct * audio.duration;
         };
+        progressContainer.addEventListener("keydown", event => {
+            if (!audio.duration || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+            event.preventDefault();
+            const delta = event.key === "ArrowRight" ? 5 : -5;
+            audio.currentTime = Math.min(audio.duration, Math.max(0, audio.currentTime + delta));
+        });
     }
 }
 
