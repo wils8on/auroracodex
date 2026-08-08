@@ -8,6 +8,10 @@ import { bindFavoriteButton } from "./progress-service.js";
 import { renderChapterList } from "./chapter-list.js";
 import { extractYouTubeId, openMediaViewer } from "./media-viewer.js";
 import { renderContentState, showToast } from "./feedback.js";
+import { bindDialogCloseButton, closeAccessibleDialog, makeActivatable, openAccessibleDialog } from "./dialog-accessibility.js";
+
+window.fecharModal = () => closeAccessibleDialog(document.getElementById("netflix-modal"));
+bindDialogCloseButton(document.getElementById("netflix-modal"));
 
 let universosCache = [];
 let livrosCache = [];
@@ -101,7 +105,7 @@ function renderizarListaUniversos() {
         card.className = "universo-card";
         card.style.backgroundColor = u.corTema || "#7c3aed";
         if (u.capa) card.style.backgroundImage = `url('${u.capa}')`;
-        card.onclick = () => window.location.href = `universos.html?id=${u.id}`;
+        makeActivatable(card, () => { window.location.href = `universos.html?id=${u.id}`; }, `Explorar universo ${u.nome}`);
 
         card.innerHTML = `
             <div class="universo-card-overlay">
@@ -142,7 +146,7 @@ function renderizarDetalheUniverso(id) {
     livrosDoUniverso.forEach(livro => {
         const card = document.createElement("div");
         card.className = "biblioteca-card";
-        card.onclick = () => abrirModalNetflix(livro.id, livro);
+        makeActivatable(card, () => abrirModalNetflix(livro.id, livro), `Abrir detalhes de ${livro.titulo}`);
 
         card.innerHTML = `
             <div class="biblioteca-card-capa">
@@ -178,8 +182,7 @@ async function abrirModalNetflix(idLivro, livro) {
 
     const modal = document.getElementById('netflix-modal');
     if (modal) {
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+        openAccessibleDialog(modal);
     }
 
     try {
@@ -233,7 +236,7 @@ async function carregarGaleriaModal(idLivro) {
                 </div>
                 <p style="color:#D4D4D4; font-size:0.75rem; margin-top:6px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.categoria}</p>
             `;
-            card.onclick = () => openMediaViewer(item.url, item.tipo);
+            makeActivatable(card, () => openMediaViewer(item.url, item.tipo), `Abrir ${item.categoria || "item da galeria"}`);
             grid.appendChild(card);
         });
     } catch (err) {

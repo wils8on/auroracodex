@@ -9,6 +9,10 @@ import { renderChapterList } from "./chapter-list.js";
 import { extractYouTubeId, openMediaViewer } from "./media-viewer.js";
 import { escapeHtml, safeUrl } from "./security.js";
 import { renderContentState, showToast } from "./feedback.js";
+import { bindDialogCloseButton, closeAccessibleDialog, makeActivatable, openAccessibleDialog } from "./dialog-accessibility.js";
+
+window.fecharModal = () => closeAccessibleDialog(document.getElementById("netflix-modal"));
+bindDialogCloseButton(document.getElementById("netflix-modal"));
 
 
 let livrosCache = [];
@@ -143,8 +147,7 @@ async function abrirModalNetflix(idLivro, livro) {
 
     const modal = document.getElementById('netflix-modal');
     if (modal) {
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+        openAccessibleDialog(modal);
     }
 
     try {
@@ -197,7 +200,7 @@ async function carregarGaleriaModal(idLivro) {
                 </div>
                 <p style="color:#D4D4D4; font-size:0.75rem; margin-top:6px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.categoria}</p>
             `;
-            card.onclick = () => openMediaViewer(item.url, item.tipo);
+            makeActivatable(card, () => openMediaViewer(item.url, item.tipo), `Abrir ${item.categoria || "item da galeria"}`);
             grid.appendChild(card);
         });
     } catch (err) {
