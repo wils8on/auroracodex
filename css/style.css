@@ -225,15 +225,33 @@ body {
 
 /* Responsividade */
 @media (max-width: 540px) {
+    body,
+    .background-overlay,
+    .login-container,
+    .login-card {
+        min-width: 0;
+        max-width: 100%;
+    }
     .login-header {
         padding: 20px;
         text-align: center;
+    }
+    .brand-logo {
+        font-size: clamp(1.45rem, 7.5vw, 1.9rem);
+        letter-spacing: clamp(1.5px, 1vw, 3px);
+        white-space: nowrap;
     }
     .login-card {
         padding: 40px 25px;
         background-color: #0D0A17;
         border: none;
         backdrop-filter: none;
+    }
+    .btn-google {
+        padding: 14px 10px;
+        gap: 9px;
+        font-size: 0.94rem;
+        white-space: normal;
     }
     .cinema-background {
         display: none; /* Simplifica no mobile para poupar dados/bateria */
