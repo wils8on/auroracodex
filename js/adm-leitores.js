@@ -1,20 +1,8 @@
 // js/adm-leitores.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCPFNgtGch_nWL6gDNmXzGuwWtd4X4QDgs",
-  authDomain: "aurora-codex.firebaseapp.com",
-  projectId: "aurora-codex",
-  storageBucket: "aurora-codex.firebasestorage.app",
-  messagingSenderId: "193340365366",
-  appId: "1:193340365366:web:6b6920e8c8b4d434749697"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { auth, db } from "./firebase.js";
+import { loadUserProfile, hasProfile } from "./user-service.js";
 
 let registrosCache = [];
 let livrosCache = [];
@@ -24,8 +12,8 @@ onAuthStateChanged(auth, async (user) => {
     if (!user) {
         window.location.href = "../index.html";
     } else {
-        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        if (!userDoc.exists() || userDoc.data().perfil !== "admin") {
+        const perfil = await loadUserProfile(user.uid);
+        if (!hasProfile(perfil, ["admin"])) {
             alert("Acesso restrito apenas ao administrador.");
             window.location.href = "../dashboard.html";
         } else {

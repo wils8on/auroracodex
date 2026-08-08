@@ -1,27 +1,22 @@
 // js/ler.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { auth, db } from "./firebase.js";
+import { escapeHtml, sanitizeRichHtml, safeUrl } from "./security.js";
+import { APPROVED_PROFILES, loadUserProfile, hasProfile } from "./user-service.js";
 
 // Credenciais Oficiais
-const firebaseConfig = { 
-    apiKey: "AIzaSyCPFNgtGch_nWL6gDNmXzGuwWtd4X4QDgs",
-    authDomain: "aurora-codex.firebaseapp.com",
-    projectId: "aurora-codex",
-    storageBucket: "aurora-codex.firebasestorage.app",
-    messagingSenderId: "193340365366",
-    appId: "1:193340365366:web:6b6920e8c8b4d434749697" 
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 // Estado do Carrossel de Destaques e Leitura
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
         window.location.href = "index.html";
     } else {
+        const perfil = await loadUserProfile(user.uid);
+        if (!hasProfile(perfil, APPROVED_PROFILES)) {
+            window.location.href = "aguardando.html";
+            return;
+        }
         carregarConteudoCapitulo(user);
     }
 });
@@ -63,11 +58,11 @@ async function carregarConteudoCapitulo(user) {
                 const pareceHtml = /<\/?[a-z][\s\S]*>/i.test(conteudoBruto);
 
                 if (pareceHtml) {
-                    txtConteudo.innerHTML = conteudoBruto;
+                    txtConteudo.innerHTML = sanitizeRichHtml(conteudoBruto);
                 } else {
                     txtConteudo.innerHTML = conteudoBruto.split('\n').map(paragrafo => {
                         if (paragrafo.trim() === "") return "";
-                        return `<p style="line-height: 1.8; margin-bottom: 20px; font-size: 1.15rem; color: #D2D2D2; text-align: justify;">${paragrafo}</p>`;
+                        return `<p style="line-height: 1.8; margin-bottom: 20px; font-size: 1.15rem; color: #D2D2D2; text-align: justify;">${escapeHtml(paragrafo)}</p>`;
                     }).join('');
                 }
             }
@@ -76,7 +71,7 @@ async function carregarConteudoCapitulo(user) {
             const bannerCapitulo = document.getElementById("capitulo-banner-capa");
             if (bannerCapitulo) {
                 if (dadosCap.capa) {
-                    bannerCapitulo.style.backgroundImage = `url('${dadosCap.capa}')`;
+                    bannerCapitulo.style.backgroundImage = `url('${safeUrl(dadosCap.capa)}')`;
                     bannerCapitulo.style.display = "block";
                 } else {
                     bannerCapitulo.style.display = "none";
@@ -110,11 +105,11 @@ async function carregarConteudoCapitulo(user) {
                         const cardChar = document.createElement("div");
                         cardChar.className = "character-mini-card";
                         cardChar.innerHTML = `
-                            <img src="${p.foto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100'}" alt="${p.nome}">
+                            <img src="${safeUrl(p.foto, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100')}" alt="${escapeHtml(p.nome)}">
                             <div class="char-info">
-                                <h5>${p.nome}</h5>
+                                <h5>${escapeHtml(p.nome)}</h5>
                                 <p class="char-role">${p.papel || p.funcao || 'Personagem'}${p.primeiraAparicao ? ' • ' + p.primeiraAparicao : ''}</p>
-                                <p class="char-desc">${p.descricao}</p>
+                                <p class="char-desc">${escapeHtml(p.descricao)}</p>
                             </div>
                         `;
                         sidebarContent.appendChild(cardChar);

@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function userDoc() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)); }
+    function role() { return signedIn() ? userDoc().data.perfil : null; }
+    function approved() { return role() in ['leitor', 'autor', 'admin']; }
+    function isAdmin() { return role() == 'admin'; }
+    function isAuthor() { return role() in ['autor', 'admin']; }
+    function legacyOwner() { return signedIn() && request.auth.token.email == 'wilsononole@gmail.com'; }
+    function ownsBook(data) { return isAdmin() || (isAuthor() && 'autorId' in data && data.autorId == request.auth.uid); }
+    function ownsLegacyBook(data) { return !('autorId' in data) && legacyOwner(); }
+    function parentBook(bookId) { return get(/databases/$(database)/documents/livros/$(bookId)).data; }
+    function ownsUniverse(data) { return isAdmin() || (isAuthor() && 'criadoPor' in data && data.criadoPor == request.auth.uid); }
+    function ownsLegacyUniverse(data) { return !('criadoPor' in data) && legacyOwner(); }
+    function validLikeChange() {
+      let before = ('curtidasUids' in resource.data ? resource.data.curtidasUids : []).toSet();
+      let after = request.resource.data.curtidasUids.toSet();
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['curtidasUids'])
+        && request.resource.data.curtidasUids is list
+        && (
+          (after.difference(before).hasOnly([request.auth.uid]) && before.difference(after).size() == 0 && after.size() == before.size() + 1)
+          || (before.difference(after).hasOnly([request.auth.uid]) && after.difference(before).size() == 0 && after.size() == before.size() - 1)
+        );
+    }
+
+    match /usuarios/{uid} {
+      allow create: if signedIn() && request.auth.uid == uid && request.resource.data.perfil == 'pendente';
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow update: if isAdmin() || (signedIn() && request.auth.uid == uid && request.resource.data.perfil == resource.data.perfil);
+      allow delete: if isAdmin();
+    }
+    match /livros/{bookId} {
+      allow read: if approved();
+      allow create: if isAuthor() && request.resource.data.autorId == request.auth.uid;
+      allow update: if isAdmin() || (ownsBook(resource.data) && request.resource.data.autorId == resource.data.autorId) || (ownsLegacyBook(resource.data) && request.resource.data.autorId == request.auth.uid);
+      allow delete: if ownsBook(resource.data) || ownsLegacyBook(resource.data);
+      match /{subcollection}/{documentId} {
+        allow read: if approved() && subcollection in ['capitulos', 'personagens', 'galeria'];
+        allow create, delete: if subcollection in ['capitulos', 'personagens', 'galeria'] && (ownsBook(parentBook(bookId)) || ownsLegacyBook(parentBook(bookId)));
+        allow update: if subcollection in ['capitulos', 'personagens', 'galeria'] && (ownsBook(parentBook(bookId)) || ownsLegacyBook(parentBook(bookId)))
+          || (subcollection == 'capitulos' && approved() && validLikeChange());
+      }
+    }
+    match /progresso_leitura/{progressId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if approved() && request.resource.data.uid == request.auth.uid && progressId == request.auth.uid + '_' + request.resource.data.livroId;
+      allow update: if approved() && resource.data.uid == request.auth.uid && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+    }
+    match /universos/{id} {
+      allow read: if approved();
+      allow create: if isAuthor() && request.resource.data.criadoPor == request.auth.uid;
+      allow update: if isAdmin() || (ownsUniverse(resource.data) && request.resource.data.criadoPor == resource.data.criadoPor) || (ownsLegacyUniverse(resource.data) && request.resource.data.criadoPor == request.auth.uid);
+      allow delete: if ownsUniverse(resource.data) || ownsLegacyUniverse(resource.data);
+    }
+    match /oraculo/{id} { allow read: if approved(); allow write: if isAdmin(); }
+    match /configuracoes/{id} { allow read: if approved(); allow write: if isAdmin(); }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

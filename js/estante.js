@@ -1,20 +1,11 @@
 // js/estante.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyCPFNgtGch_nWL6gDNmXzGuwWtd4X4QDgs",
-    authDomain: "aurora-codex.firebaseapp.com",
-    projectId: "aurora-codex",
-    storageBucket: "aurora-codex.firebasestorage.app",
-    messagingSenderId: "193340365366",
-    appId: "1:193340365366:web:6b6920e8c8b4d434749697"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc, setDoc, collection, onSnapshot, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { auth, db } from "./firebase.js";
+import { loadUserProfile } from "./user-service.js";
+import { loadBookChapters, subscribeBooks } from "./catalog-service.js";
+import { bindFavoriteButton } from "./progress-service.js";
+import { renderChapterList } from "./chapter-list.js";
 
 let livrosCache = {};       // id -> dados do livro (para exibir capa/sinopse atualizadas)
 let progressoCache = [];    // registros de progresso_leitura do usuário logado
@@ -29,9 +20,8 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById('user-avatar').src = user.photoURL;
     }
 
-    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-    if (userDoc.exists()) {
-        const dados = userDoc.data();
+    const dados = await loadUserProfile(user.uid);
+    if (dados) {
 
         if (dados.perfil === "pendente") {
             window.location.href = "aguardando.html";
@@ -51,9 +41,9 @@ onAuthStateChanged(auth, async (user) => {
 
 function inicializarEstante(user) {
     // Mantém o catálogo de livros sempre atualizado (capas, sinopses, etc podem mudar)
-    onSnapshot(collection(db, "livros"), (snapshot) => {
+    subscribeBooks((livros) => {
         livrosCache = {};
-        snapshot.forEach(d => { livrosCache[d.id] = { id: d.id, ...d.data() }; });
+        livros.forEach(livro => { livrosCache[livro.id] = livro; });
         renderizarEstante();
     });
 
@@ -194,43 +184,8 @@ async function abrirModalNetflix(idLivro, livro) {
     }
 
     try {
-        const capsRef = collection(db, "livros", idLivro, "capitulos");
-        const q = query(capsRef, orderBy("numero", "asc"));
-        const capsSnap = await getDocs(q);
-
-        if (listaCapitulosContainer) {
-            listaCapitulosContainer.innerHTML = "";
-
-            const capitulosVisiveis = capsSnap.docs.filter(d => d.data().status !== "rascunho");
-
-            if (capitulosVisiveis.length === 0) {
-                listaCapitulosContainer.innerHTML = '<p style="color: #737373;">Nenhum capítulo publicado para esta obra ainda.</p>';
-                return;
-            }
-
-            capitulosVisiveis.forEach((capSnap) => {
-                const cap = capSnap.data();
-                const item = document.createElement('div');
-                item.style.cssText = "background: #2a2440; padding: 16px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s;";
-
-                item.onmouseenter = () => item.style.background = "#332C4D";
-                item.onmouseleave = () => item.style.background = "#2a2440";
-
-                item.onclick = (e) => {
-                    e.stopPropagation();
-                    window.location.href = `ler.html?livroId=${idLivro}&capituloId=${capSnap.id}`;
-                };
-
-                item.innerHTML = `
-                    <div>
-                        <span style="color: #F97316; font-weight: 600; margin-right: 10px;">Episódio ${cap.numero}</span>
-                        <strong style="color: #FFF;">${cap.titulo}</strong>
-                    </div>
-                    <span style="color: #8C8C8C; font-size: 0.85rem;">Ler Agora &rarr;</span>
-                `;
-                listaCapitulosContainer.appendChild(item);
-            });
-        }
+        const capitulos = await loadBookChapters(idLivro);
+        renderChapterList({ container: listaCapitulosContainer, chapters: capitulos, bookId: idLivro, background: "#2a2440", hoverBackground: "#332C4D" });
     } catch (err) {
         console.error("Erro ao carregar capítulos:", err);
         if (listaCapitulosContainer) {
@@ -243,36 +198,7 @@ async function atualizarBotaoFavorito(idLivro) {
     const btn = document.getElementById("modal-btn-favoritar");
     if (!btn || !auth.currentUser) return;
 
-    const uid = auth.currentUser.uid;
-    const registroRef = doc(db, "progresso_leitura", `${uid}_${idLivro}`);
-
-    let favoritoAtual = false;
-    try {
-        const snap = await getDoc(registroRef);
-        favoritoAtual = snap.exists() && snap.data().favorito === true;
-    } catch (err) {
-        console.error("Erro ao verificar favorito:", err);
-    }
-
-    renderizarBotaoFavorito(btn, favoritoAtual);
-
-    btn.onclick = async (e) => {
-        e.stopPropagation();
-        favoritoAtual = !favoritoAtual;
-        renderizarBotaoFavorito(btn, favoritoAtual);
-
-        try {
-            await setDoc(registroRef, {
-                uid,
-                emailUsuario: auth.currentUser.email || "",
-                nomeUsuario: auth.currentUser.displayName || "",
-                livroId: idLivro,
-                favorito: favoritoAtual
-            }, { merge: true });
-        } catch (err) {
-            console.error("Erro ao favoritar:", err);
-        }
-    };
+    await bindFavoriteButton({ button: btn, user: auth.currentUser, bookId: idLivro, render: renderizarBotaoFavorito });
 }
 
 function renderizarBotaoFavorito(btn, favoritado) {
