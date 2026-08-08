@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check js/*.js",
+    "check": "node scripts/check-js.mjs",
+    "test": "npm run check && npm run test:rules",
     "test:rules": "firebase emulators:exec --only firestore \"node --test tests/firestore.rules.test.mjs\""
   },
   "devDependencies": {

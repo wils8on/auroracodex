@@ -31,6 +31,15 @@ python -m http.server 8000
 
 Depois acesse `http://localhost:8000`. O domínio local precisa estar autorizado no Firebase Authentication. O navegador também precisa de acesso às CDNs do Firebase, Google Fonts e Cloudinary.
 
+## Validação
+
+```bash
+npm ci
+npm test
+```
+
+O comando valida a sintaxe dos módulos JavaScript e executa os testes das regras do Firestore no emulador. Pull requests e atualizações da `main` executam as mesmas verificações automaticamente pelo GitHub Actions.
+
 ## Estrutura
 
 ```text
