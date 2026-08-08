@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Codex - Teste de Componentes</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 40px 20px; background: #120f1d; color: #fff; font-family: Inter, Arial, sans-serif; }
+        main { max-width: 900px; margin: auto; }
+        h1 { color: #f97316; font-family: Georgia, serif; letter-spacing: .08em; }
+        section { background: #1e1a30; border: 1px solid #332c4d; border-radius: 10px; padding: 24px; margin-top: 24px; }
+        #chapter-list { display: grid; gap: 10px; }
+        .gallery { display: flex; gap: 12px; flex-wrap: wrap; }
+        .gallery button { background: #2a2440; color: #fff; border: 1px solid #4a406b; border-radius: 6px; padding: 14px 18px; cursor: pointer; }
+        .note { color: #aaa2bb; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>AURORA CODEX</h1>
+        <p class="note">Harness local — não acessa Firebase nem dados reais.</p>
+        <section>
+            <h2>Capítulos publicados</h2>
+            <div id="chapter-list"></div>
+        </section>
+        <section>
+            <h2>Galeria</h2>
+            <div class="gallery">
+                <button id="open-image" type="button">Abrir imagem</button>
+                <button id="open-video" type="button">Abrir vídeo</button>
+            </div>
+        </section>
+    </main>
+    <script type="module">
+        import { renderChapterList } from "../js/chapter-list.js";
+        import { openMediaViewer } from "../js/media-viewer.js";
+
+        renderChapterList({
+            container: document.getElementById("chapter-list"),
+            bookId: "livro de teste",
+            chapters: [
+                { id: "capitulo-1", numero: 1, titulo: "O despertar do Códice", status: "publicado" },
+                { id: "capitulo-2", numero: 2, titulo: "Entre universos", status: "publicado" },
+                { id: "rascunho", numero: 3, titulo: "Não deve aparecer", status: "rascunho" }
+            ],
+            background: "#2a2440",
+            hoverBackground: "#332c4d"
+        });
+
+        document.getElementById("open-image").addEventListener("click", () => {
+            openMediaViewer("https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200", "imagem");
+        });
+        document.getElementById("open-video").addEventListener("click", () => {
+            openMediaViewer("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "video");
+        });
+    </script>
+</body>
+</html>

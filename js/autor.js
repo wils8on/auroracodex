@@ -1,20 +1,13 @@
 // js/autor.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, getDoc, setDoc, onSnapshot, deleteDoc, updateDoc, orderBy, query, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { collection, addDoc, doc, getDoc, setDoc, onSnapshot, deleteDoc, updateDoc, orderBy, query, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { auth, db } from "./firebase.js";
+import { loadUserProfile, hasProfile } from "./user-service.js";
+import { sanitizeRichHtml } from "./security.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCPFNgtGch_nWL6gDNmXzGuwWtd4X4QDgs",
-  authDomain: "aurora-codex.firebaseapp.com",
-  projectId: "aurora-codex",
-  storageBucket: "aurora-codex.firebasestorage.app",
-  messagingSenderId: "193340365366",
-  appId: "1:193340365366:web:6b6920e8c8b4d434749697"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const LEGACY_OWNER_EMAIL = "wilsononole@gmail.com";
+let usuarioAtual = null;
+let perfilAtual = null;
 
 // =====================================================
 // CONFIGURAÇÃO DO CLOUDINARY (upload de imagens gratuito)
@@ -34,6 +27,9 @@ let universosCache = [];
 // Faz upload de um arquivo para o Cloudinary e retorna a URL pública.
 // Atualiza um elemento de texto (id do elemento) com o status do envio.
 function uploadImagem(arquivo, pasta, idElementoProgresso) {
+    if (!arquivo?.type?.startsWith("image/") || arquivo.size > 10 * 1024 * 1024) {
+        return Promise.reject(new Error("Envie uma imagem válida de até 10 MB."));
+    }
     const elementoProgresso = document.getElementById(idElementoProgresso);
     if (elementoProgresso) elementoProgresso.innerText = "Enviando imagem...";
 
@@ -73,6 +69,11 @@ function comTimeout(promessa, ms, mensagemErro) {
 // Upload genérico pro Cloudinary. Serve tanto pra imagens quanto pra áudio —
 // o Cloudinary não tem um "resource_type" separado pra áudio, ele usa "video" pra isso.
 function uploadArquivo(arquivo, pasta, idElementoProgresso, resourceType = "image") {
+    const limite = resourceType === "video" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    const tipoValido = resourceType === "video" ? arquivo?.type?.startsWith("audio/") : arquivo?.type?.startsWith("image/");
+    if (!tipoValido || arquivo.size > limite) {
+        return Promise.reject(new Error(resourceType === "video" ? "Envie um áudio válido de até 50 MB." : "Envie uma imagem válida de até 10 MB."));
+    }
     const elementoProgresso = document.getElementById(idElementoProgresso);
     if (elementoProgresso) elementoProgresso.innerText = "Enviando arquivo...";
 
@@ -162,13 +163,21 @@ onAuthStateChanged(auth, async (user) => {
         window.location.href = "../index.html";
     } else {
         // Trava de segurança: só ADMIN ou AUTOR podem usar este painel
-        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        const perfil = userDoc.exists() ? userDoc.data().perfil : null;
+        const dadosPerfil = await loadUserProfile(user.uid);
+        const perfil = dadosPerfil?.perfil || null;
 
-        if (perfil !== "autor" && perfil !== "admin") {
+        if (!hasProfile(dadosPerfil, ["autor", "admin"])) {
             alert("Acesso restrito a autores e administradores.");
             window.location.href = "../dashboard.html";
             return;
+        }
+
+        usuarioAtual = user;
+        perfilAtual = perfil;
+
+        if (perfil !== "admin") {
+            document.querySelector('[onclick="alternarAba(\'aba-taxonomias\')"]')?.remove();
+            document.querySelector('[onclick="alternarAba(\'aba-oraculo\')"]')?.remove();
         }
 
         inicializarDadosAutor();
@@ -196,9 +205,13 @@ function inicializarDadosAutor() {
         if (selectLivroPersonagem) selectLivroPersonagem.innerHTML = '<option value="">Selecione a Obra...</option>';
         if (selectLivroGaleria) selectLivroGaleria.innerHTML = '<option value="">Selecione a Obra...</option>';
 
+        const obrasLegadas = [];
         snapshot.forEach((docSnap) => {
             const id = docSnap.id;
             const livro = docSnap.data();
+            if (!livro.autorId && usuarioAtual?.email === LEGACY_OWNER_EMAIL) obrasLegadas.push(docSnap.ref);
+            const podeGerenciar = perfilAtual === "admin" || livro.autorId === usuarioAtual?.uid || (!livro.autorId && usuarioAtual?.email === LEGACY_OWNER_EMAIL);
+            if (!podeGerenciar) return;
 
             if (tbody) {
                 const tr = document.createElement("tr");
@@ -236,7 +249,15 @@ function inicializarDadosAutor() {
             }
         });
 
-        livrosCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (obrasLegadas.length && usuarioAtual?.uid) {
+            const batch = writeBatch(db);
+            obrasLegadas.forEach(ref => batch.update(ref, { autorId: usuarioAtual.uid, atualizadoEm: new Date().toISOString() }));
+            batch.commit().catch(err => console.error("Erro ao atribuir obras legadas:", err));
+        }
+
+        livrosCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).filter(livro =>
+            perfilAtual === "admin" || livro.autorId === usuarioAtual?.uid || (!livro.autorId && usuarioAtual?.email === LEGACY_OWNER_EMAIL)
+        );
         atualizarUIUniversos();
 
          VincularEventosObras();
@@ -341,6 +362,8 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
             idLivroEdicao = null;
             btnSubmit.innerText = "Salvar Livro";
         } else {
+            dados.autorId = usuarioAtual.uid;
+            dados.criadoPor = usuarioAtual.uid;
             dados.data_criacao = new Date().toISOString();
             await addDoc(collection(db, "livros"), dados);
             alert("Nova obra catalogada com sucesso!");
@@ -616,7 +639,7 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
             capa: urlCapaFinal,
             corCena: document.getElementById("cor-cena-capitulo").value || "#f97316",
             status: document.getElementById("status-capitulo").value || "publicado",
-            conteudo: conteudoHtml
+            conteudo: sanitizeRichHtml(conteudoHtml)
         };
 
         if (idCapituloEdicao) {
@@ -806,7 +829,7 @@ function inicializarCatalogoConfig() {
         if (!snap.exists()) {
             // Primeira vez rodando: cria o documento com os valores que já estavam fixos no código.
             // Isso preserva a compatibilidade com livros já cadastrados anteriormente.
-            await setDoc(catalogoRef, CATALOGO_PADRAO);
+            if (perfilAtual === "admin") await setDoc(catalogoRef, CATALOGO_PADRAO);
             return; // este mesmo onSnapshot dispara de novo assim que o documento for criado
         }
 
@@ -929,7 +952,15 @@ function inicializarDadosUniversos() {
     const universosRef = collection(db, "universos");
 
     onSnapshot(universosRef, (snapshot) => {
-        universosCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        const legados = snapshot.docs.filter(d => !d.data().criadoPor && usuarioAtual?.email === LEGACY_OWNER_EMAIL);
+        universosCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).filter(universo =>
+            perfilAtual === "admin" || universo.criadoPor === usuarioAtual?.uid || (!universo.criadoPor && usuarioAtual?.email === LEGACY_OWNER_EMAIL)
+        );
+        if (legados.length && usuarioAtual?.uid) {
+            const batch = writeBatch(db);
+            legados.forEach(item => batch.update(item.ref, { criadoPor: usuarioAtual.uid, atualizadoEm: new Date().toISOString() }));
+            batch.commit().catch(err => console.error("Erro ao atribuir universos legados:", err));
+        }
         atualizarUIUniversos();
     });
 }
@@ -1084,6 +1115,7 @@ document.getElementById("form-universo")?.addEventListener("submit", async (e) =
         if (idUniverso) {
             await updateDoc(doc(db, "universos", idUniverso), dadosUniverso);
         } else {
+            dadosUniverso.criadoPor = usuarioAtual.uid;
             dadosUniverso.data_criacao = new Date().toISOString();
             const novoDoc = await addDoc(collection(db, "universos"), dadosUniverso);
             idUniverso = novoDoc.id;
