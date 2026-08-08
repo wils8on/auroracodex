@@ -5,6 +5,7 @@ import { auth, db } from "./firebase.js";
 import { loadUserProfile, hasProfile } from "./user-service.js";
 import { sanitizeRichHtml } from "./security.js";
 import { setButtonBusy, showToast } from "./feedback.js";
+import { confirmAction } from "./dialog-accessibility.js";
 
 const LEGACY_OWNER_EMAIL = "wilsononole@gmail.com";
 let usuarioAtual = null;
@@ -315,7 +316,7 @@ function VincularEventosObras() {
     document.querySelectorAll(".btn-excluir").forEach(btn => {
         btn.addEventListener("click", async (e) => {
             const id = e.target.getAttribute("data-id");
-            if (confirm("Deseja mesmo remover esta obra e todos os seus vínculos?")) {
+            if (await confirmAction({ title: "Remover obra?", message: "A obra e todos os seus vínculos serão removidos. Esta ação não pode ser desfeita.", confirmLabel: "Remover obra" })) {
                 await deleteDoc(doc(db, "livros", id));
             }
         });
@@ -586,7 +587,7 @@ function vincularEventosCapitulos(livroId) {
     document.querySelectorAll(".btn-excluir-capitulo").forEach(btn => {
         btn.addEventListener("click", async (e) => {
             const id = e.target.getAttribute("data-id");
-            if (confirm("Deseja mesmo excluir este capítulo? Essa ação não pode ser desfeita.")) {
+            if (await confirmAction({ title: "Excluir capítulo?", message: "O capítulo será excluído permanentemente. Esta ação não pode ser desfeita.", confirmLabel: "Excluir capítulo" })) {
                 await deleteDoc(doc(db, "livros", livroId, "capitulos", id));
                 // Se o capítulo excluído era o que estava sendo editado, limpa o formulário
                 if (idCapituloEdicao === id) resetarFormularioCapitulo();
@@ -758,7 +759,7 @@ function vincularEventosPersonagens(livroId) {
     document.querySelectorAll(".btn-excluir-personagem").forEach(btn => {
         btn.addEventListener("click", async (e) => {
             const id = e.target.getAttribute("data-id");
-            if (confirm("Deseja mesmo remover este personagem do códice?")) {
+            if (await confirmAction({ title: "Remover personagem?", message: "O personagem será removido desta obra.", confirmLabel: "Remover personagem" })) {
                 await deleteDoc(doc(db, "livros", livroId, "personagens", id));
             }
         });
@@ -918,12 +919,12 @@ function renderizarListaConfig(idContainer, lista, aoRemover) {
 }
 
 async function removerGenero(nome) {
-    if (!confirm(`Remover o gênero "${nome}" da lista de opções?`)) return;
+    if (!await confirmAction({ title: "Remover gênero?", message: `O gênero “${nome}” deixará de aparecer na lista de opções.`, confirmLabel: "Remover gênero" })) return;
     await updateDoc(doc(db, "configuracoes", "catalogo"), { generos: arrayRemove(nome) });
 }
 
 async function removerTag(nome) {
-    if (!confirm(`Remover a tag "${nome}" da lista de opções?`)) return;
+    if (!await confirmAction({ title: "Remover tag?", message: `A tag “${nome}” deixará de aparecer na lista de opções.`, confirmLabel: "Remover tag" })) return;
     await updateDoc(doc(db, "configuracoes", "catalogo"), { subgeneros: arrayRemove(nome) });
 }
 
@@ -1072,7 +1073,7 @@ function resetarFormularioUniverso() {
 }
 
 async function excluirUniverso(id) {
-    if (!confirm("Excluir este universo? Os livros vinculados a ele não serão apagados, só perdem essa conexão.")) return;
+    if (!await confirmAction({ title: "Excluir universo?", message: "Os livros vinculados não serão apagados, mas perderão a conexão com este universo.", confirmLabel: "Excluir universo" })) return;
 
     const batch = writeBatch(db);
 
@@ -1295,7 +1296,7 @@ function vincularEventosGaleria(livroId) {
     document.querySelectorAll(".btn-excluir-galeria").forEach(btn => {
         btn.addEventListener("click", async (e) => {
             const id = e.target.getAttribute("data-id");
-            if (confirm("Excluir este item da galeria?")) {
+            if (await confirmAction({ title: "Excluir item da galeria?", message: "O item será removido permanentemente desta obra.", confirmLabel: "Excluir item" })) {
                 await deleteDoc(doc(db, "livros", livroId, "galeria", id));
                 if (idGaleriaEdicao === id) resetarFormularioGaleria();
             }
@@ -1471,7 +1472,7 @@ function renderizarListaOraculo(posts) {
     document.querySelectorAll(".btn-excluir-oraculo").forEach(btn => {
         btn.addEventListener("click", async (e) => {
             const id = e.target.getAttribute("data-id");
-            if (confirm("Excluir esta publicação do Oráculo?")) {
+            if (await confirmAction({ title: "Excluir publicação?", message: "A publicação será removida permanentemente do Oráculo.", confirmLabel: "Excluir publicação" })) {
                 await deleteDoc(doc(db, "oraculo", id));
                 if (idOraculoEdicao === id) resetarFormularioOraculo();
             }
