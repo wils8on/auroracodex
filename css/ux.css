@@ -18,7 +18,38 @@ button:disabled, [aria-disabled="true"] { cursor: wait !important; opacity: 0.65
     margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important;
     white-space: nowrap !important; border: 0 !important;
 }
+.toast-region {
+    position: fixed; top: 82px; right: 18px; z-index: 25000; width: min(380px, calc(100vw - 36px));
+    display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+}
+.toast {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+    padding: 14px 16px; border: 1px solid rgba(255,255,255,0.12); border-left-width: 4px;
+    border-radius: 8px; color: #FFF; background: rgba(28, 24, 48, 0.98);
+    box-shadow: 0 14px 35px rgba(0,0,0,0.45); pointer-events: auto;
+    animation: toast-in 0.22s ease-out;
+}
+.toast-success { border-left-color: #4ADE80; }
+.toast-error { border-left-color: #FB7185; }
+.toast-info { border-left-color: #FDBA74; }
+.toast button { min-height: auto !important; padding: 0; border: 0; color: #CCC; background: transparent; font-size: 1.35rem; cursor: pointer; }
+.toast-leaving { opacity: 0; transform: translateX(16px); transition: 0.18s ease; }
+.content-state {
+    width: 100%; min-height: 120px; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 9px; padding: 28px 20px; text-align: center; color: #AFAAB9;
+    border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;
+}
+.content-state strong { color: #EDEAF2; }
+.content-state p { max-width: 520px; line-height: 1.5; }
+.content-state-error { border-color: rgba(251,113,133,0.35); }
+.state-spinner {
+    width: 26px; height: 26px; border: 3px solid rgba(255,255,255,0.15); border-top-color: #F97316;
+    border-radius: 50%; animation: ux-spin 0.8s linear infinite;
+}
+@keyframes ux-spin { to { transform: rotate(360deg); } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } }
 @media (max-width: 768px) {
+    .toast-region { top: auto; right: 12px; bottom: 12px; width: calc(100vw - 24px); }
     .navbar { align-items: flex-start !important; flex-wrap: nowrap !important; gap: 14px !important; }
     .nav-left { min-width: 0; flex: 1 1 auto; flex-direction: column; align-items: flex-start !important; gap: 9px !important; }
     .nav-links {

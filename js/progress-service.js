@@ -1,5 +1,6 @@
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { db } from "./firebase.js";
+import { setButtonBusy, showToast } from "./feedback.js";
 
 export function progressId(uid, bookId) {
     return `${uid}_${bookId}`;
@@ -36,12 +37,17 @@ export async function bindFavoriteButton({ button, user, bookId, render }) {
         const previous = favorite;
         favorite = !favorite;
         render(button, favorite);
+        setButtonBusy(button, true, favorite ? "Salvando..." : "Removendo...");
         try {
             await saveFavorite(user, bookId, favorite);
+            showToast(favorite ? "Obra adicionada aos favoritos." : "Obra removida dos favoritos.", "success", 2600);
         } catch (error) {
             favorite = previous;
-            render(button, favorite);
             console.error("Erro ao favoritar:", error);
+            showToast("Não foi possível atualizar os favoritos. Tente novamente.", "error");
+        } finally {
+            setButtonBusy(button, false);
+            render(button, favorite);
         }
     };
 }

@@ -12,6 +12,7 @@ import {
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
 import { loadUserProfile } from "./user-service.js";
+import { showToast } from "./feedback.js";
 
 // Inicializa o Firebase e os Serviços
 const provider = new GoogleAuthProvider();
@@ -33,7 +34,7 @@ if (btnLogin) {
         } catch (error) {
             console.error("Erro ao iniciar login:", error);
             restaurarBotaoLogin();
-            alert("Falha ao iniciar a autenticação com o Google.");
+            showToast("Não foi possível abrir o login do Google. Verifique se pop-ups estão permitidos.", "error", 6500);
         }
     });
 }
@@ -51,7 +52,7 @@ async function processarUsuarioAutenticado(user) {
     } catch (error) {
         console.error("Erro ao verificar perfil:", error);
         restaurarBotaoLogin();
-        alert(`Login concluído, mas não foi possível carregar o perfil (${error?.code || "erro desconhecido"}).`);
+        showToast(`Login concluído, mas não foi possível carregar o perfil (${error?.code || "erro desconhecido"}).`, "error", 7000);
     } finally {
         perfilEmVerificacao = false;
     }

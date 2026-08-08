@@ -7,6 +7,7 @@ import { bindFavoriteButton } from "./progress-service.js";
 import { extractYouTubeId, openMediaViewer } from "./media-viewer.js";
 import { loadBookChapters } from "./catalog-service.js";
 import { renderChapterList } from "./chapter-list.js";
+import { renderContentState, showToast } from "./feedback.js";
 
 let todosLivros = [];       // Lista completa vinda do Firestore
 let tagsSelecionadas = new Set(); // Tags de subgênero ativas no momento
@@ -51,6 +52,14 @@ function inicializarCatalogo() {
 
         renderizarTagsDisponiveis();
         aplicarFiltros();
+    }, (error) => {
+        console.error("Erro ao carregar biblioteca:", error);
+        renderContentState(document.getElementById("biblioteca-grid"), {
+            type: "error",
+            title: "Biblioteca indisponível",
+            message: "Não foi possível buscar as obras. Verifique sua conexão e tente novamente."
+        });
+        showToast("Falha ao atualizar a Biblioteca.", "error");
     });
 
     // Carrega as opções de gênero a partir da mesma coleção de configurações usada no painel do autor
@@ -70,6 +79,9 @@ function inicializarCatalogo() {
         });
 
         if (generos.includes(valorAtual)) select.value = valorAtual;
+    }, (error) => {
+        console.error("Erro ao carregar filtros:", error);
+        showToast("Os filtros de gênero não puderam ser atualizados.", "error");
     });
 
     // Vincula os campos de filtro (uma única vez)
