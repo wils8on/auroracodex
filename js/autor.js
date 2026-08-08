@@ -199,9 +199,17 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
+let paginaAtualObras = 1;
+const OBRAS_POR_PAGINA = 10;
+
 function inicializarDadosAutor() {
     const livrosRef = collection(db, "livros");
-    document.getElementById("busca-obras")?.addEventListener("input", atualizarFiltroObras);
+    document.getElementById("busca-obras")?.addEventListener("input", () => {
+        paginaAtualObras = 1;
+        atualizarFiltroObras();
+    });
+    document.getElementById("pagina-obras-anterior")?.addEventListener("click", () => mudarPaginaObras(-1));
+    document.getElementById("pagina-obras-proxima")?.addEventListener("click", () => mudarPaginaObras(1));
     
     onSnapshot(livrosRef, (snapshot) => {
         const tbody = document.getElementById("tabela-gerenciar-livros");
@@ -418,17 +426,32 @@ function atualizarFiltroObras() {
     if (!tbody) return;
     const termo = normalizarBusca(document.getElementById("busca-obras")?.value.trim());
     const rows = [...tbody.querySelectorAll("tr[data-search]")];
-    let visiveis = 0;
-    rows.forEach(row => {
-        const corresponde = !termo || row.dataset.search.includes(termo);
-        row.hidden = !corresponde;
-        if (corresponde) visiveis += 1;
-    });
-    if (contador) contador.textContent = `${visiveis} de ${rows.length} obra${rows.length === 1 ? "" : "s"}`;
+    const filtradas = rows.filter(row => !termo || row.dataset.search.includes(termo));
+    const totalPaginas = Math.max(1, Math.ceil(filtradas.length / OBRAS_POR_PAGINA));
+    paginaAtualObras = Math.min(Math.max(1, paginaAtualObras), totalPaginas);
+    const inicio = (paginaAtualObras - 1) * OBRAS_POR_PAGINA;
+    const fim = Math.min(inicio + OBRAS_POR_PAGINA, filtradas.length);
+    const pagina = new Set(filtradas.slice(inicio, fim));
+    rows.forEach(row => { row.hidden = !pagina.has(row); });
+
+    if (contador) contador.textContent = filtradas.length
+        ? `Exibindo ${inicio + 1}–${fim} de ${filtradas.length} obra${filtradas.length === 1 ? "" : "s"}`
+        : `0 de ${rows.length} obras`;
     if (estado) {
-        estado.hidden = visiveis > 0;
+        estado.hidden = filtradas.length > 0;
         estado.textContent = rows.length === 0 ? "Nenhuma obra cadastrada ainda." : "Nenhuma obra corresponde a esta busca.";
     }
+    const anterior = document.getElementById("pagina-obras-anterior");
+    const proxima = document.getElementById("pagina-obras-proxima");
+    const statusPagina = document.getElementById("pagina-obras-status");
+    if (anterior) anterior.disabled = paginaAtualObras <= 1 || filtradas.length === 0;
+    if (proxima) proxima.disabled = paginaAtualObras >= totalPaginas || filtradas.length === 0;
+    if (statusPagina) statusPagina.textContent = filtradas.length ? `Página ${paginaAtualObras} de ${totalPaginas}` : "Sem páginas";
+}
+
+function mudarPaginaObras(delta) {
+    paginaAtualObras += delta;
+    atualizarFiltroObras();
 }
 
 function atualizarStatusRascunho(message) {
