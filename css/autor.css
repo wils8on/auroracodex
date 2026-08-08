@@ -408,3 +408,15 @@
     border-radius: 4px;
     margin-left: 8px;
 }
+.management-toolbar {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
+}
+.management-toolbar input {
+    flex: 1; min-width: 0; padding: 12px 14px; border: 1px solid #332C4D; border-radius: 6px;
+    color: #FFF; background: #1E1A30; font: inherit;
+}
+.management-toolbar span { color: #8C8C8C; font-size: 0.85rem; white-space: nowrap; }
+@media (max-width: 600px) {
+    .management-toolbar { align-items: stretch; flex-direction: column; gap: 8px; }
+    .management-toolbar span { white-space: normal; }
+}

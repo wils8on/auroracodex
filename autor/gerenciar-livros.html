@@ -164,6 +164,12 @@
         <!-- ABA 2: LISTAGEM DE CONTROLE -->
         <div id="aba-gerenciar" class="tab-content">
             <h2 class="autor-title">Suas Obras Cadastradas</h2>
+            <div class="management-toolbar">
+                <label for="busca-obras" class="sr-only">Buscar obras por título, gênero ou status</label>
+                <input type="search" id="busca-obras" placeholder="Buscar por título, gênero ou status..." autocomplete="off">
+                <span id="contador-obras" role="status" aria-live="polite">Carregando obras...</span>
+            </div>
+            <p id="estado-filtro-obras" class="content-state content-state-empty" hidden>Nenhuma obra corresponde a esta busca.</p>
             <div class="form-wrapper" style="overflow-x: auto;">
                 <table>
                     <thead>
