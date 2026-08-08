@@ -1,4 +1,5 @@
 import { safeUrl } from "./security.js";
+import { closeAccessibleDialog, openAccessibleDialog } from "./dialog-accessibility.js";
 
 export function extractYouTubeId(value) {
     if (!value) return "";
@@ -18,8 +19,14 @@ export function extractYouTubeId(value) {
 export function openMediaViewer(value, type) {
     const overlay = document.createElement("div");
     overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px;";
-    overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-modal", "true");
+    overlay.dataset.dialogDisplay = "flex";
+
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.setAttribute("aria-label", "Fechar visualização");
+    closeButton.textContent = "×";
+    closeButton.style.cssText = "position:absolute; top:20px; right:20px; width:44px; height:44px; border:0; border-radius:50%; background:rgba(0,0,0,.65); color:#fff; font-size:2rem; cursor:pointer;";
+    overlay.appendChild(closeButton);
 
     if (type === "video") {
         const videoId = extractYouTubeId(value);
@@ -43,17 +50,11 @@ export function openMediaViewer(value, type) {
         overlay.appendChild(image);
     }
 
-    let onKeyDown;
     const close = () => {
-        overlay.remove();
-        document.removeEventListener("keydown", onKeyDown);
+        closeAccessibleDialog(overlay);
     };
+    closeButton.addEventListener("click", close);
     overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
-    onKeyDown = event => {
-        if (event.key === "Escape") {
-            close();
-        }
-    };
-    document.addEventListener("keydown", onKeyDown);
     document.body.appendChild(overlay);
+    openAccessibleDialog(overlay, { initialFocus: closeButton, onClose: () => overlay.remove() });
 }

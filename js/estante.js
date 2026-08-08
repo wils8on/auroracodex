@@ -7,6 +7,10 @@ import { loadBookChapters, subscribeBooks } from "./catalog-service.js";
 import { bindFavoriteButton } from "./progress-service.js";
 import { renderChapterList } from "./chapter-list.js";
 import { renderContentState, showToast } from "./feedback.js";
+import { bindDialogCloseButton, closeAccessibleDialog, makeActivatable, openAccessibleDialog } from "./dialog-accessibility.js";
+
+window.fecharModal = () => closeAccessibleDialog(document.getElementById("netflix-modal"));
+bindDialogCloseButton(document.getElementById("netflix-modal"));
 
 let livrosCache = {};       // id -> dados do livro (para exibir capa/sinopse atualizadas)
 let progressoCache = [];    // registros de progresso_leitura do usuário logado
@@ -126,13 +130,13 @@ function renderizarCardContinuar(registro) {
         </div>
         <span class="continuar-card-cta">Continuar &rarr;</span>
     `;
-    card.onclick = () => {
+    makeActivatable(card, () => {
         if (registro.ultimoCapituloId) {
             window.location.href = `ler.html?livroId=${registro.livroId}&capituloId=${registro.ultimoCapituloId}`;
         } else if (livro) {
             abrirModalNetflix(registro.livroId, livro);
         }
-    };
+    }, `Continuar leitura de ${registro.livroTitulo}`);
     container.appendChild(card);
 }
 
@@ -155,11 +159,11 @@ function renderizarGridSecao(idSecao, idGrid, registros, mostrarProgresso) {
 
         const card = document.createElement("div");
         card.className = "biblioteca-card";
-        card.onclick = () => {
+        makeActivatable(card, () => {
             if (livro) {
                 abrirModalNetflix(registro.livroId, livro);
             }
-        };
+        }, `Abrir detalhes de ${titulo}`);
 
         card.innerHTML = `
             <div class="biblioteca-card-capa">
@@ -197,8 +201,7 @@ async function abrirModalNetflix(idLivro, livro) {
 
     const modal = document.getElementById('netflix-modal');
     if (modal) {
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+        openAccessibleDialog(modal);
     }
 
     try {
