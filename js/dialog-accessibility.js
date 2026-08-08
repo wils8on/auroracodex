@@ -28,6 +28,57 @@ export function bindDialogCloseButton(dialog) {
     button.addEventListener("click", () => closeAccessibleDialog(dialog));
 }
 
+export function confirmAction({
+    title = "Confirmar ação",
+    message,
+    confirmLabel = "Confirmar",
+    cancelLabel = "Cancelar"
+}) {
+    return new Promise(resolve => {
+        const overlay = document.createElement("div");
+        overlay.className = "confirm-overlay";
+        overlay.dataset.dialogDisplay = "flex";
+
+        const panel = document.createElement("div");
+        panel.className = "confirm-dialog";
+        const heading = document.createElement("h2");
+        heading.textContent = title;
+        const description = document.createElement("p");
+        description.textContent = message || "Esta ação precisa da sua confirmação.";
+        const actions = document.createElement("div");
+        actions.className = "confirm-dialog-actions";
+        const cancelButton = document.createElement("button");
+        cancelButton.type = "button";
+        cancelButton.className = "confirm-cancel";
+        cancelButton.textContent = cancelLabel;
+        const confirmButton = document.createElement("button");
+        confirmButton.type = "button";
+        confirmButton.className = "confirm-danger";
+        confirmButton.textContent = confirmLabel;
+
+        actions.append(cancelButton, confirmButton);
+        panel.append(heading, description, actions);
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+
+        let settled = false;
+        const finish = value => {
+            if (settled) return;
+            settled = true;
+            closeAccessibleDialog(overlay);
+            overlay.remove();
+            resolve(value);
+        };
+
+        cancelButton.addEventListener("click", () => finish(false));
+        confirmButton.addEventListener("click", () => finish(true));
+        overlay.addEventListener("click", event => {
+            if (event.target === overlay) finish(false);
+        });
+        openAccessibleDialog(overlay, { initialFocus: cancelButton, onClose: () => finish(false) });
+    });
+}
+
 export function openAccessibleDialog(dialog, { initialFocus, onClose } = {}) {
     if (!dialog) return;
     closeAccessibleDialog(dialog, { restoreFocus: false });

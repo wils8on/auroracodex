@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aurora Codex - Teste de Componentes</title>
+    <link rel="stylesheet" href="../css/ux.css">
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; padding: 40px 20px; background: #120f1d; color: #fff; font-family: Inter, Arial, sans-serif; }
@@ -31,10 +32,16 @@
                 <button id="open-video" type="button">Abrir vídeo</button>
             </div>
         </section>
+        <section>
+            <h2>Confirmação acessível</h2>
+            <button id="open-confirm" type="button">Testar exclusão</button>
+            <p id="confirm-result" class="note" role="status">Nenhuma escolha realizada.</p>
+        </section>
     </main>
     <script type="module">
         import { renderChapterList } from "../js/chapter-list.js";
         import { openMediaViewer } from "../js/media-viewer.js";
+        import { confirmAction } from "../js/dialog-accessibility.js";
 
         renderChapterList({
             container: document.getElementById("chapter-list"),
@@ -53,6 +60,14 @@
         });
         document.getElementById("open-video").addEventListener("click", () => {
             openMediaViewer("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "video");
+        });
+        document.getElementById("open-confirm").addEventListener("click", async () => {
+            const confirmed = await confirmAction({
+                title: "Excluir item de teste?",
+                message: "Este diálogo não altera dados reais.",
+                confirmLabel: "Excluir teste"
+            });
+            document.getElementById("confirm-result").textContent = confirmed ? "Exclusão confirmada." : "Exclusão cancelada.";
         });
     </script>
 </body>

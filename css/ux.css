@@ -46,6 +46,20 @@ button:disabled, [aria-disabled="true"] { cursor: wait !important; opacity: 0.65
     width: 26px; height: 26px; border: 3px solid rgba(255,255,255,0.15); border-top-color: #F97316;
     border-radius: 50%; animation: ux-spin 0.8s linear infinite;
 }
+.confirm-overlay {
+    position: fixed; inset: 0; z-index: 30000; align-items: center; justify-content: center;
+    padding: 20px; background: rgba(5, 4, 10, 0.82); backdrop-filter: blur(5px);
+}
+.confirm-dialog {
+    width: min(460px, 100%); padding: 26px; border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 12px; color: #FFF; background: #1C1830; box-shadow: 0 24px 70px rgba(0,0,0,0.58);
+}
+.confirm-dialog h2 { margin: 0 0 12px; font-size: 1.35rem; }
+.confirm-dialog p { margin: 0; color: #C7C2D0; line-height: 1.6; }
+.confirm-dialog-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.confirm-dialog-actions button { min-height: 44px; padding: 10px 18px; border-radius: 7px; cursor: pointer; font-weight: 700; }
+.confirm-cancel { border: 1px solid rgba(255,255,255,0.2); color: #FFF; background: transparent; }
+.confirm-danger { border: 1px solid #FB7185; color: #FFF; background: #BE123C; }
 @keyframes ux-spin { to { transform: rotate(360deg); } }
 @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } }
 @media (max-width: 768px) {
@@ -61,6 +75,8 @@ button:disabled, [aria-disabled="true"] { cursor: wait !important; opacity: 0.65
     .nav-right { flex: 0 0 auto; gap: 10px !important; }
     .nav-right #link-adm, .nav-right #btn-logout, .nav-right .badge-profile { font-size: 0.72rem !important; }
     button, select, input[type="button"], input[type="submit"] { min-height: 44px; }
+    .confirm-dialog-actions { flex-direction: column-reverse; }
+    .confirm-dialog-actions button { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
