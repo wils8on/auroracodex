@@ -4,6 +4,7 @@ import { collection, addDoc, doc, getDoc, setDoc, onSnapshot, deleteDoc, updateD
 import { auth, db } from "./firebase.js";
 import { loadUserProfile, hasProfile } from "./user-service.js";
 import { sanitizeRichHtml } from "./security.js";
+import { showToast } from "./feedback.js";
 
 const LEGACY_OWNER_EMAIL = "wilsononole@gmail.com";
 let usuarioAtual = null;
@@ -167,7 +168,7 @@ onAuthStateChanged(auth, async (user) => {
         const perfil = dadosPerfil?.perfil || null;
 
         if (!hasProfile(dadosPerfil, ["autor", "admin"])) {
-            alert("Acesso restrito a autores e administradores.");
+            showToast("Acesso restrito a autores e administradores.", "error");
             window.location.href = "../dashboard.html";
             return;
         }
@@ -324,7 +325,7 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
 
     // Se não há arquivo novo e também não há uma capa já salva (nem em edição), bloqueia
     if (!arquivoCapa && !document.getElementById("url-capa").value) {
-        alert("Selecione uma imagem de capa.");
+        showToast("Selecione uma imagem de capa.", "info");
         return;
     }
 
@@ -358,7 +359,7 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
 
         if (idLivroEdicao) {
             await updateDoc(doc(db, "livros", idLivroEdicao), dados);
-            alert("Configurações do livro atualizadas com sucesso!");
+            showToast("Configurações do livro atualizadas com sucesso!", "success");
             idLivroEdicao = null;
             btnSubmit.innerText = "Salvar Livro";
         } else {
@@ -366,7 +367,7 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
             dados.criadoPor = usuarioAtual.uid;
             dados.data_criacao = new Date().toISOString();
             await addDoc(collection(db, "livros"), dados);
-            alert("Nova obra catalogada com sucesso!");
+            showToast("Nova obra catalogada com sucesso!", "success");
         }
 
         e.target.reset();
@@ -375,7 +376,7 @@ document.getElementById("form-cadastrar-livro")?.addEventListener("submit", asyn
         document.getElementById("universo-atual-label").innerText = "Nenhum — vincule na aba Universos";
     } catch (err) {
         console.error(err);
-        alert("Erro ao salvar a obra. Verifique sua conexão e tente novamente.");
+        showToast("Erro ao salvar a obra. Verifique sua conexão e tente novamente.", "error");
     } finally {
         btnSubmit.disabled = false;
         if (btnSubmit.innerText === "Salvando...") btnSubmit.innerText = "Salvar Livro";
@@ -594,7 +595,7 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
     const idLivro = document.getElementById("select-livro-capitulo").value;
 
     if (!idLivro) {
-        alert("Selecione a obra à qual este capítulo pertence.");
+        showToast("Selecione a obra à qual este capítulo pertence.", "info");
         return;
     }
 
@@ -602,7 +603,7 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
     const conteudoHtml = editorConteudo ? editorConteudo.innerHTML.trim() : "";
 
     if (!conteudoHtml) {
-        alert("Escreva o conteúdo do capítulo antes de salvar.");
+        showToast("Escreva o conteúdo do capítulo antes de salvar.", "info");
         return;
     }
 
@@ -644,16 +645,16 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
 
         if (idCapituloEdicao) {
             await updateDoc(doc(db, "livros", idLivro, "capitulos", idCapituloEdicao), capituloDados);
-            alert(`Capítulo ${capituloDados.numero} atualizado com sucesso!`);
+            showToast(`Capítulo ${capituloDados.numero} atualizado com sucesso!`, "success");
         } else {
             capituloDados.data_publicacao = new Date().toISOString();
             await addDoc(collection(db, "livros", idLivro, "capitulos"), capituloDados);
-            alert(`Capítulo ${capituloDados.numero} publicado no Codex!`);
+            showToast(`Capítulo ${capituloDados.numero} publicado no Codex!`, "success");
         }
         resetarFormularioCapitulo();
     } catch (err) {
         console.error(err);
-        alert("Erro ao salvar capítulo. " + (err && err.message ? err.message : ""));
+        showToast("Erro ao salvar capítulo. " + (err && err.message ? err.message : ""), "error", 6500);
     } finally {
         btnSubmit.disabled = false;
         if (btnSubmit.innerText === "Salvando...") btnSubmit.innerText = textoOriginalBotao;
@@ -767,7 +768,7 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
 
     const livroId = document.getElementById("select-livro-personagem").value;
     if (!livroId) {
-        alert("Selecione a obra à qual este personagem pertence.");
+        showToast("Selecione a obra à qual este personagem pertence.", "info");
         return;
     }
 
@@ -794,19 +795,19 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
 
         if (idPersonagemEdicao) {
             await updateDoc(doc(db, "livros", livroId, "personagens", idPersonagemEdicao), dadosPersonagem);
-            alert("Personagem atualizado com sucesso!");
+            showToast("Personagem atualizado com sucesso!", "success");
             idPersonagemEdicao = null;
             btnSubmit.innerText = "Adicionar ao Códice";
         } else {
             await addDoc(collection(db, "livros", livroId, "personagens"), dadosPersonagem);
-            alert("Personagem adicionado ao Códice!");
+            showToast("Personagem adicionado ao Códice!", "success");
         }
         e.target.reset();
         document.getElementById("select-livro-personagem").value = livroId; // mantém a obra selecionada
         document.getElementById("preview-wrapper-personagem").style.display = "none";
     } catch (err) {
         console.error(err);
-        alert("Erro ao salvar personagem.");
+        showToast("Erro ao salvar personagem.", "error");
     } finally {
         btnSubmit.disabled = false;
         if (btnSubmit.innerText === "Salvando...") btnSubmit.innerText = "Adicionar ao Códice";
@@ -1140,11 +1141,11 @@ document.getElementById("form-universo")?.addEventListener("submit", async (e) =
 
         await batch.commit();
 
-        alert(idUniversoEdicao ? "Universo atualizado com sucesso!" : "Universo criado com sucesso!");
+        showToast(idUniversoEdicao ? "Universo atualizado com sucesso!" : "Universo criado com sucesso!", "success");
         resetarFormularioUniverso();
     } catch (err) {
         console.error(err);
-        alert("Erro ao salvar universo.");
+        showToast("Erro ao salvar universo.", "error");
     } finally {
         btnSubmit.disabled = false;
         if (btnSubmit.innerText === "Salvando...") {
@@ -1307,7 +1308,7 @@ document.getElementById("form-galeria")?.addEventListener("submit", async (e) =>
 
     const livroId = document.getElementById("select-livro-galeria").value;
     if (!livroId) {
-        alert("Selecione o livro ao qual este item pertence.");
+        showToast("Selecione o livro ao qual este item pertence.", "info");
         return;
     }
 
@@ -1328,7 +1329,7 @@ document.getElementById("form-galeria")?.addEventListener("submit", async (e) =>
             }
 
             if (!urlFinal) {
-                alert("Selecione uma imagem para adicionar.");
+                showToast("Selecione uma imagem para adicionar.", "info");
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = idGaleriaEdicao ? "Atualizar Item" : "Adicionar";
                 return;
@@ -1336,7 +1337,7 @@ document.getElementById("form-galeria")?.addEventListener("submit", async (e) =>
         } else {
             urlFinal = document.getElementById("url-video-galeria").value.trim();
             if (!urlFinal) {
-                alert("Informe a URL do vídeo do YouTube.");
+                showToast("Informe a URL do vídeo do YouTube.", "info");
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = idGaleriaEdicao ? "Atualizar Item" : "Adicionar";
                 return;
@@ -1354,17 +1355,17 @@ document.getElementById("form-galeria")?.addEventListener("submit", async (e) =>
 
         if (idGaleriaEdicao) {
             await updateDoc(doc(db, "livros", livroId, "galeria", idGaleriaEdicao), dadosItem);
-            alert("Item atualizado com sucesso!");
+            showToast("Item atualizado com sucesso!", "success");
         } else {
             dadosItem.data_criacao = new Date().toISOString();
             await addDoc(collection(db, "livros", livroId, "galeria"), dadosItem);
-            alert("Item adicionado à galeria!");
+            showToast("Item adicionado à galeria!", "success");
         }
 
         resetarFormularioGaleria();
     } catch (err) {
         console.error(err);
-        alert("Erro ao salvar item da galeria.");
+        showToast("Erro ao salvar item da galeria.", "error");
     } finally {
         btnSubmit.disabled = false;
         if (btnSubmit.innerText === "Salvando...") {
@@ -1559,7 +1560,7 @@ document.getElementById("form-oraculo")?.addEventListener("submit", async (e) =>
         } else {
             const valorData = document.getElementById("data-agendada-oraculo").value;
             if (!valorData) {
-                alert("Escolha uma data para agendar a publicação.");
+                showToast("Escolha uma data para agendar a publicação.", "info");
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = idOraculoEdicao ? "Atualizar Publicação" : "Criar Publicação";
                 return;
@@ -1578,17 +1579,17 @@ document.getElementById("form-oraculo")?.addEventListener("submit", async (e) =>
 
         if (idOraculoEdicao) {
             await updateDoc(doc(db, "oraculo", idOraculoEdicao), dadosPost);
-            alert("Publicação atualizada com sucesso!");
+            showToast("Publicação atualizada com sucesso!", "success");
         } else {
             dadosPost.data_criacao = new Date().toISOString();
             await addDoc(collection(db, "oraculo"), dadosPost);
-            alert(publicarAgora ? "Publicação criada com sucesso!" : "Publicação agendada com sucesso!");
+            showToast(publicarAgora ? "Publicação criada com sucesso!" : "Publicação agendada com sucesso!", "success");
         }
 
         resetarFormularioOraculo();
     } catch (err) {
         console.error(err);
-        alert("Erro ao salvar publicação.");
+        showToast("Erro ao salvar publicação.", "error");
     } finally {
         btnSubmit.disabled = false;
         if (btnSubmit.innerText === "Salvando...") {

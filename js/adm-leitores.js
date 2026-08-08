@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/fi
 import { doc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
 import { loadUserProfile, hasProfile } from "./user-service.js";
+import { renderContentState, showToast } from "./feedback.js";
 
 let registrosCache = [];
 let livrosCache = [];
@@ -14,7 +15,7 @@ onAuthStateChanged(auth, async (user) => {
     } else {
         const perfil = await loadUserProfile(user.uid);
         if (!hasProfile(perfil, ["admin"])) {
-            alert("Acesso restrito apenas ao administrador.");
+            showToast("Acesso restrito apenas ao administrador.", "error");
             window.location.href = "../dashboard.html";
         } else {
             inicializarDashboard();
@@ -26,12 +27,12 @@ function inicializarDashboard() {
     onSnapshot(collection(db, "livros"), (snapshot) => {
         livrosCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderizarTudo();
-    });
+    }, mostrarErroDashboard);
 
     onSnapshot(collection(db, "progresso_leitura"), (snapshot) => {
         registrosCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderizarTudo();
-    });
+    }, mostrarErroDashboard);
 
     document.getElementById("busca-email").addEventListener("input", renderizarPorLeitor);
 }
@@ -120,4 +121,14 @@ function renderizarPorLivro() {
         `;
         tbody.appendChild(tr);
     });
+}
+
+function mostrarErroDashboard(error) {
+    console.error("Erro ao carregar dashboard de leitores:", error);
+    renderContentState(document.querySelector(".table-wrapper"), {
+        type: "error",
+        title: "Dados indisponíveis",
+        message: "Não foi possível atualizar as métricas de leitura."
+    });
+    showToast("Falha ao carregar o dashboard de leitores.", "error");
 }
