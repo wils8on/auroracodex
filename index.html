@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/ux.css">
 </head>
 <body>
 
@@ -19,12 +20,12 @@
             <h1 class="brand-logo">AURORA CODEX</h1>
         </header>
 
-        <main class="login-container">
+        <main class="login-container" id="conteudo-principal">
             <div class="login-card animate-fade-in">
                 <h2>Entrar no Portal</h2>
                 <p class="subtitle">Descubra universos, conecte histórias e explore o Oráculo.</p>
                 
-                <button id="btn-google-login" class="btn-google">
+                <button id="btn-google-login" class="btn-google" aria-describedby="login-orientacao">
                     <span class="google-icon-wrap">
                         <svg class="google-icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                             <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
@@ -36,7 +37,7 @@
                     Entrar com o Google
                 </button>
 
-                <div class="login-help">
+                <div class="login-help" id="login-orientacao">
                     <p>Novo por aqui? O acesso à plataforma é restrito e exige aprovação do administrador para a segurança e privacidade das obras.</p>
                 </div>
             </div>

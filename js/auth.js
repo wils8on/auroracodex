@@ -19,17 +19,20 @@ let perfilEmVerificacao = false;
 
 // Captura o botão de login da tela index.html se ele existir na página
 const btnLogin = document.getElementById('btn-google-login');
+const textoPadraoLogin = btnLogin?.innerHTML;
 
 if (btnLogin) {
     btnLogin.addEventListener('click', async () => {
         btnLogin.disabled = true;
+        btnLogin.setAttribute("aria-busy", "true");
+        btnLogin.textContent = "Abrindo o Google...";
         try {
             await setPersistence(auth, browserLocalPersistence);
             const resultado = await signInWithPopup(auth, provider);
             await processarUsuarioAutenticado(resultado.user);
         } catch (error) {
             console.error("Erro ao iniciar login:", error);
-            btnLogin.disabled = false;
+            restaurarBotaoLogin();
             alert("Falha ao iniciar a autenticação com o Google.");
         }
     });
@@ -47,11 +50,18 @@ async function processarUsuarioAutenticado(user) {
         await verificarPerfilUsuario(user);
     } catch (error) {
         console.error("Erro ao verificar perfil:", error);
-        if (btnLogin) btnLogin.disabled = false;
+        restaurarBotaoLogin();
         alert(`Login concluído, mas não foi possível carregar o perfil (${error?.code || "erro desconhecido"}).`);
     } finally {
         perfilEmVerificacao = false;
     }
+}
+
+function restaurarBotaoLogin() {
+    if (!btnLogin) return;
+    btnLogin.disabled = false;
+    btnLogin.removeAttribute("aria-busy");
+    btnLogin.innerHTML = textoPadraoLogin;
 }
 
 // Função lógica para verificar permissões e direcionar o usuário

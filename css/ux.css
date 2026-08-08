@@ -1,0 +1,40 @@
+:root { color-scheme: dark; --ux-focus: #FDBA74; --ux-focus-shadow: rgba(249, 115, 22, 0.35); }
+html { scroll-behavior: smooth; }
+button, a, input, select, textarea, [tabindex]:not([tabindex="-1"]) { -webkit-tap-highlight-color: rgba(249, 115, 22, 0.2); }
+:where(button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 3px solid var(--ux-focus) !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px var(--ux-focus-shadow);
+}
+button:disabled, [aria-disabled="true"] { cursor: wait !important; opacity: 0.65; }
+.skip-link {
+    position: fixed; top: 10px; left: 10px; z-index: 20000; padding: 10px 14px;
+    border-radius: 6px; background: #FFF; color: #15111F; font-weight: 700;
+    transform: translateY(-160%); transition: transform 0.2s ease;
+}
+.skip-link:focus { transform: translateY(0); }
+.sr-only {
+    position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important;
+    margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important; border: 0 !important;
+}
+@media (max-width: 768px) {
+    .navbar { align-items: flex-start !important; flex-wrap: nowrap !important; gap: 14px !important; }
+    .nav-left { min-width: 0; flex: 1 1 auto; flex-direction: column; align-items: flex-start !important; gap: 9px !important; }
+    .nav-links {
+        width: 100%; max-width: calc(100vw - 100px); overflow-x: auto; overscroll-behavior-inline: contain;
+        scrollbar-width: thin; padding: 4px 2px 9px; white-space: nowrap;
+    }
+    .nav-links li { flex: 0 0 auto; }
+    .nav-links a { display: inline-flex; min-height: 36px; align-items: center; }
+    .nav-right { flex: 0 0 auto; gap: 10px !important; }
+    .nav-right #link-adm, .nav-right #btn-logout, .nav-right .badge-profile { font-size: 0.72rem !important; }
+    button, select, input[type="button"], input[type="submit"] { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important; transition-duration: 0.01ms !important;
+    }
+}
