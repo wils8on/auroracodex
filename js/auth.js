@@ -2,7 +2,13 @@
 
 // CONFIGURAÇÃO DO FIREBASE (Substitua pelos seus dados gerados no console)
 // Integração com os scripts do Firebase via CDN (HTML Puro)
-import { getRedirectResult, onAuthStateChanged, signInWithRedirect, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+    browserLocalPersistence,
+    GoogleAuthProvider,
+    onAuthStateChanged,
+    setPersistence,
+    signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
 import { loadUserProfile } from "./user-service.js";
@@ -18,7 +24,9 @@ if (btnLogin) {
     btnLogin.addEventListener('click', async () => {
         btnLogin.disabled = true;
         try {
-            await signInWithRedirect(auth, provider);
+            await setPersistence(auth, browserLocalPersistence);
+            const resultado = await signInWithPopup(auth, provider);
+            await processarUsuarioAutenticado(resultado.user);
         } catch (error) {
             console.error("Erro ao iniciar login:", error);
             btnLogin.disabled = false;
@@ -27,21 +35,24 @@ if (btnLogin) {
     });
 }
 
-getRedirectResult(auth)
-    .then(result => {
-        if (result?.user) return verificarPerfilUsuario(result.user);
-    })
-    .catch(error => {
-        console.error("Erro ao concluir login:", error);
-        if (btnLogin) btnLogin.disabled = false;
-        alert("Falha ao concluir a autenticação com o Google.");
-    });
-
 onAuthStateChanged(auth, user => {
-    if (!user || perfilEmVerificacao) return;
-    perfilEmVerificacao = true;
-    verificarPerfilUsuario(user).finally(() => { perfilEmVerificacao = false; });
+    if (user) processarUsuarioAutenticado(user);
 });
+
+async function processarUsuarioAutenticado(user) {
+    if (!user || perfilEmVerificacao) return;
+
+    perfilEmVerificacao = true;
+    try {
+        await verificarPerfilUsuario(user);
+    } catch (error) {
+        console.error("Erro ao verificar perfil:", error);
+        if (btnLogin) btnLogin.disabled = false;
+        alert(`Login concluído, mas não foi possível carregar o perfil (${error?.code || "erro desconhecido"}).`);
+    } finally {
+        perfilEmVerificacao = false;
+    }
+}
 
 // Função lógica para verificar permissões e direcionar o usuário
 async function verificarPerfilUsuario(user) {
