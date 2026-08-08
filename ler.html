@@ -8,8 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/ler.css">
+    <link rel="stylesheet" href="css/ux.css">
 </head>
 <body>
+    <a class="skip-link" href="#conteudo-principal">Ir para o capítulo</a>
 
     <!-- Cabeçalho de Leitura (Sutil e Dinâmico) -->
     <header class="reader-header">
@@ -29,7 +31,7 @@
     </header>
 
     <!-- Área Central de Leitura -->
-    <main class="reader-container">
+    <main class="reader-container" id="conteudo-principal" tabindex="-1">
         <article class="reading-core">
             <div class="capitulo-banner-capa" id="capitulo-banner-capa"></div>
             <header class="chapter-intro">

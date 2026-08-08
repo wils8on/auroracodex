@@ -9,8 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/biblioteca.css">
+    <link rel="stylesheet" href="css/ux.css">
 </head>
 <body class="biblioteca-body">
+    <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
 
     <!-- Navbar (idêntica ao dashboard, com "Biblioteca" ativa) -->
     <nav class="navbar nav-black" id="main-nav">
@@ -35,7 +37,7 @@
         </div>
     </nav>
 
-    <main class="biblioteca-container">
+    <main class="biblioteca-container" id="conteudo-principal" tabindex="-1">
         <header class="biblioteca-header">
             <h2>Biblioteca</h2>
             <p>Explore todas as obras disponíveis</p>
@@ -45,12 +47,12 @@
         <div class="biblioteca-filtros">
             <div class="busca-wrapper">
                 <svg viewBox="0 0 24 24" class="icon-busca"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                <input type="text" id="busca-titulo" placeholder="Buscar por título, sinopse...">
+                <input type="text" id="busca-titulo" placeholder="Buscar por título, sinopse..." aria-label="Buscar obras por título ou sinopse">
             </div>
-            <select id="filtro-genero">
+            <select id="filtro-genero" aria-label="Filtrar por gênero">
                 <option value="">Todos os Gêneros</option>
             </select>
-            <select id="filtro-status">
+            <select id="filtro-status" aria-label="Filtrar por status">
                 <option value="">Todos os Status</option>
                 <option value="Em Breve">Em Breve</option>
                 <option value="Em Andamento">Em Andamento</option>
