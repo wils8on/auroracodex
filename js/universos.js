@@ -7,6 +7,7 @@ import { loadBookChapters, subscribeBooks, subscribeUniverses } from "./catalog-
 import { bindFavoriteButton } from "./progress-service.js";
 import { renderChapterList } from "./chapter-list.js";
 import { extractYouTubeId, openMediaViewer } from "./media-viewer.js";
+import { renderContentState, showToast } from "./feedback.js";
 
 let universosCache = [];
 let livrosCache = [];
@@ -46,11 +47,22 @@ function inicializarDados() {
     subscribeUniverses((universos) => {
         universosCache = universos;
         renderizarTela();
+    }, (error) => {
+        console.error("Erro ao carregar universos:", error);
+        renderContentState(document.getElementById("universos-grid"), {
+            type: "error",
+            title: "Universos indisponíveis",
+            message: "Não foi possível atualizar esta área. Tente novamente."
+        });
+        showToast("Falha ao carregar os universos.", "error");
     });
 
     subscribeBooks((livros) => {
         livrosCache = livros;
         renderizarTela();
+    }, (error) => {
+        console.error("Erro ao carregar obras dos universos:", error);
+        showToast("Falha ao atualizar as obras dos universos.", "error");
     });
 
     document.getElementById("btn-logout")?.addEventListener("click", () => {

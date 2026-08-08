@@ -6,6 +6,7 @@ import { loadUserProfile } from "./user-service.js";
 import { loadBookChapters, subscribeBooks } from "./catalog-service.js";
 import { bindFavoriteButton } from "./progress-service.js";
 import { renderChapterList } from "./chapter-list.js";
+import { renderContentState, showToast } from "./feedback.js";
 
 let livrosCache = {};       // id -> dados do livro (para exibir capa/sinopse atualizadas)
 let progressoCache = [];    // registros de progresso_leitura do usuário logado
@@ -45,6 +46,14 @@ function inicializarEstante(user) {
         livrosCache = {};
         livros.forEach(livro => { livrosCache[livro.id] = livro; });
         renderizarEstante();
+    }, (error) => {
+        console.error("Erro ao carregar livros da estante:", error);
+        renderContentState(document.getElementById("card-continuar-leitura"), {
+            type: "error",
+            title: "Estante indisponível",
+            message: "Não foi possível atualizar os dados das obras."
+        });
+        showToast("Falha ao atualizar a Estante.", "error");
     });
 
     // Escuta apenas o progresso de leitura do usuário logado
@@ -52,6 +61,15 @@ function inicializarEstante(user) {
     onSnapshot(progressoRef, (snapshot) => {
         progressoCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderizarEstante();
+    }, (error) => {
+        console.error("Erro ao carregar progresso:", error);
+        document.getElementById("estante-vazio").style.display = "none";
+        renderContentState(document.getElementById("card-continuar-leitura"), {
+            type: "error",
+            title: "Progresso indisponível",
+            message: "Não foi possível carregar sua leitura. Tente recarregar a página."
+        });
+        showToast("Falha ao carregar seu progresso de leitura.", "error");
     });
 
     document.getElementById("btn-logout")?.addEventListener("click", () => {

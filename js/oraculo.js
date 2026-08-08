@@ -8,6 +8,7 @@ import { bindFavoriteButton } from "./progress-service.js";
 import { renderChapterList } from "./chapter-list.js";
 import { extractYouTubeId, openMediaViewer } from "./media-viewer.js";
 import { escapeHtml, safeUrl } from "./security.js";
+import { renderContentState, showToast } from "./feedback.js";
 
 
 let livrosCache = [];
@@ -44,6 +45,9 @@ onAuthStateChanged(auth, async (user) => {
 function inicializarFeed() {
     subscribeBooks((livros) => {
         livrosCache = livros;
+    }, (error) => {
+        console.error("Erro ao carregar obras relacionadas:", error);
+        showToast("Algumas obras relacionadas podem estar indisponíveis.", "error");
     });
 
     subscribeOraclePosts((todosPosts) => {
@@ -55,6 +59,14 @@ function inicializarFeed() {
             .sort((a, b) => new Date(b.dataPublicacao) - new Date(a.dataPublicacao));
 
         renderizarFeed(posts);
+    }, (error) => {
+        console.error("Erro ao carregar Oráculo:", error);
+        renderContentState(document.getElementById("oraculo-feed"), {
+            type: "error",
+            title: "Oráculo indisponível",
+            message: "Não foi possível consultar as publicações agora."
+        });
+        showToast("Falha ao atualizar o Oráculo.", "error");
     });
 
     document.getElementById("btn-logout")?.addEventListener("click", () => {

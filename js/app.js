@@ -7,6 +7,7 @@ import { bindFavoriteButton } from "./progress-service.js";
 import { extractYouTubeId, openMediaViewer } from "./media-viewer.js";
 import { loadBookChapters } from "./catalog-service.js";
 import { renderChapterList } from "./chapter-list.js";
+import { renderContentState, showToast } from "./feedback.js";
 
 // Estado do Carrossel de Destaques
 let listaDestaques = [];
@@ -91,6 +92,14 @@ function ouvirCatalogo() {
 
         // Inicializa o slider principal com todos os destaques encontrados
         iniciarCarrosselHero();
+    }, (error) => {
+        console.error("Erro ao carregar catálogo:", error);
+        renderContentState(document.getElementById("catalogo-livros"), {
+            type: "error",
+            title: "Catálogo indisponível",
+            message: "Verifique sua conexão e recarregue a página."
+        });
+        showToast("Não foi possível atualizar o catálogo.", "error");
     });
 }
 
