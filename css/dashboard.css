@@ -296,6 +296,10 @@ a {
     border-radius: 4px;
 }
 
+.hero-media {
+    display: none;
+}
+
 .book-cover-backdrop { display: none; }
 
 .book-hover-info {
@@ -507,21 +511,60 @@ a {
     }
 
     .hero-banner {
-        height: min(760px, 88dvh) !important;
-        min-height: 610px !important;
-        padding: 190px 20px 92px !important;
-        align-items: flex-end;
-        background-position: 62% top !important;
+        display: block;
+        height: auto !important;
+        min-height: 660px !important;
+        padding: 76px 20px 92px !important;
+        background-image: none !important;
+    }
+
+    .hero-media {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        max-height: 430px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        background: #0d0914;
+        box-shadow: 0 18px 46px rgba(0,0,0,0.42);
+    }
+
+    .hero-art-backdrop,
+    .hero-art-main {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    .hero-art-backdrop {
+        inset: 0;
+        object-fit: cover;
+        filter: blur(18px) brightness(0.42) saturate(0.9);
+        transform: scale(1.12);
+    }
+
+    .hero-art-main {
+        inset: 0;
+        z-index: 1;
+        object-fit: contain;
+        object-position: center;
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.55));
     }
 
     .hero-vignette {
-        background: linear-gradient(180deg, rgba(21,17,31,0.18) 0%, rgba(21,17,31,0.05) 28%, rgba(21,17,31,0.78) 62%, #15111F 100%),
-                    linear-gradient(90deg, rgba(21,17,31,0.62), transparent 78%);
+        z-index: 2;
+        background: linear-gradient(180deg, transparent 0%, transparent 42%, rgba(21,17,31,0.36) 57%, #15111F 76%);
     }
 
     .hero-content {
+        position: relative;
+        z-index: 3;
         width: 100%;
         max-width: 520px;
+        margin-top: 22px;
     }
 
     .hero-title {
