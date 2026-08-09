@@ -39,6 +39,7 @@ button:disabled, [aria-disabled="true"] { cursor: wait !important; opacity: 0.65
     justify-content: center; gap: 9px; padding: 28px 20px; text-align: center; color: #AFAAB9;
     border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;
 }
+.content-state[hidden] { display: none; }
 .content-state strong { color: #EDEAF2; }
 .content-state p { max-width: 520px; line-height: 1.5; }
 .content-state-error { border-color: rgba(251,113,133,0.35); }
