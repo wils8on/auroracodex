@@ -41,6 +41,23 @@ service cloud.firestore {
         allow update: if subcollection in ['capitulos', 'personagens', 'galeria'] && (ownsBook(parentBook(bookId)) || ownsLegacyBook(parentBook(bookId)))
           || (subcollection == 'capitulos' && approved() && validLikeChange());
       }
+      match /capitulos/{chapterId}/comentarios/{commentId} {
+        allow read: if approved();
+        allow create: if approved()
+          && request.resource.data.keys().hasOnly(['uid', 'nome', 'foto', 'texto', 'criadoEm'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.nome is string
+          && request.resource.data.nome.size() > 0
+          && request.resource.data.nome.size() <= 100
+          && request.resource.data.foto is string
+          && request.resource.data.foto.size() <= 1000
+          && request.resource.data.texto is string
+          && request.resource.data.texto.size() > 0
+          && request.resource.data.texto.size() <= 1000
+          && request.resource.data.criadoEm is string;
+        allow update: if false;
+        allow delete: if isAdmin() || (approved() && resource.data.uid == request.auth.uid);
+      }
     }
     match /progresso_leitura/{progressId} {
       allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);

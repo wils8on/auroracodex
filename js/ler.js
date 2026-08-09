@@ -1,10 +1,10 @@
 // js/ler.js
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, updateDoc, addDoc, arrayUnion, arrayRemove, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
 import { escapeHtml, sanitizeRichHtml, safeUrl } from "./security.js";
 import { APPROVED_PROFILES, loadUserProfile, hasProfile } from "./user-service.js";
-import { renderContentState, showToast } from "./feedback.js";
+import { renderContentState, setButtonBusy, showToast } from "./feedback.js";
 
 const READER_PREFERENCES_KEY = "aurora-codex:preferencias-leitura";
 
@@ -125,7 +125,8 @@ async function carregarConteudoCapitulo(user) {
             configurarBotaoLike(user, livroId, capituloId, dadosCap);
 
             // 2.5 REGISTRA O PROGRESSO DE LEITURA (usado no Dashboard de Leitores do admin)
-            registrarProgressoLeitura(user, livroId, dadosLivro.titulo, dadosCap, dadosLivro.capa);
+            registrarProgressoLeitura(user, livroId, capituloId, dadosLivro.titulo, dadosCap, dadosLivro.capa);
+            configurarComentarios(user, livroId, capituloId);
 
             // 3. BUSCA OS PERSONAGENS REAIS DO CÓDICE PARA ESSE LIVRO
             const sidebarContent = document.querySelector(".sidebar-content");
@@ -166,6 +167,98 @@ async function carregarConteudoCapitulo(user) {
 }
 
 // Trata o link/arquivo do capítulo e injeta o player correto no rodapé
+async function configurarComentarios(user, livroId, capituloId) {
+    const lista = document.getElementById("lista-comentarios");
+    const campo = document.getElementById("input-comentario");
+    const publicar = document.getElementById("btn-enviar-comentario");
+    const carregarMais = document.getElementById("btn-carregar-mais-comentarios");
+    const containerCarregarMais = document.getElementById("container-carregar-mais");
+    const avatarUsuario = document.getElementById("user-comment-avatar");
+    if (!lista || !campo || !publicar) return;
+    campo.maxLength = 1000;
+
+    const comentariosRef = collection(db, "livros", livroId, "capitulos", capituloId, "comentarios");
+    const avatarPadrao = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100";
+    if (avatarUsuario) avatarUsuario.src = safeUrl(user.photoURL, avatarPadrao);
+    let comentarios = [];
+    let quantidadeVisivel = 10;
+
+    const renderizar = () => {
+        lista.replaceChildren();
+        if (comentarios.length === 0) {
+            renderContentState(lista, { type: "empty", title: "Nenhum coment\u00e1rio ainda", message: "Seja a primeira pessoa a compartilhar uma impress\u00e3o sobre este cap\u00edtulo." });
+        } else {
+            comentarios.slice(0, quantidadeVisivel).forEach(comentario => {
+                const item = document.createElement("article");
+                item.className = "comment-item";
+                const avatar = document.createElement("img");
+                avatar.className = "comment-avatar";
+                avatar.src = safeUrl(comentario.foto, avatarPadrao);
+                avatar.alt = "";
+                const conteudo = document.createElement("div");
+                conteudo.className = "comment-content";
+                const meta = document.createElement("p");
+                meta.className = "comment-meta";
+                const autor = document.createElement("strong");
+                autor.textContent = comentario.nome || "Leitor do Codex";
+                const data = document.createElement("span");
+                const criada = new Date(comentario.criadoEm);
+                data.textContent = Number.isNaN(criada.getTime()) ? "Data indispon\u00edvel" : criada.toLocaleDateString("pt-BR", { dateStyle: "medium" });
+                meta.append(autor, data);
+                const texto = document.createElement("p");
+                texto.className = "comment-text";
+                texto.textContent = comentario.texto;
+                conteudo.append(meta, texto);
+                item.append(avatar, conteudo);
+                lista.appendChild(item);
+            });
+        }
+        if (containerCarregarMais) containerCarregarMais.style.display = comentarios.length > quantidadeVisivel ? "block" : "none";
+    };
+
+    const carregar = async () => {
+        try {
+            const snapshot = await getDocs(query(comentariosRef, orderBy("criadoEm", "desc")));
+            comentarios = snapshot.docs.map(registro => ({ id: registro.id, ...registro.data() }));
+            quantidadeVisivel = 10;
+            renderizar();
+        } catch (err) {
+            console.error("Erro ao carregar coment\u00e1rios:", err);
+            renderContentState(lista, { type: "error", title: "Coment\u00e1rios indispon\u00edveis", message: "N\u00e3o foi poss\u00edvel carregar esta conversa agora." });
+        }
+    };
+
+    publicar.onclick = async () => {
+        const texto = campo.value.trim();
+        if (!texto || texto.length > 1000) {
+            showToast(!texto ? "Escreva um coment\u00e1rio antes de publicar." : "O coment\u00e1rio deve ter no m\u00e1ximo 1.000 caracteres.", "error");
+            campo.focus();
+            return;
+        }
+        setButtonBusy(publicar, true, "Publicando...");
+        try {
+            await addDoc(comentariosRef, {
+                uid: user.uid,
+                nome: (user.displayName || "Leitor do Codex").slice(0, 100),
+                foto: safeUrl(user.photoURL, "").slice(0, 1000),
+                texto,
+                criadoEm: new Date().toISOString()
+            });
+            campo.value = "";
+            showToast("Coment\u00e1rio publicado.", "success");
+            await carregar();
+        } catch (err) {
+            console.error("Erro ao publicar coment\u00e1rio:", err);
+            showToast("N\u00e3o foi poss\u00edvel publicar o coment\u00e1rio.", "error");
+        } finally {
+            setButtonBusy(publicar, false);
+        }
+    };
+
+    if (carregarMais) carregarMais.onclick = () => { quantidadeVisivel += 10; renderizar(); };
+    await carregar();
+}
+
 function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
     const trackTitle = document.getElementById("player-track-title");
     const trackAuthor = document.getElementById("player-track-author");
@@ -354,7 +447,7 @@ function configurarBotaoLike(user, livroId, capituloId, dadosCap) {
 
 // Cria/atualiza um registro por (usuário, livro). Detecta automaticamente conclusão
 // quando o capítulo lido é o último publicado da obra.
-async function registrarProgressoLeitura(user, livroId, tituloLivro, dadosCap, capaLivro) {
+async function registrarProgressoLeitura(user, livroId, capituloId, tituloLivro, dadosCap, capaLivro) {
     try {
         const registroId = `${user.uid}_${livroId}`;
         const registroRef = doc(db, "progresso_leitura", registroId);
