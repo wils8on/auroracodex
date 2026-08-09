@@ -6,7 +6,7 @@ import {
   assertSucceeds,
   initializeTestEnvironment
 } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 
 const projectId = "aurora-codex-rules-test";
 let env;
@@ -85,5 +85,25 @@ describe("leitura e atividade", () => {
     await assertSucceeds(updateDoc(ref, { curtidasUids: ["leitor1"] }));
     await assertFails(updateDoc(ref, { curtidasUids: ["leitor2"] }));
     await assertFails(updateDoc(ref, { titulo: "Alterado" }));
+  });
+
+  test("leitor aprovado publica comentario proprio dentro dos limites", async () => {
+    await seed();
+    const ref = collection(dbFor("leitor1"), "livros/livro1/capitulos/cap1/comentarios");
+    await assertSucceeds(addDoc(ref, { uid: "leitor1", nome: "Leitor", foto: "", texto: "Gostei do capitulo.", criadoEm: new Date().toISOString() }));
+    await assertFails(addDoc(ref, { uid: "leitor2", nome: "Leitor", foto: "", texto: "Identidade falsa", criadoEm: new Date().toISOString() }));
+    await assertFails(addDoc(ref, { uid: "leitor1", nome: "Leitor", foto: "", texto: "x".repeat(1001), criadoEm: new Date().toISOString() }));
+    await assertSucceeds(getDocs(ref));
+  });
+
+  test("autor do comentario e admin podem excluir; outro leitor nao pode", async () => {
+    await seed();
+    await env.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), "livros/livro1/capitulos/cap1/comentarios/com1"), { uid: "leitor1", nome: "Leitor", foto: "", texto: "Comentario", criadoEm: new Date().toISOString() });
+      await setDoc(doc(context.firestore(), "livros/livro1/capitulos/cap1/comentarios/com2"), { uid: "leitor2", nome: "Leitor", foto: "", texto: "Comentario", criadoEm: new Date().toISOString() });
+    });
+    await assertFails(deleteDoc(doc(dbFor("leitor2"), "livros/livro1/capitulos/cap1/comentarios/com1")));
+    await assertSucceeds(deleteDoc(doc(dbFor("leitor1"), "livros/livro1/capitulos/cap1/comentarios/com1")));
+    await assertSucceeds(deleteDoc(doc(dbFor("admin"), "livros/livro1/capitulos/cap1/comentarios/com2")));
   });
 });
