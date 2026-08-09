@@ -9,6 +9,7 @@ import { loadBookChapters } from "./catalog-service.js";
 import { renderChapterList } from "./chapter-list.js";
 import { renderContentState, showToast } from "./feedback.js";
 import { bindDialogCloseButton, closeAccessibleDialog, makeActivatable, openAccessibleDialog } from "./dialog-accessibility.js";
+import { escapeHtml, safeUrl } from "./security.js";
 
 window.fecharModal = () => closeAccessibleDialog(document.getElementById("netflix-modal"));
 bindDialogCloseButton(document.getElementById("netflix-modal"));
@@ -74,15 +75,19 @@ function ouvirCatalogo() {
                 const card = document.createElement("div");
                 card.className = "book-card";
                 card.style.cursor = "pointer";
+                const capaSegura = safeUrl(livro.capa);
+                const tituloSeguro = escapeHtml(livro.titulo);
+                const universoSeguro = escapeHtml(filtrarNomeUniverso(livro.universo));
                 
                 // Clique abre o modal estilo Netflix
                 makeActivatable(card, () => abrirModalNetflix(id, livro), `Abrir detalhes de ${livro.titulo}`);
 
                 card.innerHTML = `
-                    <img src="${livro.capa}" alt="${livro.titulo}" class="book-cover">
+                    <img src="${capaSegura}" alt="" class="book-cover-backdrop" aria-hidden="true">
+                    <img src="${capaSegura}" alt="${tituloSeguro}" class="book-cover">
                     <div class="book-hover-info">
-                        <h4>${livro.titulo}</h4>
-                        <div class="book-meta"><span>${filtrarNomeUniverso(livro.universo)}</span></div>
+                        <h4>${tituloSeguro}</h4>
+                        <div class="book-meta"><span>${universoSeguro}</span></div>
                     </div>
                 `;
                 container.appendChild(card);
