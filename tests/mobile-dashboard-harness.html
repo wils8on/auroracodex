@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard mobile — teste visual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/ux.css">
+</head>
+<body>
+    <nav class="navbar" id="main-nav">
+        <div class="nav-left">
+            <h1 class="nav-logo">AURORA CODEX</h1>
+            <div class="nav-drawer" id="nav-drawer">
+                <ul class="nav-links">
+                    <li><a href="#" class="active">Início</a></li>
+                    <li><a href="#">Biblioteca</a></li>
+                    <li><a href="#">Universos</a></li>
+                    <li><a href="#">Estante</a></li>
+                    <li><a href="#">Meus Livros</a></li>
+                    <li><a href="#">O Oráculo</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="#" id="link-adm" style="display:block">Painel ADM</a>
+                    <button id="btn-logout">Sair</button>
+                </div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="user-profile">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100" alt="Perfil" id="user-avatar">
+                <span class="badge-profile">ADMIN</span>
+            </div>
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Abrir menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <header class="hero-banner" style="background-image:url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=85&w=1200');background-size:cover;background-position:center top">
+        <div class="hero-content">
+            <span class="hero-tagline">✦ DESTAQUES DO SEU UNIVERSO</span>
+            <h2 class="hero-title">Labirinto de Vidro</h2>
+            <p class="hero-synopsis">Quando as barreiras invisíveis nos mostram a única saída.</p>
+            <div class="hero-buttons">
+                <button class="btn-read"><svg viewBox="0 0 24 24" class="icon-play"><path d="M8 5v14l11-7z"/></svg>Ler Capítulo 1</button>
+                <button class="btn-info"><svg viewBox="0 0 24 24" class="icon-info"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 8 8 8zm-1-13h2v-2h-2v2z"/></svg>Detalhes</button>
+            </div>
+        </div>
+        <div class="hero-vignette"></div>
+        <div id="hero-controls" style="display:flex;position:absolute;bottom:20px;right:40px;z-index:10;align-items:center;gap:15px">
+            <button id="btn-prev-hero">&lt;</button><div style="display:flex;gap:7px"><i style="width:24px;height:7px;border-radius:9px;background:#F97316"></i><i style="width:7px;height:7px;border-radius:50%;background:#777"></i><i style="width:7px;height:7px;border-radius:50%;background:#777"></i></div><button id="btn-next-hero">&gt;</button>
+        </div>
+    </header>
+
+    <main class="content-rows">
+        <section class="row">
+            <h3 class="row-title">Universos Conectados</h3>
+            <div class="row-posters">
+                <article class="book-card"><img class="book-cover" src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=85&w=800" alt="Cidade sob chuva"><div class="book-hover-info"><h4>Depois do Fim</h4><div class="book-meta"><span>NEXUM</span></div></div></article>
+                <article class="book-card"><img class="book-cover" src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=85&w=800" alt="Labirinto de vidro"><div class="book-hover-info"><h4>Labirinto de Vidro</h4><div class="book-meta"><span>NEXUM</span></div></div></article>
+                <article class="book-card"><img class="book-cover" src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=85&w=800" alt="Arquitetura"><div class="book-hover-info"><h4>Laços Invisíveis</h4><div class="book-meta"><span>NEXUM</span></div></div></article>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const nav = document.getElementById('main-nav');
+        const toggle = document.getElementById('mobile-menu-toggle');
+        toggle.addEventListener('click', () => {
+            const aberto = nav.classList.toggle('mobile-open');
+            toggle.setAttribute('aria-expanded', String(aberto));
+            toggle.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+        });
+    </script>
+</body>
+</html>

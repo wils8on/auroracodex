@@ -43,6 +43,30 @@ a {
     gap: 40px;
 }
 
+.nav-drawer,
+.nav-actions {
+    display: flex;
+    align-items: center;
+}
+
+.nav-drawer { gap: 24px; }
+.nav-actions { gap: 18px; }
+
+#link-adm {
+    display: none;
+    color: #B8B3C1;
+    font-size: 0.85rem;
+}
+
+#btn-logout {
+    border: 0;
+    color: #B8B3C1;
+    background: transparent;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
 .nav-logo {
     font-family: 'Cinzel', serif;
     background: linear-gradient(90deg, #FDBA74 0%, #F97316 70%);
@@ -74,7 +98,10 @@ a {
 .nav-right {
     display: flex;
     align-items: center;
+    gap: 16px;
 }
+
+.mobile-menu-toggle { display: none; }
 
 .user-profile {
     display: flex;
@@ -364,74 +391,233 @@ a {
    ========================================================= */
 
 @media (max-width: 768px) {
-    /* 1. Navbar Adaptável */
     .navbar {
-        padding: 12px 16px !important;
-        flex-wrap: wrap;
-        gap: 10px;
+        min-height: 64px;
+        padding: 10px 16px !important;
+        background: linear-gradient(to bottom, rgba(12, 9, 18, 0.96), rgba(12, 9, 18, 0.72), transparent);
+        flex-wrap: nowrap;
     }
 
     .nav-logo {
-        font-size: 1.2rem !important;
+        font-size: clamp(1rem, 4.8vw, 1.25rem) !important;
+        letter-spacing: 1.4px;
+        white-space: nowrap;
     }
+
+    .nav-left { gap: 0; }
+
+    .nav-drawer {
+        position: fixed;
+        inset: 64px 12px auto;
+        display: none;
+        max-height: calc(100dvh - 78px);
+        padding: 18px;
+        overflow-y: auto;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 18px;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 14px;
+        background: rgba(21, 17, 31, 0.98);
+        box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+        backdrop-filter: blur(18px);
+    }
+
+    .navbar.mobile-open .nav-drawer { display: flex; }
 
     .nav-links {
-        gap: 12px !important;
-        font-size: 0.85rem !important;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px !important;
+        font-size: 0.92rem !important;
     }
 
-    .user-profile img {
+    .nav-links li a {
+        display: block;
+        min-height: 44px;
+        padding: 12px;
+        border-radius: 8px;
+        color: #D8D4DE;
+    }
+
+    .nav-links li a.active,
+    .nav-links li a:hover {
+        color: #FFF;
+        background: rgba(249,115,22,0.14);
+    }
+
+    .nav-actions {
+        padding-top: 14px;
+        justify-content: space-between;
+        border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    #link-adm,
+    #btn-logout {
+        min-height: 44px;
+        padding: 12px;
+        font-size: 0.88rem;
+    }
+
+    #user-avatar {
         width: 32px !important;
         height: 32px !important;
+        border-radius: 50%;
     }
 
-    /* 2. Hero Banner Destaque em Telas Pequenas */
+    .badge-profile {
+        position: absolute;
+        right: -5px;
+        bottom: -5px;
+        padding: 2px 4px;
+        font-size: 0.5rem;
+    }
+
+    .mobile-menu-toggle {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-content: center;
+        gap: 4px;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 50%;
+        color: #FFF;
+        background: rgba(21,17,31,0.58);
+    }
+
+    .mobile-menu-toggle span {
+        display: block;
+        width: 17px;
+        height: 1.5px;
+        background: currentcolor;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .mobile-open .mobile-menu-toggle span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+    .mobile-open .mobile-menu-toggle span:nth-child(2) { opacity: 0; }
+    .mobile-open .mobile-menu-toggle span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+    .nav-black {
+        min-height: 64px;
+        padding: 10px 16px !important;
+        background: rgba(21,17,31,0.96);
+    }
+
     .hero-banner {
-        height: auto !important;
-        min-height: 420px !important;
-        padding: 90px 20px 40px 20px !important;
+        height: min(760px, 88dvh) !important;
+        min-height: 610px !important;
+        padding: 190px 20px 92px !important;
+        align-items: flex-end;
+        background-position: 62% top !important;
+    }
+
+    .hero-vignette {
+        background: linear-gradient(180deg, rgba(21,17,31,0.18) 0%, rgba(21,17,31,0.05) 28%, rgba(21,17,31,0.78) 62%, #15111F 100%),
+                    linear-gradient(90deg, rgba(21,17,31,0.62), transparent 78%);
+    }
+
+    .hero-content {
+        width: 100%;
+        max-width: 520px;
     }
 
     .hero-title {
-        font-size: 1.8rem !important;
-        line-height: 1.2 !important;
+        max-width: 12ch;
+        margin: 8px 0 12px;
+        font-size: clamp(2rem, 9vw, 3rem) !important;
+        line-height: 1.05 !important;
     }
 
     .hero-synopsis {
-        font-size: 0.95rem !important;
-        line-height: 1.5 !important;
-        -webkit-line-clamp: 3;
-        line-clamp: 3;
+        max-width: 34rem;
+        margin-bottom: 18px;
+        font-size: 0.92rem !important;
+        line-height: 1.45 !important;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
         display: -webkit-box;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
 
     .hero-buttons {
-        flex-direction: column !important;
         width: 100% !important;
-        gap: 10px !important;
+        gap: 8px !important;
     }
 
     .hero-buttons button {
-        width: 100% !important;
+        min-height: 48px;
         justify-content: center !important;
-        padding: 12px !important;
+        padding: 11px 14px !important;
+        font-size: 0.9rem;
     }
 
-    /* 3. Carrossel de Cards (Fileira de Livros) */
+    .btn-read { flex: 1.25; }
+    .btn-info { flex: 1; }
+
+    #hero-controls {
+        right: 50% !important;
+        bottom: 28px !important;
+        transform: translateX(50%);
+        gap: 10px !important;
+    }
+
+    #btn-prev-hero,
+    #btn-next-hero { width: 32px !important; height: 32px !important; }
+
+    .content-rows {
+        margin-top: 0;
+        padding: 18px 0 54px;
+    }
+
     .row {
-        padding: 0 15px !important;
+        padding: 0 0 0 20px !important;
+        margin-bottom: 28px;
+    }
+
+    .row-title {
+        margin: 0 20px 6px 0;
+        font-family: 'Cinzel', serif;
+        font-size: 1.15rem;
     }
 
     .row-posters {
-        gap: 10px !important;
-        padding: 10px 0 !important;
+        gap: 12px !important;
+        padding: 10px 20px 18px 0 !important;
+        scroll-snap-type: x mandatory;
+        scroll-padding-left: 20px;
+        -webkit-overflow-scrolling: touch;
     }
 
-    .book-card, .row-poster {
-        width: 130px !important;
-        height: 185px !important;
+    .book-card,
+    .row-poster {
+        flex: 0 0 min(76vw, 300px);
+        min-width: min(76vw, 300px) !important;
+        width: min(76vw, 300px) !important;
+        height: 172px !important;
+        overflow: hidden;
+        scroll-snap-align: start;
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.32);
+    }
+
+    .book-card:hover { transform: none; }
+
+    .book-hover-info {
+        padding: 32px 14px 12px;
+        opacity: 1;
+        background: linear-gradient(to top, rgba(13,10,20,0.94), transparent);
+    }
+
+    .book-mini-desc { display: none; }
+
+    .book-meta { margin-bottom: 0; }
+
+    .book-cover { border-radius: 10px; }
+
+    .hero-tagline {
+        font-size: 0.68rem;
+        letter-spacing: 1.7px;
     }
 
     /* 4. Modal Estilo Netflix */
