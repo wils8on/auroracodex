@@ -1,10 +1,11 @@
 // js/ler.js
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, getDoc, setDoc, updateDoc, addDoc, arrayUnion, arrayRemove, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, arrayUnion, arrayRemove, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
 import { escapeHtml, sanitizeRichHtml, safeUrl } from "./security.js";
 import { APPROVED_PROFILES, loadUserProfile, hasProfile } from "./user-service.js";
 import { renderContentState, setButtonBusy, showToast } from "./feedback.js";
+import { confirmAction } from "./dialog-accessibility.js?v=confirm-dialog-v1";
 
 const READER_PREFERENCES_KEY = "aurora-codex:preferencias-leitura";
 
@@ -54,11 +55,11 @@ onAuthStateChanged(auth, async (user) => {
             window.location.href = "aguardando.html";
             return;
         }
-        carregarConteudoCapitulo(user);
+        carregarConteudoCapitulo(user, perfil);
     }
 });
 
-async function carregarConteudoCapitulo(user) {
+async function carregarConteudoCapitulo(user, perfil) {
     const urlParams = new URLSearchParams(window.location.search);
     const livroId = urlParams.get('livroId');
     const capituloId = urlParams.get('capituloId');
@@ -126,7 +127,7 @@ async function carregarConteudoCapitulo(user) {
 
             // 2.5 REGISTRA O PROGRESSO DE LEITURA (usado no Dashboard de Leitores do admin)
             registrarProgressoLeitura(user, livroId, capituloId, dadosLivro.titulo, dadosCap, dadosLivro.capa);
-            configurarComentarios(user, livroId, capituloId);
+            configurarComentarios(user, perfil, livroId, capituloId);
 
             // 3. BUSCA OS PERSONAGENS REAIS DO CÓDICE PARA ESSE LIVRO
             const sidebarContent = document.querySelector(".sidebar-content");
@@ -167,7 +168,7 @@ async function carregarConteudoCapitulo(user) {
 }
 
 // Trata o link/arquivo do capítulo e injeta o player correto no rodapé
-async function configurarComentarios(user, livroId, capituloId) {
+async function configurarComentarios(user, perfil, livroId, capituloId) {
     const lista = document.getElementById("lista-comentarios");
     const campo = document.getElementById("input-comentario");
     const publicar = document.getElementById("btn-enviar-comentario");
@@ -209,6 +210,32 @@ async function configurarComentarios(user, livroId, capituloId) {
                 texto.className = "comment-text";
                 texto.textContent = comentario.texto;
                 conteudo.append(meta, texto);
+
+                if (comentario.uid === user.uid || perfil?.perfil === "admin") {
+                    const remover = document.createElement("button");
+                    remover.type = "button";
+                    remover.className = "btn-comment-delete";
+                    remover.textContent = perfil?.perfil === "admin" && comentario.uid !== user.uid ? "Remover como administrador" : "Excluir meu coment\u00e1rio";
+                    remover.addEventListener("click", async () => {
+                        const confirmado = await confirmAction({
+                            title: "Excluir coment\u00e1rio?",
+                            message: "A mensagem ser\u00e1 removida permanentemente desta conversa.",
+                            confirmLabel: "Excluir coment\u00e1rio"
+                        });
+                        if (!confirmado) return;
+                        setButtonBusy(remover, true, "Excluindo...");
+                        try {
+                            await deleteDoc(doc(comentariosRef, comentario.id));
+                            showToast("Coment\u00e1rio exclu\u00eddo.", "success");
+                            await carregar();
+                        } catch (err) {
+                            console.error("Erro ao excluir coment\u00e1rio:", err);
+                            showToast("N\u00e3o foi poss\u00edvel excluir o coment\u00e1rio.", "error");
+                            setButtonBusy(remover, false);
+                        }
+                    });
+                    conteudo.appendChild(remover);
+                }
                 item.append(avatar, conteudo);
                 lista.appendChild(item);
             });
