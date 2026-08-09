@@ -17,26 +17,30 @@
     <nav class="navbar" id="main-nav">
         <div class="nav-left">
             <h1 class="nav-logo">AURORA CODEX</h1>
-            <ul class="nav-links">
-                <li><a href="dashboard.html" class="active">Início</a></li>
-                <li><a href="biblioteca.html">Biblioteca</a></li>
-                <li><a href="universos.html">Universos</a></li>
-                <li><a href="estante.html">Estante</a></li>
-                <!-- Aponta para a página de gerenciamento dentro da pasta autor -->
-                <li><a href="autor/gerenciar-livros.html">Meus Livros</a></li>
-                <li><a href="oraculo.html">O Oráculo</a></li>
-            </ul>
+            <div class="nav-drawer" id="nav-drawer">
+                <ul class="nav-links">
+                    <li><a href="dashboard.html" class="active">Início</a></li>
+                    <li><a href="biblioteca.html">Biblioteca</a></li>
+                    <li><a href="universos.html">Universos</a></li>
+                    <li><a href="estante.html">Estante</a></li>
+                    <!-- Aponta para a página de gerenciamento dentro da pasta autor -->
+                    <li><a href="autor/gerenciar-livros.html">Meus Livros</a></li>
+                    <li><a href="oraculo.html">O Oráculo</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="adm/painel-usuarios.html" id="link-adm">Painel ADM</a>
+                    <button id="btn-logout">Sair</button>
+                </div>
+            </div>
         </div>
-        <div class="nav-right" style="gap: 20px;">
-            <!-- Link para ir ao Painel ADM se for administrador (você pode ocultar ou exibir via JS) -->
-            <a href="adm/painel-usuarios.html" id="link-adm" style="font-size: 0.85rem; color: #8C8C8C; display: none;">Painel ADM</a>
-            
-            <button id="btn-logout" style="background: transparent; border: none; color: #8C8C8C; font-size: 0.85rem; cursor: pointer; transition: color 0.2s;">Sair</button>
-            
+        <div class="nav-right">
             <div class="user-profile">
                 <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100" alt="Perfil" id="user-avatar">
                 <span class="badge-profile" id="user-role-badge">...</span>
             </div>
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Abrir menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </nav>
 
@@ -129,6 +133,24 @@
     <!-- Script para mudar a cor da Navbar ao rolar a página -->
     <script>
         const nav = document.getElementById('main-nav');
+        const menuToggle = document.getElementById('mobile-menu-toggle');
+        const navDrawer = document.getElementById('nav-drawer');
+
+        function fecharMenuMobile() {
+            nav.classList.remove('mobile-open');
+            menuToggle?.setAttribute('aria-expanded', 'false');
+            menuToggle?.setAttribute('aria-label', 'Abrir menu');
+        }
+
+        menuToggle?.addEventListener('click', () => {
+            const aberto = nav.classList.toggle('mobile-open');
+            menuToggle.setAttribute('aria-expanded', String(aberto));
+            menuToggle.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+        });
+        navDrawer?.querySelectorAll('a').forEach(link => link.addEventListener('click', fecharMenuMobile));
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') fecharMenuMobile();
+        });
         window.onscroll = function () { 
             if (window.scrollY > 50) {
                 nav.classList.add("nav-black");
