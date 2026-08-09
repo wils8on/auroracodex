@@ -147,7 +147,6 @@ function exibirDestaquePorIndice(index) {
     const livro = listaDestaques[index];
     const heroBg = document.getElementById("hero-banner-bg") || document.querySelector(".hero-banner");
     const heroArtMain = document.getElementById("hero-art-main");
-    const heroArtBackdrop = document.getElementById("hero-art-backdrop");
     const heroTitulo = document.getElementById("hero-titulo-destaque") || document.querySelector(".hero-title");
     const heroSinopse = document.getElementById("hero-sinopse-destaque") || document.querySelector(".hero-synopsis");
     const btnLer = document.getElementById("btn-ler-destaque") || document.querySelector(".btn-read");
@@ -161,7 +160,6 @@ function exibirDestaquePorIndice(index) {
     }
 
     if (heroArtMain && capaSegura) heroArtMain.src = capaSegura;
-    if (heroArtBackdrop && capaSegura) heroArtBackdrop.src = capaSegura;
 
     if (heroTitulo) heroTitulo.innerText = livro.titulo;
     if (heroSinopse) heroSinopse.innerText = livro.sinopse;
