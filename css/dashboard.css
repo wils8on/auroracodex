@@ -621,10 +621,18 @@ a {
     }
 
     /* 4. Modal Estilo Netflix */
+    #netflix-modal {
+        height: 100dvh !important;
+        padding: 10px 10px calc(28px + env(safe-area-inset-bottom)) !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
     #netflix-modal > div {
         margin: 10px auto !important;
         width: 95% !important;
-        max-height: 90vh !important;
+        max-height: none !important;
     }
 
     #modal-banner {

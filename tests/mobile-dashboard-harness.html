@@ -63,7 +63,30 @@
                 <article class="book-card"><img class="book-cover" src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=85&w=800" alt="Arquitetura"><div class="book-hover-info"><h4>Laços Invisíveis</h4><div class="book-meta"><span>NEXUM</span></div></div></article>
             </div>
         </section>
+        <button id="open-test-modal" style="margin:0 20px;padding:12px 18px">Testar capítulos</button>
     </main>
+
+    <div id="netflix-modal" style="display:none;position:fixed;inset:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;overflow-y:auto;padding:20px 10px">
+        <div style="background:#1C1830;width:100%;max-width:750px;margin:20px auto;border-radius:8px;overflow:hidden;color:#FFF;position:relative">
+            <button id="close-test-modal" style="position:absolute;top:20px;right:20px;z-index:2;width:40px;height:40px;border:0;border-radius:50%">×</button>
+            <div id="modal-banner" style="height:280px;background:url('https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=85&w=900') center/cover"></div>
+            <div style="padding:24px 20px 40px">
+                <h2 style="font-family:Cinzel,serif">Laços Invisíveis</h2>
+                <p style="margin:18px 0;line-height:1.6;color:#D2D2D2">Uma travessia íntima por pertencimentos, raízes, renascimentos e a beleza delicada de amar.</p>
+                <h3 style="font-family:Cinzel,serif;border-bottom:2px solid #404040;padding-bottom:10px">Capítulos Disponíveis</h3>
+                <div style="display:grid;gap:12px;margin-top:16px">
+                    <a href="#" style="padding:20px;background:#302F30;border-radius:5px">Episódio 1 — Aviso importante</a>
+                    <a href="#" style="padding:20px;background:#302F30;border-radius:5px">Episódio 2 — Sinopse completa</a>
+                    <a href="#" style="padding:20px;background:#302F30;border-radius:5px">Episódio 3 — Prefácio do autor</a>
+                    <a href="#" style="padding:20px;background:#302F30;border-radius:5px">Episódio 4 — Dedicatória</a>
+                    <a href="#" style="padding:20px;background:#302F30;border-radius:5px">Episódio 5 — Um horizonte ao longe</a>
+                    <a href="#" style="padding:20px;background:#302F30;border-radius:5px">Episódio 6 — Quando olhares se cruzam</a>
+                    <a href="#" style="padding:20px;background:#302F30;border-radius:5px">Episódio 7 — Encontros e desencontros</a>
+                    <a href="#episodio-8" id="episodio-8" style="padding:20px;background:#302F30;border-radius:5px">Episódio 8 — Entre verdades e descobertas</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const nav = document.getElementById('main-nav');
@@ -72,6 +95,14 @@
             const aberto = nav.classList.toggle('mobile-open');
             toggle.setAttribute('aria-expanded', String(aberto));
             toggle.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
+        });
+        document.getElementById('open-test-modal').addEventListener('click', () => {
+            document.getElementById('netflix-modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        });
+        document.getElementById('close-test-modal').addEventListener('click', () => {
+            document.getElementById('netflix-modal').style.display = 'none';
+            document.body.style.overflow = '';
         });
     </script>
 </body>
