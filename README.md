@@ -4,7 +4,7 @@ Plataforma web de publicação e leitura de histórias seriadas, com construçã
 
 ## Estado do projeto
 
-O projeto está em fase de MVP funcional. A aplicação usa HTML, CSS e JavaScript puros no navegador, Firebase Authentication e Firestore para autenticação e dados, e Cloudinary para imagens e áudio.
+O projeto está em fase de MVP estabilizado. A aplicação usa HTML, CSS e JavaScript puros no navegador, Firebase Authentication e Firestore para autenticação e dados, e Cloudinary para imagens e áudio. As regras de segurança estão publicadas, o GitHub Actions valida cada pull request e o GitHub Pages publica a `main`.
 
 Os fluxos existentes estão em [`docs/arquitetura-atual.md`](docs/arquitetura-atual.md), o modelo observado do banco em [`docs/modelo-de-dados.md`](docs/modelo-de-dados.md) e o roteiro de validação em [`docs/checklist-regressao.md`](docs/checklist-regressao.md).
 
@@ -68,17 +68,16 @@ A configuração do Firebase e as instâncias compartilhadas de autenticação e
 - Cloudinary com upload não assinado.
 - Google Fonts.
 
-## Atenção antes de produção
+## Estado de produção
 
-Este repositório ainda não contém regras versionadas do Firestore, testes automatizados ou uma configuração formal de implantação. As verificações de perfil feitas no navegador melhoram a navegação, mas não substituem regras de segurança no banco.
+As regras do Firestore estão versionadas, cobertas por oito testes no Emulator e publicadas no projeto remoto. O conteúdo rico dos capítulos passa por uma lista permitida de elementos HTML, URLs são validadas e uploads possuem limites no cliente.
 
-O conteúdo rico dos capítulos passa por uma lista permitida de elementos HTML. As regras do Firestore estão versionadas em `firestore.rules`, mas precisam ser testadas no Emulator e publicadas explicitamente antes de proteger o projeto remoto.
+A homologação de 8 de agosto de 2026 confirmou login, catálogo, autoria, leitura, universos, Oráculo, estante e administração no GitHub Pages. Testes que alteram perfis, criam ou excluem conteúdo, enviam arquivos ou simulam falha de rede permanecem reservados a um ambiente Firebase de homologação; consulte [`docs/checklist-regressao.md`](docs/checklist-regressao.md).
 
 ## Roadmap técnico
 
-1. Documentar e preservar os fluxos atuais.
-2. Implementar regras de segurança, propriedade de conteúdo e sanitização.
-3. Centralizar Firebase e modularizar o JavaScript.
-4. Adicionar qualidade automatizada e testes.
-5. Evoluir a experiência de leitores, autores e administradores.
-6. Preparar observabilidade, custos, privacidade e escala.
+1. Criar um projeto Firebase separado para homologação e completar os testes destrutivos.
+2. Auditar a migração de `autorId` e `criadoPor` e remover a exceção legada quando seguro.
+3. Ampliar testes automatizados dos serviços e fluxos do navegador.
+4. Evoluir a experiência de leitores, autores e administradores.
+5. Preparar observabilidade, custos, privacidade e escala.

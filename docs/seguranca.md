@@ -2,7 +2,7 @@
 
 ## Estado
 
-As regras locais estão em `firestore.rules` e a associação em `firebase.json`. Em 8 de agosto de 2026, a suíte `tests/firestore.rules.test.mjs` foi executada no Firestore Emulator 1.19.8: 6 testes passaram e nenhum falhou. As regras ainda não foram publicadas no projeto remoto; manter o arquivo no repositório não altera as regras ativas no console.
+As regras estão versionadas em `firestore.rules`, associadas por `firebase.json` e publicadas no projeto `aurora-codex`. Em 8 de agosto de 2026, a suíte `tests/firestore.rules.test.mjs` foi executada no Firestore Emulator 1.19.8: 8 testes passaram e nenhum falhou. A publicação em produção foi confirmada no console do Firebase e os principais fluxos foram retestados no GitHub Pages.
 
 ## Matriz implementada
 
@@ -21,7 +21,7 @@ As regras locais estão em `firestore.rules` e a associação em `firebase.json`
 
 Ao entrar no painel de autor com `wilsononole@gmail.com`, livros sem `autorId` recebem o UID autenticado e universos sem `criadoPor` recebem o mesmo UID. As regras permitem essa atribuição somente para esse e-mail e somente quando o campo ainda não existe.
 
-Antes de publicar as regras, faça backup do Firestore e execute a checklist de segurança. Após confirmar a migração, uma etapa posterior pode remover a exceção temporária baseada em e-mail.
+O painel de autor foi acessado pela conta legada e as seis obras ficaram disponíveis em `Suas Obras`, acionando a migração dos documentos sem `autorId`. Antes de remover a exceção temporária baseada em e-mail, faça uma auditoria direta dos campos `autorId` e `criadoPor` no Firestore.
 
 ## Conteúdo e arquivos
 
@@ -32,11 +32,10 @@ Antes de publicar as regras, faça backup do Firestore e execute a checklist de 
 
 Validação no cliente melhora a experiência, mas limites equivalentes devem ser configurados no preset do Cloudinary. O preset não assinado continua sendo uma superfície externa ao Firestore.
 
-## Publicação planejada
+## Rotina para próximas alterações
 
-1. Instalar Node.js, Java e as dependências de desenvolvimento com `npm install`.
-2. Repetir os testes no Emulator com `npm run test:rules` antes de cada mudança nas regras.
-3. Fazer backup do banco de produção.
-4. Publicar somente as regras: `firebase deploy --only firestore:rules`.
-5. Entrar como proprietário legado e confirmar `autorId`/`criadoPor`.
-6. Executar a checklist completa de regressão e segurança.
+1. Executar `npm ci` e repetir `npm test` antes de cada mudança nas regras.
+2. Fazer backup do banco de produção.
+3. Publicar somente as regras: `firebase deploy --only firestore:rules`.
+4. Confirmar a versão ativa no console do Firebase.
+5. Executar a checklist de regressão e segurança em homologação e repetir os fluxos críticos em produção.
