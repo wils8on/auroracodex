@@ -12,29 +12,22 @@
     <nav class="navbar" id="main-nav">
         <div class="nav-left">
             <h1 class="nav-logo">AURORA CODEX</h1>
-            <div class="nav-drawer" id="nav-drawer">
-                <ul class="nav-links">
-                    <li><a href="#" class="active">Início</a></li>
-                    <li><a href="#">Biblioteca</a></li>
-                    <li><a href="#">Universos</a></li>
-                    <li><a href="#">Estante</a></li>
-                    <li><a href="#">Meus Livros</a></li>
-                    <li><a href="#">O Oráculo</a></li>
-                </ul>
-                <div class="nav-actions">
-                    <a href="#" id="link-adm" style="display:block">Painel ADM</a>
-                    <button id="btn-logout">Sair</button>
-                </div>
-            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active">Início</a></li>
+                <li><a href="#">Biblioteca</a></li>
+                <li><a href="#">Universos</a></li>
+                <li><a href="#">Estante</a></li>
+                <li><a href="#">Meus Livros</a></li>
+                <li><a href="#">O Oráculo</a></li>
+            </ul>
         </div>
         <div class="nav-right">
+            <a href="#" id="link-adm" style="display:block">Painel ADM</a>
+            <button id="btn-logout">Sair</button>
             <div class="user-profile">
                 <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100" alt="Perfil" id="user-avatar">
                 <span class="badge-profile">ADMIN</span>
             </div>
-            <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Abrir menu">
-                <span></span><span></span><span></span>
-            </button>
         </div>
     </nav>
 
@@ -88,14 +81,8 @@
         </div>
     </div>
 
+    <script type="module" src="../js/mobile-nav.js?v=mobile-nav-v1"></script>
     <script>
-        const nav = document.getElementById('main-nav');
-        const toggle = document.getElementById('mobile-menu-toggle');
-        toggle.addEventListener('click', () => {
-            const aberto = nav.classList.toggle('mobile-open');
-            toggle.setAttribute('aria-expanded', String(aberto));
-            toggle.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
-        });
         document.getElementById('open-test-modal').addEventListener('click', () => {
             document.getElementById('netflix-modal').style.display = 'block';
             document.body.style.overflow = 'hidden';
