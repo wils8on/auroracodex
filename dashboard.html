@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/dashboard.css?v=mobile-dashboard-v2">
+    <link rel="stylesheet" href="css/dashboard.css?v=mobile-nav-v1">
     <link rel="stylesheet" href="css/ux.css">
 </head>
 <body>
@@ -133,24 +133,6 @@
     <!-- Script para mudar a cor da Navbar ao rolar a página -->
     <script>
         const nav = document.getElementById('main-nav');
-        const menuToggle = document.getElementById('mobile-menu-toggle');
-        const navDrawer = document.getElementById('nav-drawer');
-
-        function fecharMenuMobile() {
-            nav.classList.remove('mobile-open');
-            menuToggle?.setAttribute('aria-expanded', 'false');
-            menuToggle?.setAttribute('aria-label', 'Abrir menu');
-        }
-
-        menuToggle?.addEventListener('click', () => {
-            const aberto = nav.classList.toggle('mobile-open');
-            menuToggle.setAttribute('aria-expanded', String(aberto));
-            menuToggle.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu');
-        });
-        navDrawer?.querySelectorAll('a').forEach(link => link.addEventListener('click', fecharMenuMobile));
-        document.addEventListener('keydown', event => {
-            if (event.key === 'Escape') fecharMenuMobile();
-        });
         window.onscroll = function () { 
             if (window.scrollY > 50) {
                 nav.classList.add("nav-black");
@@ -165,6 +147,7 @@
         }
     </script>
 
+    <script type="module" src="js/mobile-nav.js?v=mobile-nav-v1"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
