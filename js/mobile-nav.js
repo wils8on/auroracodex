@@ -76,3 +76,4 @@ function prepararMenuMobile(nav) {
 }
 
 document.querySelectorAll("nav.navbar").forEach(prepararMenuMobile);
+import("./pwa.js?v=pwa-v1");
