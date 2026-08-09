@@ -3,7 +3,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/fi
 import { collection, addDoc, doc, getDoc, setDoc, onSnapshot, deleteDoc, updateDoc, orderBy, query, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
 import { loadUserProfile, hasProfile } from "./user-service.js";
-import { sanitizeRichHtml } from "./security.js";
+import { escapeHtml, safeUrl, sanitizeRichHtml } from "./security.js";
 import { setButtonBusy, showToast } from "./feedback.js";
 import { confirmAction } from "./dialog-accessibility.js?v=confirm-dialog-v1";
 
