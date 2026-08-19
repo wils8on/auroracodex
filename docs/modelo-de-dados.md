@@ -40,14 +40,18 @@ O próprio usuário cria o documento inicial. Apenas administradores deveriam po
 
 - `numero`, `titulo`, `status`, `conteudo`
 - `trilhaSonora`, `capa`, `corCena`
-- `data_publicacao`
+- `data_publicacao`, `data_agendamento`
 - `curtidasUids`: array de UIDs
+
+`status` aceita `rascunho`, `agendado` e `publicado`. Um capítulo agendado só é exibido ao leitor quando `data_agendamento` for atingida.
 
 `conteudo` é HTML e precisa ser sanitizado. Curtidas em um array dentro do capítulo podem atingir limites de tamanho em escala.
 
 ### `livros/{livroId}/personagens/{personagemId}`
 
-- `nome`, `papel`, `primeiraAparicao`, `foto`, `descricao`
+- `nome`, `papel`, `primeiraAparicao`, `capitulosAparicao`, `foto`, `descricao`
+
+`capitulosAparicao` contém os IDs de todos os capítulos em que o personagem aparece. O Códice do leitor usa essa lista para revelar apenas personagens presentes no capítulo atual.
 
 ### `livros/{livroId}/galeria/{itemId}`
 

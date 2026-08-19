@@ -61,6 +61,11 @@
                 </p>
             </section>
 
+            <nav class="chapter-navigation" aria-label="Navegação entre capítulos">
+                <a id="capitulo-anterior" class="chapter-navigation-link" hidden>← <span>Capítulo anterior</span></a>
+                <a id="proximo-capitulo" class="chapter-navigation-link chapter-navigation-next" hidden><span>Próximo capítulo</span> →</a>
+            </nav>
+
             <!-- Área de Interações do Capítulo -->
             <footer class="chapter-interactions">
                 <button class="btn-like" id="btn-like">
@@ -152,7 +157,7 @@
 
     <!-- Interface nativa com o script dinâmico do Firebase -->
     <script type="module" src="js/pwa.js?v=pwa-v1"></script>
-    <script type="module" src="js/ler.js"></script>
+    <script type="module" src="js/ler.js?v=reading-flow-v1"></script>
 
     <!-- Script de Interação Local da Página -->
     <script>
