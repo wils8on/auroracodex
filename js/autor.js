@@ -216,6 +216,9 @@ function inicializarDadosAutor() {
         const selectLivro = document.getElementById("select-livro-capitulo");
         const selectLivroPersonagem = document.getElementById("select-livro-personagem");
         const selectLivroGaleria = document.getElementById("select-livro-galeria");
+        const livroCapituloSelecionado = selectLivro?.value || "";
+        const livroPersonagemSelecionado = selectLivroPersonagem?.value || "";
+        const livroGaleriaSelecionado = selectLivroGaleria?.value || "";
 
         if (tbody) tbody.innerHTML = "";
         if (selectLivro) selectLivro.innerHTML = '<option value="">Selecione a Obra...</option>';
@@ -277,6 +280,12 @@ function inicializarDadosAutor() {
         livrosCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).filter(livro =>
             perfilAtual === "admin" || livro.autorId === usuarioAtual?.uid || (!livro.autorId && usuarioAtual?.email === LEGACY_OWNER_EMAIL)
         );
+        if (selectLivro && [...selectLivro.options].some(option => option.value === livroCapituloSelecionado)) selectLivro.value = livroCapituloSelecionado;
+        if (selectLivroPersonagem && [...selectLivroPersonagem.options].some(option => option.value === livroPersonagemSelecionado)) {
+            selectLivroPersonagem.value = livroPersonagemSelecionado;
+            carregarCapitulosParaPersonagem(livroPersonagemSelecionado);
+        }
+        if (selectLivroGaleria && [...selectLivroGaleria.options].some(option => option.value === livroGaleriaSelecionado)) selectLivroGaleria.value = livroGaleriaSelecionado;
         atualizarUIUniversos();
         oferecerRecuperacaoRascunho();
         atualizarFiltroObras();
@@ -875,20 +884,44 @@ function inicializarDadosPersonagens() {
 }
 
 async function carregarCapitulosParaPersonagem(livroId, selecionados = []) {
-    const select = document.getElementById("capitulos-personagem");
-    if (!select) return;
-    select.replaceChildren();
+    const container = document.getElementById("capitulos-personagem");
+    if (!container) return;
+    container.replaceChildren();
     if (!livroId) return;
-    const snapshot = await getDocs(query(collection(db, "livros", livroId, "capitulos"), orderBy("numero", "asc")));
-    snapshot.forEach(registro => {
-        const capitulo = registro.data();
-        const option = document.createElement("option");
-        option.value = registro.id;
-        option.textContent = `Capítulo ${capitulo.numero} — ${capitulo.titulo || "Sem título"}`;
-        option.dataset.numero = String(capitulo.numero ?? "");
-        option.selected = selecionados.includes(registro.id);
-        select.appendChild(option);
-    });
+    const estado = document.createElement("p");
+    estado.className = "chapter-appearance-empty";
+    estado.textContent = "Carregando capítulos...";
+    container.appendChild(estado);
+    try {
+        const snapshot = await getDocs(collection(db, "livros", livroId, "capitulos"));
+        const capitulos = snapshot.docs
+            .map(registro => ({ id: registro.id, ...registro.data() }))
+            .sort((a, b) => Number(a.numero || 0) - Number(b.numero || 0));
+        container.replaceChildren();
+        if (!capitulos.length) {
+            estado.textContent = "Esta obra ainda não possui capítulos cadastrados.";
+            container.appendChild(estado);
+            return;
+        }
+        capitulos.forEach(capitulo => {
+            const label = document.createElement("label");
+            label.className = "chapter-appearance-option";
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.name = "capitulos-personagem";
+            checkbox.value = capitulo.id;
+            checkbox.dataset.numero = String(capitulo.numero ?? "");
+            checkbox.checked = selecionados.includes(capitulo.id);
+            const texto = document.createElement("span");
+            texto.textContent = `Capítulo ${capitulo.numero || "?"} — ${capitulo.titulo || "Sem título"}`;
+            label.append(checkbox, texto);
+            container.appendChild(label);
+        });
+    } catch (erro) {
+        console.error("Erro ao carregar capítulos do personagem:", erro);
+        estado.textContent = "Não foi possível carregar os capítulos. Tente selecionar a obra novamente.";
+        container.replaceChildren(estado);
+    }
 }
 
 function carregarPersonagensDaObra(livroId) {
@@ -998,12 +1031,12 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
             urlFotoFinal = await uploadImagem(arquivoFoto, "personagens", "progresso-upload-personagem");
         }
 
-        const selectCapitulos = document.getElementById("capitulos-personagem");
-        const opcoesSelecionadas = [...selectCapitulos.selectedOptions];
+        const opcoesSelecionadas = [...document.querySelectorAll('input[name="capitulos-personagem"]:checked')];
         const capitulosAparicao = opcoesSelecionadas.map(option => option.value);
         if (!capitulosAparicao.length) throw new Error("Selecione ao menos um capítulo em que o personagem aparece.");
-        const primeiraOpcao = opcoesSelecionadas.sort((a, b) => Number(a.dataset.numero) - Number(b.dataset.numero))[0];
-        const primeiraAparicao = primeiraOpcao?.textContent?.split(" — ")[0] || "";
+        const primeiraOpcao = [...opcoesSelecionadas].sort((a, b) => Number(a.dataset.numero) - Number(b.dataset.numero))[0];
+        const primeiraAparicaoInformada = document.getElementById("primeira-aparicao-personagem").value.trim();
+        const primeiraAparicao = primeiraAparicaoInformada || `Capítulo ${primeiraOpcao?.dataset.numero || ""}`;
 
         const dadosPersonagem = {
             nome: document.getElementById("nome-personagem").value,

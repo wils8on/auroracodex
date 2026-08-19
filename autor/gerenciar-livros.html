@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/dashboard.css?v=pwa-v1">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/autor.css">
+    <link rel="stylesheet" href="../css/autor.css?v=character-chapters-v2">
     <link rel="stylesheet" href="../css/ux.css?v=hidden-states-v1">
     <style>
         /* CORREÇÃO DE OVERFLOW: Força a rolagem vertical nativa e impede cortes de tela */
@@ -350,13 +350,15 @@
                         </div>
                         <div class="form-group">
                             <label for="primeira-aparicao-personagem">Primeira Aparição</label>
-                            <input type="text" id="primeira-aparicao-personagem" placeholder="Calculada pelos capítulos selecionados" readonly>
+                            <input type="text" id="primeira-aparicao-personagem" placeholder="Ex: Capítulo 5">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="capitulos-personagem">Capítulos em que aparece</label>
-                        <select id="capitulos-personagem" multiple size="7" required></select>
-                        <small style="color:#8C8C8C;">Use Ctrl (Windows) ou Command (Mac) para selecionar vários capítulos.</small>
+                        <label id="label-capitulos-personagem">Capítulos em que aparece</label>
+                        <div id="capitulos-personagem" class="chapter-appearance-list" role="group" aria-labelledby="label-capitulos-personagem">
+                            <p class="chapter-appearance-empty">Selecione uma obra para carregar os capítulos.</p>
+                        </div>
+                        <small style="color:#8C8C8C;">Marque todos os capítulos em que o personagem participa.</small>
                     </div>
                     <div class="form-group">
                         <label for="arquivo-avatar-personagem">Foto do Personagem</label>
@@ -665,6 +667,6 @@
         }
     </script>
     <script type="module" src="../js/mobile-nav.js?v=mobile-nav-v1"></script>
-    <script type="module" src="../js/autor.js?v=scheduled-chapters-v1"></script>
+    <script type="module" src="../js/autor.js?v=character-chapters-v2"></script>
 </body>
 </html>

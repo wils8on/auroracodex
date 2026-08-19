@@ -10,7 +10,6 @@ import { confirmAction } from "./dialog-accessibility.js?v=confirm-dialog-v1";
 const READER_PREFERENCES_KEY = "aurora-codex:preferencias-leitura";
 
 function capituloDisponivel(capitulo, perfil) {
-    if (["admin", "autor"].includes(perfil?.perfil)) return true;
     if (capitulo.status === "rascunho") return false;
     if (capitulo.status !== "agendado") return true;
     return Boolean(capitulo.data_agendamento) && new Date(capitulo.data_agendamento).getTime() <= Date.now();
@@ -136,10 +135,8 @@ async function carregarConteudoCapitulo(user, perfil) {
             configurarPlayerTrilha(dadosCap.trilhaSonora, dadosCap.titulo);
 
             const capitulosSnapshot = await getDocs(query(collection(db, "livros", livroId, "capitulos"), orderBy("numero", "asc")));
-            const capitulosDisponiveis = capitulosSnapshot.docs
-                .map(registro => ({ id: registro.id, ...registro.data() }))
-                .filter(capitulo => capituloDisponivel(capitulo, perfil));
-            configurarNavegacaoCapitulos(livroId, capituloId, capitulosDisponiveis);
+            const todosCapitulos = capitulosSnapshot.docs.map(registro => ({ id: registro.id, ...registro.data() }));
+            configurarNavegacaoCapitulos(livroId, capituloId, todosCapitulos, perfil, dadosLivro.capa);
 
             // 2.4 CONFIGURA O BOTÃO DE CURTIDAS (persistido no Firestore, por usuário)
             configurarBotaoLike(user, livroId, capituloId, dadosCap);
@@ -165,7 +162,8 @@ async function carregarConteudoCapitulo(user, perfil) {
                 } else {
                     personagensEmCena.forEach((pSnap) => {
                         const p = pSnap.data();
-                        const cardChar = document.createElement("div");
+                        const cardChar = document.createElement("button");
+                        cardChar.type = "button";
                         cardChar.className = "character-mini-card";
                         cardChar.innerHTML = `
                             <img src="${safeUrl(p.foto, 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100')}" alt="${escapeHtml(p.nome)}">
@@ -175,6 +173,7 @@ async function carregarConteudoCapitulo(user, perfil) {
                                 <p class="char-desc">${escapeHtml(p.descricao)}</p>
                             </div>
                         `;
+                        cardChar.addEventListener("click", () => abrirFichaPersonagem(p));
                         sidebarContent.appendChild(cardChar);
                     });
                 }
@@ -310,7 +309,7 @@ async function configurarComentarios(user, perfil, livroId, capituloId) {
     await carregar();
 }
 
-function configurarNavegacaoCapitulos(livroId, capituloId, capitulos) {
+function configurarNavegacaoCapitulos(livroId, capituloId, capitulos, perfil, capaLivro) {
     const indice = capitulos.findIndex(capitulo => capitulo.id === capituloId);
     const anterior = document.getElementById("capitulo-anterior");
     const proximo = document.getElementById("proximo-capitulo");
@@ -322,9 +321,55 @@ function configurarNavegacaoCapitulos(livroId, capituloId, capitulos) {
         const texto = elemento.querySelector("span");
         if (texto) texto.textContent = `${rotulo}: ${capitulo.titulo || `Capítulo ${capitulo.numero}`}`;
     };
-    configurar(anterior, indice > 0 ? capitulos[indice - 1] : null, "Anterior");
-    configurar(proximo, indice >= 0 && indice < capitulos.length - 1 ? capitulos[indice + 1] : null, "Próximo");
+    const anteriorPublicado = capitulos.slice(0, Math.max(indice, 0)).reverse().find(capitulo => capituloDisponivel(capitulo, perfil));
+    configurar(anterior, anteriorPublicado || null, "Anterior");
+
+    const seguinte = indice >= 0 && indice < capitulos.length - 1 ? capitulos[indice + 1] : null;
+    if (!proximo) return;
+    proximo.onclick = null;
+    if (!seguinte || seguinte.status === "rascunho") {
+        proximo.hidden = true;
+    } else if (capituloDisponivel(seguinte, perfil)) {
+        configurar(proximo, seguinte, "Próximo");
+    } else if (seguinte.status === "agendado") {
+        proximo.hidden = false;
+        proximo.removeAttribute("href");
+        const texto = proximo.querySelector("span");
+        if (texto) texto.textContent = `Próximo: ${seguinte.titulo || `Capítulo ${seguinte.numero}`}`;
+        proximo.onclick = event => {
+            event.preventDefault();
+            abrirAvisoDisponibilidade(seguinte, capaLivro);
+        };
+    }
 }
+
+function abrirFichaPersonagem(personagem) {
+    const dialog = document.getElementById("character-profile-dialog");
+    if (!dialog) return;
+    const imagem = document.getElementById("character-profile-image");
+    imagem.src = safeUrl(personagem.foto, "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=800");
+    imagem.alt = personagem.nome ? `Retrato de ${personagem.nome}` : "Retrato do personagem";
+    document.getElementById("character-profile-name").textContent = personagem.nome || "Personagem";
+    document.getElementById("character-profile-role").textContent = personagem.papel || personagem.funcao || "Personagem";
+    document.getElementById("character-profile-first").textContent = personagem.primeiraAparicao ? `Primeira aparição: ${personagem.primeiraAparicao}` : "Primeira aparição não informada";
+    document.getElementById("character-profile-description").textContent = personagem.descricao || "Descrição ainda não cadastrada.";
+    dialog.showModal();
+}
+
+function abrirAvisoDisponibilidade(capitulo, capaLivro) {
+    const dialog = document.getElementById("chapter-availability-dialog");
+    if (!dialog) return;
+    const data = new Date(capitulo.data_agendamento);
+    const dataTexto = data.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+    const horaTexto = data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    document.getElementById("chapter-availability-message").textContent = `O próximo capítulo “${capitulo.titulo || `Capítulo ${capitulo.numero}`}” estará disponível a partir do dia ${dataTexto}, às ${horaTexto}.`;
+    const banner = document.getElementById("chapter-availability-banner");
+    banner.style.backgroundImage = capaLivro ? `linear-gradient(180deg, transparent, rgba(24,19,38,0.35)), url('${safeUrl(capaLivro)}')` : "linear-gradient(135deg, #332C4D, #F97316)";
+    dialog.showModal();
+}
+
+document.getElementById("close-character-profile")?.addEventListener("click", () => document.getElementById("character-profile-dialog")?.close());
+document.getElementById("close-chapter-availability")?.addEventListener("click", () => document.getElementById("chapter-availability-dialog")?.close());
 
 function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
     const trackTitle = document.getElementById("player-track-title");
