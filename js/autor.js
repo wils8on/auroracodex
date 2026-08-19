@@ -1,6 +1,6 @@
 // js/autor.js
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { collection, addDoc, doc, getDoc, setDoc, onSnapshot, deleteDoc, updateDoc, orderBy, query, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, doc, getDoc, getDocs, setDoc, onSnapshot, deleteDoc, updateDoc, orderBy, query, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
 import { loadUserProfile, hasProfile } from "./user-service.js";
 import { escapeHtml, safeUrl, sanitizeRichHtml } from "./security.js";
@@ -1063,7 +1063,7 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
         document.getElementById("preview-wrapper-personagem").style.display = "none";
     } catch (err) {
         console.error(err);
-        showToast("Erro ao salvar personagem.", "error");
+        showToast(`Erro ao salvar personagem: ${err?.message || "tente novamente"}.`, "error", 6500);
     } finally {
         setButtonBusy(btnSubmit, false);
     }
