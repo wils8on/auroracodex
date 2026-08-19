@@ -384,7 +384,12 @@ body {
     border-radius: 6px;
     margin-bottom: 15px;
     border: 1px solid rgba(255,255,255,0.03);
+    width: 100%;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
 }
+.character-mini-card:hover { border-color: rgba(249,115,22,0.55); background: rgba(249,115,22,0.08); }
 
 .character-mini-card img {
     width: 60px;
@@ -446,6 +451,35 @@ body {
     flex-direction: column;
     min-width: 0;
 }
+
+.character-profile-dialog,
+.chapter-availability-dialog {
+    width: min(92vw, 620px);
+    max-height: 88vh;
+    padding: 0;
+    overflow: auto;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    color: #FFF;
+    background: #181326;
+    box-shadow: 0 28px 80px rgba(0,0,0,0.65);
+}
+.character-profile-dialog::backdrop,
+.chapter-availability-dialog::backdrop { background: rgba(5,3,10,0.84); backdrop-filter: blur(6px); }
+.dialog-close { position: absolute; z-index: 2; top: 12px; right: 14px; width: 40px; height: 40px; border: 0; border-radius: 50%; color:#FFF; background:rgba(0,0,0,0.58); font-size:1.7rem; cursor:pointer; }
+.character-profile-image { display:block; width:100%; height:min(48vh,360px); object-fit:cover; object-position:center top; }
+.character-profile-body { padding: 26px 30px 32px; }
+.character-profile-kicker,
+.chapter-availability-kicker { color:#F97316; font-size:0.75rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; }
+.character-profile-body h2,
+.chapter-availability-body h2 { margin:8px 0 6px; font-family:'Cinzel',serif; }
+.character-profile-role { color:#F97316; font-weight:600; }
+.character-profile-first { margin:8px 0 20px; color:#A3A3A3; font-size:0.9rem; }
+.character-profile-description { color:#D4D4D4; line-height:1.7; }
+.chapter-availability-banner { height:230px; background-size:cover; background-position:center; }
+.chapter-availability-body { padding:26px 30px 30px; }
+.chapter-availability-body p { margin:12px 0 22px; color:#D4D4D4; line-height:1.6; }
+.chapter-availability-body button { width:100%; min-height:48px; border:0; border-radius:7px; color:#FFF; background:#F97316; font-weight:700; cursor:pointer; }
 
 .track-title {
     font-size: 0.9rem;

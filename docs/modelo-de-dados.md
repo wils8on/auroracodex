@@ -53,6 +53,8 @@ O próprio usuário cria o documento inicial. Apenas administradores deveriam po
 
 `capitulosAparicao` contém os IDs de todos os capítulos em que o personagem aparece. O Códice do leitor usa essa lista para revelar apenas personagens presentes no capítulo atual.
 
+A ficha completa do personagem é aberta a partir do Códice durante a leitura. Personagens legados sem `capitulosAparicao` permanecem ocultos até que o autor associe seus capítulos no painel.
+
 ### `livros/{livroId}/galeria/{itemId}`
 
 - `titulo`, `tipo`, `categoria`, `url`, `descricao`, `ordem`, `data_criacao`

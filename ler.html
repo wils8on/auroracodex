@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/ler.css">
+    <link rel="stylesheet" href="css/ler.css?v=codex-flow-v2">
     <link rel="stylesheet" href="css/ux.css">
 </head>
 <body>
@@ -132,6 +132,28 @@
         </div>
     </aside>
 
+    <dialog class="character-profile-dialog" id="character-profile-dialog" aria-labelledby="character-profile-name">
+        <button type="button" class="dialog-close" id="close-character-profile" aria-label="Fechar ficha">×</button>
+        <img id="character-profile-image" class="character-profile-image" alt="">
+        <div class="character-profile-body">
+            <span class="character-profile-kicker">Códice de personagem</span>
+            <h2 id="character-profile-name"></h2>
+            <p id="character-profile-role" class="character-profile-role"></p>
+            <p id="character-profile-first" class="character-profile-first"></p>
+            <p id="character-profile-description" class="character-profile-description"></p>
+        </div>
+    </dialog>
+
+    <dialog class="chapter-availability-dialog" id="chapter-availability-dialog" aria-labelledby="chapter-availability-title">
+        <div class="chapter-availability-banner" id="chapter-availability-banner"></div>
+        <div class="chapter-availability-body">
+            <span class="chapter-availability-kicker">Próxima publicação</span>
+            <h2 id="chapter-availability-title">Um novo capítulo está a caminho</h2>
+            <p id="chapter-availability-message"></p>
+            <button type="button" id="close-chapter-availability">Continuar explorando</button>
+        </div>
+    </dialog>
+
     <!-- Player Fixo de Trilha Sonora (único — antes havia dois blocos duplicados com os mesmos IDs) -->
     <div class="audio-player-dock" id="audio-player-dock">
         <div class="player-track-info">
@@ -157,7 +179,7 @@
 
     <!-- Interface nativa com o script dinâmico do Firebase -->
     <script type="module" src="js/pwa.js?v=pwa-v1"></script>
-    <script type="module" src="js/ler.js?v=reading-flow-v1"></script>
+    <script type="module" src="js/ler.js?v=codex-flow-v2"></script>
 
     <!-- Script de Interação Local da Página -->
     <script>
