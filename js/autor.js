@@ -485,6 +485,7 @@ function salvarRascunhoLocal() {
         numero: document.getElementById("numero-capitulo")?.value || "",
         titulo,
         status: document.getElementById("status-capitulo")?.value || "publicado",
+        dataAgendamento: document.getElementById("data-agendamento-capitulo")?.value || "",
         corCena: document.getElementById("cor-cena-capitulo")?.value || "#f97316",
         conteudo,
         salvoEm: new Date().toISOString()
@@ -530,6 +531,8 @@ async function oferecerRecuperacaoRascunho() {
     document.getElementById("numero-capitulo").value = rascunho.numero || "";
     document.getElementById("titulo-capitulo").value = rascunho.titulo || "";
     document.getElementById("status-capitulo").value = rascunho.status || "publicado";
+    document.getElementById("data-agendamento-capitulo").value = rascunho.dataAgendamento || "";
+    atualizarCampoAgendamento();
     document.getElementById("cor-cena-capitulo").value = rascunho.corCena || "#f97316";
     document.getElementById("conteudo-capitulo").innerHTML = rascunho.conteudo || "";
     const texto = document.getElementById("conteudo-capitulo").innerText.trim();
@@ -568,12 +571,31 @@ function inicializarDadosCapitulos() {
         const btn = document.getElementById("btn-submit-capitulo");
         if (!btn) return;
         const editando = !!idCapituloEdicao;
+        atualizarCampoAgendamento();
         if (e.target.value === "rascunho") {
             btn.innerText = editando ? "Atualizar Rascunho" : "Salvar Rascunho";
+        } else if (e.target.value === "agendado") {
+            btn.innerText = editando ? "Atualizar Agendamento" : "Agendar Publicação";
         } else {
             btn.innerText = editando ? "Atualizar Capítulo" : "Publicar Capítulo";
         }
     });
+    atualizarCampoAgendamento();
+}
+
+function atualizarCampoAgendamento() {
+    const grupo = document.getElementById("grupo-agendamento-capitulo");
+    const campo = document.getElementById("data-agendamento-capitulo");
+    const agendado = document.getElementById("status-capitulo")?.value === "agendado";
+    if (grupo) grupo.hidden = !agendado;
+    if (campo) campo.required = agendado;
+}
+
+function isoParaDataLocal(valor) {
+    const data = valor ? new Date(valor) : null;
+    if (!data || Number.isNaN(data.getTime())) return "";
+    const local = new Date(data.getTime() - data.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
 }
 
 // Mostra o nome da obra selecionada no topo do editor (estilo "estúdio")
@@ -620,6 +642,9 @@ function resetarFormularioCapitulo() {
 
         const statusSelect = document.getElementById("status-capitulo");
         if (statusSelect) statusSelect.value = "publicado";
+        const dataAgendamento = document.getElementById("data-agendamento-capitulo");
+        if (dataAgendamento) dataAgendamento.value = "";
+        atualizarCampoAgendamento();
 
         form.querySelector(".btn-submit").innerText = "Publicar Capítulo";
         document.getElementById("contador-palavras").innerText = "0";
@@ -667,6 +692,7 @@ function carregarCapitulosDaObra(livroId) {
                     <span style="color:#F97316; font-weight:600; margin-right:10px;">Cap. ${cap.numero}</span>
                     <strong style="color:#FFF;">${cap.titulo}</strong>
                     ${cap.status === 'rascunho' ? '<span class="badge-rascunho-capitulo">Rascunho</span>' : ''}
+                    ${cap.status === 'agendado' ? `<span class="badge-rascunho-capitulo">Agendado para ${new Date(cap.data_agendamento).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span>` : ''}
                 </div>
                 <div>
                     <button class="btn-editar-capitulo" data-id="${id}" style="background:#332C4D; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
@@ -692,7 +718,9 @@ function vincularEventosCapitulos(livroId) {
                 document.getElementById("numero-capitulo").value = cap.numero;
                 document.getElementById("titulo-capitulo").value = cap.titulo;
                 document.getElementById("cor-cena-capitulo").value = cap.corCena || "#f97316";
-                document.getElementById("status-capitulo").value = cap.status === "rascunho" ? "rascunho" : "publicado";
+                document.getElementById("status-capitulo").value = ["rascunho", "agendado"].includes(cap.status) ? cap.status : "publicado";
+                document.getElementById("data-agendamento-capitulo").value = isoParaDataLocal(cap.data_agendamento);
+                atualizarCampoAgendamento();
 
                 // Capa do capítulo: guarda a URL já existente e mostra o preview
                 document.getElementById("capa-capitulo").value = cap.capa || "";
@@ -728,7 +756,9 @@ function vincularEventosCapitulos(livroId) {
                 const textoPlano = (editor.innerText || "").trim();
                 document.getElementById("contador-palavras").innerText = textoPlano === "" ? 0 : textoPlano.split(/\s+/).length;
 
-                document.getElementById("form-cadastrar-capitulo").querySelector(".btn-submit").innerText = "Atualizar Capítulo";
+                document.getElementById("form-cadastrar-capitulo").querySelector(".btn-submit").innerText = cap.status === "rascunho"
+                    ? "Atualizar Rascunho"
+                    : cap.status === "agendado" ? "Atualizar Agendamento" : "Atualizar Capítulo";
                 const btnCancelar = document.getElementById("btn-cancelar-edicao-capitulo");
                 if (btnCancelar) btnCancelar.style.display = "inline-block";
 
@@ -791,13 +821,20 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
             trilhaFinal = document.getElementById("trilha-sonora").value || "";
         }
 
+        const statusCapitulo = document.getElementById("status-capitulo").value || "publicado";
+        const dataAgendamentoLocal = document.getElementById("data-agendamento-capitulo")?.value || "";
+        if (statusCapitulo === "agendado" && new Date(dataAgendamentoLocal).getTime() <= Date.now()) {
+            throw new Error("Escolha uma data futura para o agendamento.");
+        }
+
         const capituloDados = {
             numero: parseInt(document.getElementById("numero-capitulo").value),
             titulo: document.getElementById("titulo-capitulo").value,
             trilhaSonora: trilhaFinal,
             capa: urlCapaFinal,
             corCena: document.getElementById("cor-cena-capitulo").value || "#f97316",
-            status: document.getElementById("status-capitulo").value || "publicado",
+            status: statusCapitulo,
+            data_agendamento: statusCapitulo === "agendado" ? new Date(dataAgendamentoLocal).toISOString() : null,
             conteudo: sanitizeRichHtml(conteudoHtml)
         };
 
@@ -805,9 +842,9 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
             await updateDoc(doc(db, "livros", idLivro, "capitulos", idCapituloEdicao), capituloDados);
             showToast(`Capítulo ${capituloDados.numero} atualizado com sucesso!`, "success");
         } else {
-            capituloDados.data_publicacao = new Date().toISOString();
+            capituloDados.data_publicacao = statusCapitulo === "agendado" ? null : new Date().toISOString();
             await addDoc(collection(db, "livros", idLivro, "capitulos"), capituloDados);
-            showToast(`Capítulo ${capituloDados.numero} publicado no Codex!`, "success");
+            showToast(statusCapitulo === "agendado" ? `Capítulo ${capituloDados.numero} agendado com sucesso!` : `Capítulo ${capituloDados.numero} publicado no Codex!`, "success");
         }
         limparRascunhoLocal();
         resetarFormularioCapitulo();
@@ -833,6 +870,24 @@ function inicializarDadosPersonagens() {
     // Sempre que o autor trocar a obra selecionada, recarrega a lista de personagens dela
     selectLivroPersonagem.addEventListener("change", () => {
         carregarPersonagensDaObra(selectLivroPersonagem.value);
+        carregarCapitulosParaPersonagem(selectLivroPersonagem.value);
+    });
+}
+
+async function carregarCapitulosParaPersonagem(livroId, selecionados = []) {
+    const select = document.getElementById("capitulos-personagem");
+    if (!select) return;
+    select.replaceChildren();
+    if (!livroId) return;
+    const snapshot = await getDocs(query(collection(db, "livros", livroId, "capitulos"), orderBy("numero", "asc")));
+    snapshot.forEach(registro => {
+        const capitulo = registro.data();
+        const option = document.createElement("option");
+        option.value = registro.id;
+        option.textContent = `Capítulo ${capitulo.numero} — ${capitulo.titulo || "Sem título"}`;
+        option.dataset.numero = String(capitulo.numero ?? "");
+        option.selected = selecionados.includes(registro.id);
+        select.appendChild(option);
     });
 }
 
@@ -871,7 +926,7 @@ function carregarPersonagensDaObra(livroId) {
                 <img src="${p.foto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100'}" style="width:48px; height:48px; object-fit:cover; border-radius:4px;">
                 <div style="flex-grow:1;">
                     <strong style="color:#FFF;">${p.nome}</strong>
-                    <p style="color:#8C8C8C; font-size:0.8rem;">${p.papel || p.funcao || 'Sem papel definido'}${p.primeiraAparicao ? ' • ' + p.primeiraAparicao : ''}</p>
+                    <p style="color:#8C8C8C; font-size:0.8rem;">${p.papel || p.funcao || 'Sem papel definido'}${p.primeiraAparicao ? ' • ' + p.primeiraAparicao : ''}${Array.isArray(p.capitulosAparicao) ? ` • ${p.capitulosAparicao.length} capítulo(s)` : ''}</p>
                 </div>
                 <button class="btn-editar-personagem" data-id="${id}" style="background:#332C4D; color:#FFF; border:none; padding:6px 12px; margin-right:8px; border-radius:4px; cursor:pointer;">Editar</button>
                 <button class="btn-excluir-personagem" data-id="${id}" style="background:#F97316; color:#FFF; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Excluir</button>
@@ -895,6 +950,7 @@ function vincularEventosPersonagens(livroId) {
                 document.getElementById("nome-personagem").value = p.nome;
                 document.getElementById("papel-personagem").value = p.papel || "Secundário";
                 document.getElementById("primeira-aparicao-personagem").value = p.primeiraAparicao || "";
+                await carregarCapitulosParaPersonagem(livroId, Array.isArray(p.capitulosAparicao) ? p.capitulosAparicao : []);
                 document.getElementById("url-avatar-personagem").value = p.foto || "";
                 document.getElementById("arquivo-avatar-personagem").value = "";
                 if (p.foto) {
@@ -942,10 +998,18 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
             urlFotoFinal = await uploadImagem(arquivoFoto, "personagens", "progresso-upload-personagem");
         }
 
+        const selectCapitulos = document.getElementById("capitulos-personagem");
+        const opcoesSelecionadas = [...selectCapitulos.selectedOptions];
+        const capitulosAparicao = opcoesSelecionadas.map(option => option.value);
+        if (!capitulosAparicao.length) throw new Error("Selecione ao menos um capítulo em que o personagem aparece.");
+        const primeiraOpcao = opcoesSelecionadas.sort((a, b) => Number(a.dataset.numero) - Number(b.dataset.numero))[0];
+        const primeiraAparicao = primeiraOpcao?.textContent?.split(" — ")[0] || "";
+
         const dadosPersonagem = {
             nome: document.getElementById("nome-personagem").value,
             papel: document.getElementById("papel-personagem").value,
-            primeiraAparicao: document.getElementById("primeira-aparicao-personagem").value.trim(),
+            primeiraAparicao,
+            capitulosAparicao,
             foto: urlFotoFinal,
             descricao: document.getElementById("descricao-personagem").value
         };
@@ -962,6 +1026,7 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
         }
         e.target.reset();
         document.getElementById("select-livro-personagem").value = livroId; // mantém a obra selecionada
+        await carregarCapitulosParaPersonagem(livroId);
         document.getElementById("preview-wrapper-personagem").style.display = "none";
     } catch (err) {
         console.error(err);

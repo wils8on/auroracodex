@@ -9,6 +9,13 @@ import { confirmAction } from "./dialog-accessibility.js?v=confirm-dialog-v1";
 
 const READER_PREFERENCES_KEY = "aurora-codex:preferencias-leitura";
 
+function capituloDisponivel(capitulo, perfil) {
+    if (["admin", "autor"].includes(perfil?.perfil)) return true;
+    if (capitulo.status === "rascunho") return false;
+    if (capitulo.status !== "agendado") return true;
+    return Boolean(capitulo.data_agendamento) && new Date(capitulo.data_agendamento).getTime() <= Date.now();
+}
+
 function configurarPreferenciasLeitura() {
     const core = document.querySelector(".reading-core");
     const chapterText = document.getElementById("capitulo-texto-exibicao");
@@ -78,6 +85,12 @@ async function carregarConteudoCapitulo(user, perfil) {
             const dadosCap = capDoc.data();
             const dadosLivro = livroDoc.exists() ? livroDoc.data() : { titulo: "Obra Codex" };
 
+            if (!capituloDisponivel(dadosCap, perfil)) {
+                renderContentState(document.getElementById("capitulo-texto-exibicao"), { type: "empty", title: "Capítulo ainda não publicado", message: "Este capítulo estará disponível na data programada pelo autor." });
+                showToast("Este capítulo ainda não está disponível.", "info");
+                return;
+            }
+
             // 1. Atualiza cabeçalho e texto narrativo
             const txtHeaderLivro = document.getElementById("header-nome-livro");
             const txtHeaderCapitulo = document.getElementById("header-nome-capitulo");
@@ -122,6 +135,12 @@ async function carregarConteudoCapitulo(user, perfil) {
             // 2. CONFIGURAÇÃO DINÂMICA DA TRILHA SONORA (PLAYER NO RODAPÉ)
             configurarPlayerTrilha(dadosCap.trilhaSonora, dadosCap.titulo);
 
+            const capitulosSnapshot = await getDocs(query(collection(db, "livros", livroId, "capitulos"), orderBy("numero", "asc")));
+            const capitulosDisponiveis = capitulosSnapshot.docs
+                .map(registro => ({ id: registro.id, ...registro.data() }))
+                .filter(capitulo => capituloDisponivel(capitulo, perfil));
+            configurarNavegacaoCapitulos(livroId, capituloId, capitulosDisponiveis);
+
             // 2.4 CONFIGURA O BOTÃO DE CURTIDAS (persistido no Firestore, por usuário)
             configurarBotaoLike(user, livroId, capituloId, dadosCap);
 
@@ -136,10 +155,15 @@ async function carregarConteudoCapitulo(user, perfil) {
                 
                 const queryPersonagens = await getDocs(collection(db, "livros", livroId, "personagens"));
                 
-                if (queryPersonagens.empty) {
+                const personagensEmCena = queryPersonagens.docs.filter(registro => {
+                    const aparicoes = registro.data().capitulosAparicao;
+                    return Array.isArray(aparicoes) && aparicoes.includes(capituloId);
+                });
+
+                if (!personagensEmCena.length) {
                     sidebarContent.innerHTML += `<p style="color: #737373; font-size: 0.9rem; padding-top: 10px;">Nenhum detalhe registrado no códice para este universo.</p>`;
                 } else {
-                    queryPersonagens.forEach((pSnap) => {
+                    personagensEmCena.forEach((pSnap) => {
                         const p = pSnap.data();
                         const cardChar = document.createElement("div");
                         cardChar.className = "character-mini-card";
@@ -286,6 +310,22 @@ async function configurarComentarios(user, perfil, livroId, capituloId) {
     await carregar();
 }
 
+function configurarNavegacaoCapitulos(livroId, capituloId, capitulos) {
+    const indice = capitulos.findIndex(capitulo => capitulo.id === capituloId);
+    const anterior = document.getElementById("capitulo-anterior");
+    const proximo = document.getElementById("proximo-capitulo");
+    const configurar = (elemento, capitulo, rotulo) => {
+        if (!elemento) return;
+        elemento.hidden = !capitulo;
+        if (!capitulo) return;
+        elemento.href = `ler.html?livroId=${encodeURIComponent(livroId)}&capituloId=${encodeURIComponent(capitulo.id)}`;
+        const texto = elemento.querySelector("span");
+        if (texto) texto.textContent = `${rotulo}: ${capitulo.titulo || `Capítulo ${capitulo.numero}`}`;
+    };
+    configurar(anterior, indice > 0 ? capitulos[indice - 1] : null, "Anterior");
+    configurar(proximo, indice >= 0 && indice < capitulos.length - 1 ? capitulos[indice + 1] : null, "Próximo");
+}
+
 function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
     const trackTitle = document.getElementById("player-track-title");
     const trackAuthor = document.getElementById("player-track-author");
@@ -330,7 +370,7 @@ function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
                 <iframe
                     width="220"
                     height="40"
-                    src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0"
+                    src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}"
                     title="Trilha do Capítulo"
                     frameborder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -362,6 +402,7 @@ function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
     if (!audio || !playBtn) return;
 
     audio.src = urlTrilha;
+    audio.loop = true;
     playBtn.style.display = "flex";
     if (progressContainer) progressContainer.style.display = "block";
     if (trackTime) trackTime.style.display = "inline-block";
@@ -383,6 +424,13 @@ function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
         }
     };
 
+    audio.play().then(() => {
+        playBtn.innerHTML = iconPause;
+        playBtn.setAttribute("aria-label", "Pausar trilha sonora");
+    }).catch(() => {
+        if (trackAuthor) trackAuthor.innerText = "Toque em reproduzir para iniciar a trilha em repetição";
+    });
+
     audio.ontimeupdate = () => {
         if (audio.duration && progressBar) {
             const progresso = (audio.currentTime / audio.duration) * 100;
@@ -395,9 +443,14 @@ function configurarPlayerTrilha(urlTrilha, tituloCapitulo) {
         }
     };
 
-    audio.onended = () => {
+    audio.onpause = () => {
         playBtn.innerHTML = iconPlay;
         playBtn.setAttribute("aria-label", "Reproduzir trilha sonora");
+    };
+
+    audio.onplay = () => {
+        playBtn.innerHTML = iconPause;
+        playBtn.setAttribute("aria-label", "Pausar trilha sonora");
     };
 
     if (progressContainer) {

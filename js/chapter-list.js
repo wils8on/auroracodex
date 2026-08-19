@@ -1,7 +1,10 @@
 export function renderChapterList({ container, chapters, bookId, background = "#2f2f2f", hoverBackground = "#3c3c3c" }) {
     if (!container) return;
     container.replaceChildren();
-    const visible = chapters.filter(chapter => chapter.status !== "rascunho");
+    const agora = Date.now();
+    const visible = chapters.filter(chapter => chapter.status !== "rascunho" && (
+        chapter.status !== "agendado" || (chapter.data_agendamento && new Date(chapter.data_agendamento).getTime() <= agora)
+    ));
     if (!visible.length) {
         const empty = document.createElement("p");
         empty.style.color = "#737373";

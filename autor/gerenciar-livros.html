@@ -205,6 +205,7 @@
                 <div style="display:flex; align-items:center; gap:10px;">
                     <select id="status-capitulo" title="Status do capítulo">
                         <option value="publicado" selected>Publicado</option>
+                        <option value="agendado">Agendado</option>
                         <option value="rascunho">Rascunho</option>
                     </select>
                     <button type="button" id="btn-cancelar-edicao-capitulo" class="tag-label" style="cursor:pointer; padding:10px 16px; display:none;">Cancelar Edição</button>
@@ -232,6 +233,12 @@
                     <div class="form-group">
                         <label for="titulo-capitulo">Título do Capítulo</label>
                         <input type="text" id="titulo-capitulo" placeholder="Título do capítulo..." required>
+                    </div>
+
+                    <div class="form-group" id="grupo-agendamento-capitulo" hidden>
+                        <label for="data-agendamento-capitulo">Publicar automaticamente em</label>
+                        <input type="datetime-local" id="data-agendamento-capitulo">
+                        <small style="color:#8C8C8C;">O capítulo ficará oculto dos leitores até esta data e horário.</small>
                     </div>
 
                     <div class="form-group">
@@ -343,8 +350,13 @@
                         </div>
                         <div class="form-group">
                             <label for="primeira-aparicao-personagem">Primeira Aparição</label>
-                            <input type="text" id="primeira-aparicao-personagem" placeholder="Ex: Capítulo 1">
+                            <input type="text" id="primeira-aparicao-personagem" placeholder="Calculada pelos capítulos selecionados" readonly>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="capitulos-personagem">Capítulos em que aparece</label>
+                        <select id="capitulos-personagem" multiple size="7" required></select>
+                        <small style="color:#8C8C8C;">Use Ctrl (Windows) ou Command (Mac) para selecionar vários capítulos.</small>
                     </div>
                     <div class="form-group">
                         <label for="arquivo-avatar-personagem">Foto do Personagem</label>
@@ -653,6 +665,6 @@
         }
     </script>
     <script type="module" src="../js/mobile-nav.js?v=mobile-nav-v1"></script>
-    <script type="module" src="../js/autor.js?v=author-library-v1"></script>
+    <script type="module" src="../js/autor.js?v=scheduled-chapters-v1"></script>
 </body>
 </html>

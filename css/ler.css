@@ -146,6 +146,35 @@ body {
     text-align: justify;
 }
 
+.chapter-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 46px 0 8px;
+}
+
+.chapter-navigation-link {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 12px 18px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #FFF;
+    background: rgba(255,255,255,0.04);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.chapter-navigation-next { margin-left: auto; text-align: right; }
+.chapter-navigation-link:hover { border-color: #F97316; background: rgba(249,115,22,0.12); }
+
+@media (max-width: 600px) {
+    .chapter-navigation { flex-direction: column; }
+    .chapter-navigation-link { width: 100%; justify-content: center; }
+    .chapter-navigation-next { margin-left: 0; }
+}
+
 /* --- CURTIDAS E COMENTÁRIOS --- */
 .chapter-interactions {
     margin-top: 50px;

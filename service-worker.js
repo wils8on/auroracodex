@@ -1,4 +1,4 @@
-const CACHE_NAME = "aurora-codex-shell-v1";
+const CACHE_NAME = "aurora-codex-shell-v2";
 const SHELL_FILES = [
     "./",
     "./index.html",
