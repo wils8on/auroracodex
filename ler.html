@@ -12,11 +12,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/ler.css?v=codex-flow-v3">
+    <link rel="stylesheet" href="css/ler.css?v=editorial-protection-v1">
     <link rel="stylesheet" href="css/ux.css">
 </head>
 <body>
     <a class="skip-link" href="#conteudo-principal">Ir para o capítulo</a>
+    <div id="content-watermark" class="content-watermark" aria-hidden="true"></div>
+    <div class="print-protection-message" aria-hidden="true">Este capítulo está disponível somente para leitura no Aurora Codex.</div>
 
     <!-- Cabeçalho de Leitura (Sutil e Dinâmico) -->
     <header class="reader-header">
@@ -138,9 +140,17 @@
         <div class="character-profile-body">
             <span class="character-profile-kicker">Códice de personagem</span>
             <h2 id="character-profile-name"></h2>
+            <h3 id="character-profile-subtitle" class="character-profile-subtitle"></h3>
+            <p id="character-profile-data" class="character-profile-data"></p>
             <p id="character-profile-role" class="character-profile-role"></p>
             <p id="character-profile-first" class="character-profile-first"></p>
+            <blockquote id="character-profile-quote" class="character-profile-quote" hidden></blockquote>
             <p id="character-profile-description" class="character-profile-description"></p>
+            <div class="character-profile-columns">
+                <section id="character-profile-traits-section" hidden><h4>Quem é</h4><ul id="character-profile-traits"></ul></section>
+                <section id="character-profile-secrets-section" hidden><h4>O que esconde</h4><ul id="character-profile-secrets"></ul></section>
+            </div>
+            <section id="character-profile-habits-section" class="character-profile-habits" hidden><h4>Manias, gostos e escolhas</h4><p id="character-profile-habits"></p></section>
         </div>
     </dialog>
 
@@ -179,7 +189,7 @@
 
     <!-- Interface nativa com o script dinâmico do Firebase -->
     <script type="module" src="js/pwa.js?v=pwa-v1"></script>
-    <script type="module" src="js/ler.js?v=codex-flow-v2"></script>
+    <script type="module" src="js/ler.js?v=editorial-protection-v1"></script>
 
     <!-- Script de Interação Local da Página -->
     <script>

@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/dashboard.css?v=pwa-v1">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/autor.css?v=character-chapters-v2">
+    <link rel="stylesheet" href="../css/autor.css?v=editorial-scheduling-v1">
     <link rel="stylesheet" href="../css/ux.css?v=hidden-states-v1">
     <style>
         /* CORREÇÃO DE OVERFLOW: Força a rolagem vertical nativa e impede cortes de tela */
@@ -218,7 +218,7 @@
                     <div class="cap-meta-header">
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <span>Cap. nº</span>
-                            <input type="number" id="numero-capitulo" min="1" value="1" style="width: 70px; background: #1E1A30; border: 1px solid #332C4D; color: #FFF; padding: 6px; border-radius: 4px; text-align: center;">
+                            <input type="number" id="numero-capitulo" min="0" step="0.1" value="1" inputmode="decimal" style="width: 82px; background: #1E1A30; border: 1px solid #332C4D; color: #FFF; padding: 6px; border-radius: 4px; text-align: center;">
                         </div>
                         <div>
                             <span id="contador-palavras">0</span> palavras
@@ -235,10 +235,10 @@
                         <input type="text" id="titulo-capitulo" placeholder="Título do capítulo..." required>
                     </div>
 
-                    <div class="form-group" id="grupo-agendamento-capitulo" hidden>
+                    <div class="form-group" id="grupo-agendamento-capitulo">
                         <label for="data-agendamento-capitulo">Publicar automaticamente em</label>
                         <input type="datetime-local" id="data-agendamento-capitulo">
-                        <small style="color:#8C8C8C;">O capítulo ficará oculto dos leitores até esta data e horário.</small>
+                        <small style="color:#8C8C8C;">Ao preencher, o status muda automaticamente para Agendado. Deixe vazio para publicar ou salvar como rascunho.</small>
                     </div>
 
                     <div class="form-group">
@@ -373,6 +373,19 @@
                         <label for="descricao-personagem">Descrição / Ficha Breve</label>
                         <textarea id="descricao-personagem" rows="4" placeholder="Ex: Herdeiro direto da dinastia Claes..." required></textarea>
                     </div>
+                    <details class="character-editorial-fields">
+                        <summary>Enriquecer ficha editorial (opcional)</summary>
+                        <div class="form-row">
+                            <div class="form-group"><label for="subtitulo-personagem">Nome completo / subtítulo</label><input type="text" id="subtitulo-personagem" placeholder="Ex: Elisa Vitória Valença"></div>
+                            <div class="form-group"><label for="dados-personagem">Idade, época e profissão</label><input type="text" id="dados-personagem" placeholder="Ex: 29 anos em 1993 · Editora"></div>
+                        </div>
+                        <div class="form-group"><label for="citacao-personagem">Citação marcante</label><textarea id="citacao-personagem" rows="2" placeholder="Uma frase que represente o personagem..."></textarea></div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="tracos-personagem">Quem é</label><textarea id="tracos-personagem" rows="5" placeholder="Um traço por linha"></textarea></div>
+                            <div class="form-group"><label for="segredos-personagem">O que esconde</label><textarea id="segredos-personagem" rows="5" placeholder="Um segredo ou conflito por linha"></textarea></div>
+                        </div>
+                        <div class="form-group"><label for="manias-personagem">Manias, gostos e escolhas</label><textarea id="manias-personagem" rows="4" placeholder="Detalhes cotidianos, gostos, manias e escolhas..."></textarea></div>
+                    </details>
                     <button type="submit" class="btn-submit">Adicionar ao Códice</button>
                 </form>
             </div>
@@ -667,6 +680,6 @@
         }
     </script>
     <script type="module" src="../js/mobile-nav.js?v=mobile-nav-v1"></script>
-    <script type="module" src="../js/autor.js?v=character-chapters-v3"></script>
+    <script type="module" src="../js/autor.js?v=editorial-scheduling-v1"></script>
 </body>
 </html>

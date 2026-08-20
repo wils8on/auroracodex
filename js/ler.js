@@ -9,6 +9,34 @@ import { confirmAction } from "./dialog-accessibility.js?v=confirm-dialog-v1";
 
 const READER_PREFERENCES_KEY = "aurora-codex:preferencias-leitura";
 
+function configurarProtecaoConteudo(user) {
+    const watermark = document.getElementById("content-watermark");
+    const identificador = user.email || user.displayName || user.uid.slice(0, 8);
+    if (watermark) {
+        watermark.replaceChildren(...Array.from({ length: 18 }, () => {
+            const mark = document.createElement("span");
+            mark.textContent = `AURORA CODEX • ${identificador}`;
+            return mark;
+        }));
+    }
+
+    const areaProtegida = target => target instanceof Element && Boolean(target.closest(
+        ".reading-core, .oracle-sidebar, .character-profile-dialog, .chapter-availability-dialog"
+    ));
+    document.addEventListener("contextmenu", event => {
+        if (areaProtegida(event.target)) event.preventDefault();
+    });
+    document.addEventListener("dragstart", event => {
+        if (areaProtegida(event.target)) event.preventDefault();
+    });
+    document.addEventListener("copy", event => {
+        if (areaProtegida(event.target)) {
+            event.preventDefault();
+            showToast("A cópia do conteúdo de leitura está desativada.", "info");
+        }
+    });
+}
+
 function capituloDisponivel(capitulo, perfil) {
     if (capitulo.status === "rascunho") return false;
     if (capitulo.status !== "agendado") return true;
@@ -61,6 +89,7 @@ onAuthStateChanged(auth, async (user) => {
             window.location.href = "aguardando.html";
             return;
         }
+        configurarProtecaoConteudo(user);
         carregarConteudoCapitulo(user, perfil);
     }
 });
@@ -350,10 +379,36 @@ function abrirFichaPersonagem(personagem) {
     imagem.src = safeUrl(personagem.foto, "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=800");
     imagem.alt = personagem.nome ? `Retrato de ${personagem.nome}` : "Retrato do personagem";
     document.getElementById("character-profile-name").textContent = personagem.nome || "Personagem";
+    const subtitulo = document.getElementById("character-profile-subtitle");
+    subtitulo.textContent = personagem.subtitulo || "";
+    subtitulo.hidden = !personagem.subtitulo;
+    const dados = document.getElementById("character-profile-data");
+    dados.textContent = personagem.dados || "";
+    dados.hidden = !personagem.dados;
     document.getElementById("character-profile-role").textContent = personagem.papel || personagem.funcao || "Personagem";
     document.getElementById("character-profile-first").textContent = personagem.primeiraAparicao ? `Primeira aparição: ${personagem.primeiraAparicao}` : "Primeira aparição não informada";
     document.getElementById("character-profile-description").textContent = personagem.descricao || "Descrição ainda não cadastrada.";
+    const citacao = document.getElementById("character-profile-quote");
+    citacao.textContent = personagem.citacao || "";
+    citacao.hidden = !personagem.citacao;
+    preencherListaFicha("character-profile-traits", "character-profile-traits-section", personagem.tracos);
+    preencherListaFicha("character-profile-secrets", "character-profile-secrets-section", personagem.segredos);
+    const maniasSection = document.getElementById("character-profile-habits-section");
+    document.getElementById("character-profile-habits").textContent = personagem.manias || "";
+    maniasSection.hidden = !personagem.manias;
     dialog.showModal();
+}
+
+function preencherListaFicha(listaId, secaoId, valores) {
+    const lista = document.getElementById(listaId);
+    const secao = document.getElementById(secaoId);
+    const itens = Array.isArray(valores) ? valores.filter(Boolean) : String(valores || "").split(/\r?\n/).filter(Boolean);
+    lista.replaceChildren(...itens.map(texto => {
+        const item = document.createElement("li");
+        item.textContent = texto;
+        return item;
+    }));
+    secao.hidden = !itens.length;
 }
 
 function abrirAvisoDisponibilidade(capitulo, capaLivro) {

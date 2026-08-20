@@ -237,14 +237,13 @@ async function carregarGaleriaModal(idLivro) {
 
     try {
         const galeriaRef = collection(db, "livros", idLivro, "galeria");
-        const q = query(galeriaRef, orderBy("ordem", "asc"));
-        const snap = await getDocs(q);
+        const snap = await getDocs(galeriaRef);
 
         if (snap.empty) return;
 
         secao.style.display = "block";
 
-        snap.forEach((docSnap) => {
+        [...snap.docs].sort((a, b) => Number(a.data().ordem ?? 0) - Number(b.data().ordem ?? 0)).forEach((docSnap) => {
             const item = docSnap.data();
             const card = document.createElement("div");
             card.style.cssText = "width:110px; cursor:pointer;";
@@ -264,7 +263,7 @@ async function carregarGaleriaModal(idLivro) {
                 </div>
                 <p style="color:#D4D4D4; font-size:0.75rem; margin-top:6px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.categoria}</p>
             `;
-            makeActivatable(card, () => openMediaViewer(item.url, item.tipo), `Abrir ${item.categoria || "item da galeria"}`);
+            makeActivatable(card, () => openMediaViewer(item.url, item.tipo, item), `Abrir ${item.categoria || "item da galeria"}`);
             grid.appendChild(card);
         });
     } catch (err) {

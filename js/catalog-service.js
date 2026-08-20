@@ -26,5 +26,6 @@ export async function loadBookCharacters(bookId) {
 }
 
 export async function loadBookGallery(bookId) {
-    return mapSnapshot(await getDocs(query(collection(db, "livros", bookId, "galeria"), orderBy("ordem", "asc"))));
+    const items = mapSnapshot(await getDocs(collection(db, "livros", bookId, "galeria")));
+    return items.sort((a, b) => Number(a.ordem ?? 0) - Number(b.ordem ?? 0));
 }

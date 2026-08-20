@@ -589,6 +589,12 @@ function inicializarDadosCapitulos() {
             btn.innerText = editando ? "Atualizar Capítulo" : "Publicar Capítulo";
         }
     });
+    document.getElementById("data-agendamento-capitulo")?.addEventListener("change", event => {
+        const status = document.getElementById("status-capitulo");
+        if (!status) return;
+        status.value = event.target.value ? "agendado" : "rascunho";
+        status.dispatchEvent(new Event("change"));
+    });
     atualizarCampoAgendamento();
 }
 
@@ -596,7 +602,7 @@ function atualizarCampoAgendamento() {
     const grupo = document.getElementById("grupo-agendamento-capitulo");
     const campo = document.getElementById("data-agendamento-capitulo");
     const agendado = document.getElementById("status-capitulo")?.value === "agendado";
-    if (grupo) grupo.hidden = !agendado;
+    if (grupo) grupo.hidden = false;
     if (campo) campo.required = agendado;
 }
 
@@ -684,6 +690,16 @@ function carregarCapitulosDaObra(livroId) {
 
     unsubscribeCapitulos = onSnapshot(q, (snapshot) => {
         listaContainer.innerHTML = "";
+
+        const agendadosVencidos = snapshot.docs.filter(registro => {
+            const capitulo = registro.data();
+            return capitulo.status === "agendado" && capitulo.data_agendamento && new Date(capitulo.data_agendamento).getTime() <= Date.now();
+        });
+        if (agendadosVencidos.length) {
+            const batch = writeBatch(db);
+            agendadosVencidos.forEach(registro => batch.update(registro.ref, { status: "publicado", data_publicacao: new Date().toISOString() }));
+            batch.commit().catch(erro => console.error("Erro ao concluir publicações programadas:", erro));
+        }
 
         if (snapshot.empty) {
             listaContainer.innerHTML = '<p style="color:#737373; font-size:0.9rem;">Nenhum capítulo publicado para esta obra ainda.</p>';
@@ -837,7 +853,7 @@ document.getElementById("form-cadastrar-capitulo")?.addEventListener("submit", a
         }
 
         const capituloDados = {
-            numero: parseInt(document.getElementById("numero-capitulo").value),
+            numero: parseFloat(document.getElementById("numero-capitulo").value),
             titulo: document.getElementById("titulo-capitulo").value,
             trilhaSonora: trilhaFinal,
             capa: urlCapaFinal,
@@ -992,6 +1008,12 @@ function vincularEventosPersonagens(livroId) {
                     document.getElementById("progresso-upload-personagem").innerText = "Foto atual (envie um novo arquivo para substituir)";
                 }
                 document.getElementById("descricao-personagem").value = p.descricao;
+                document.getElementById("subtitulo-personagem").value = p.subtitulo || "";
+                document.getElementById("dados-personagem").value = p.dados || "";
+                document.getElementById("citacao-personagem").value = p.citacao || "";
+                document.getElementById("tracos-personagem").value = Array.isArray(p.tracos) ? p.tracos.join("\n") : (p.tracos || "");
+                document.getElementById("segredos-personagem").value = Array.isArray(p.segredos) ? p.segredos.join("\n") : (p.segredos || "");
+                document.getElementById("manias-personagem").value = p.manias || "";
 
                 document.getElementById("form-cadastrar-personagem").querySelector(".btn-submit").innerText = "Atualizar Personagem";
                 document.getElementById("nome-personagem").scrollIntoView({ behavior: "smooth" });
@@ -1044,7 +1066,13 @@ document.getElementById("form-cadastrar-personagem")?.addEventListener("submit",
             primeiraAparicao,
             capitulosAparicao,
             foto: urlFotoFinal,
-            descricao: document.getElementById("descricao-personagem").value
+            descricao: document.getElementById("descricao-personagem").value,
+            subtitulo: document.getElementById("subtitulo-personagem").value.trim(),
+            dados: document.getElementById("dados-personagem").value.trim(),
+            citacao: document.getElementById("citacao-personagem").value.trim(),
+            tracos: document.getElementById("tracos-personagem").value.split(/\r?\n/).map(item => item.trim()).filter(Boolean),
+            segredos: document.getElementById("segredos-personagem").value.split(/\r?\n/).map(item => item.trim()).filter(Boolean),
+            manias: document.getElementById("manias-personagem").value.trim()
         };
 
         if (idPersonagemEdicao) {
@@ -1418,7 +1446,6 @@ function inicializarDadosGaleria() {
     if (!selectLivroGaleria) return;
 
     selectLivroGaleria.addEventListener("change", () => {
-        setButtonBusy(btnSubmit, false);
         resetarFormularioGaleria();
         carregarGaleriaDaObra(selectLivroGaleria.value);
     });
@@ -1469,9 +1496,8 @@ function carregarGaleriaDaObra(livroId) {
     }
 
     const galeriaRef = collection(db, "livros", livroId, "galeria");
-    const q = query(galeriaRef, orderBy("ordem", "asc"));
 
-    unsubscribeGaleria = onSnapshot(q, (snapshot) => {
+    unsubscribeGaleria = onSnapshot(galeriaRef, (snapshot) => {
         listaContainer.innerHTML = "";
 
         if (snapshot.empty) {
@@ -1479,7 +1505,8 @@ function carregarGaleriaDaObra(livroId) {
             return;
         }
 
-        snapshot.forEach((docSnap) => {
+        const registros = [...snapshot.docs].sort((a, b) => Number(a.data().ordem ?? 0) - Number(b.data().ordem ?? 0));
+        registros.forEach((docSnap) => {
             const item = docSnap.data();
             const id = docSnap.id;
 
