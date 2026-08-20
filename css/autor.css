@@ -437,6 +437,11 @@
 .chapter-appearance-option:hover { background: rgba(249,115,22,0.1); }
 .chapter-appearance-option input { width: 18px; height: 18px; accent-color: #F97316; }
 .chapter-appearance-empty { margin: 4px; color: #8C8C8C; font-size: 0.85rem; }
+
+.character-editorial-fields { margin: 4px 0 22px; border: 1px solid #332C4D; border-radius: 8px; background: rgba(30,26,48,0.55); }
+.character-editorial-fields summary { padding: 14px 16px; color:#F97316; font-weight:700; cursor:pointer; }
+.character-editorial-fields[open] { padding: 0 16px 4px; }
+.character-editorial-fields[open] summary { margin: 0 -16px 16px; border-bottom:1px solid #332C4D; }
 .management-toolbar input {
     flex: 1; min-width: 0; padding: 12px 14px; border: 1px solid #332C4D; border-radius: 6px;
     color: #FFF; background: #1E1A30; font: inherit;
