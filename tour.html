@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#15111F">
+    <meta name="theme-color" content="#050505">
     <title>Conheça o Aurora Codex</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/tour.css?v=tour-v1">
+    <link rel="stylesheet" href="css/tour.css?v=detailed-tour-v1">
 </head>
 <body>
     <header class="tour-nav">
@@ -16,6 +16,7 @@
         <nav aria-label="Navegação do tour">
             <a href="#experiencia">Experiência</a>
             <a href="#leitura">Leitura</a>
+            <a href="#status">Status das obras</a>
             <a href="#autores">Autores</a>
             <a class="tour-nav-cta" href="index.html">Entrar</a>
         </nav>
@@ -45,7 +46,7 @@
             <div class="section-heading"><span>01 · Descoberta</span><h2>Encontre sua próxima história</h2><p>Do primeiro destaque à estante pessoal, cada espaço ajuda você a continuar explorando.</p></div>
             <div class="feature-grid">
                 <article><div class="feature-icon">✦</div><h3>Destaques</h3><p>Obras selecionadas ganham um espaço cinematográfico logo na entrada.</p></article>
-                <article><div class="feature-icon">▦</div><h3>Biblioteca</h3><p>Consulte todas as obras disponíveis e abra seus capítulos em poucos toques.</p></article>
+                <article><div class="feature-icon">▦</div><h3>Biblioteca</h3><p>Pesquise por título ou sinopse e filtre por gênero, tags e etapa editorial da obra.</p></article>
                 <article><div class="feature-icon">♡</div><h3>Estante pessoal</h3><p>Favorite histórias e acompanhe de onde parou em cada leitura.</p></article>
                 <article><div class="feature-icon">∞</div><h3>Universos conectados</h3><p>Descubra livros que compartilham cenários, acontecimentos e personagens.</p></article>
             </div>
@@ -61,31 +62,66 @@
             <div class="reading-copy"><span class="eyebrow">02 · Imersão</span><h2>Leia sem quebrar o ritmo</h2><ul>
                 <li><b>Anterior e próximo:</b> avance sem voltar à lista.</li>
                 <li><b>Trilha sonora:</b> cada capítulo pode ter sua própria ambientação.</li>
-                <li><b>Aparência confortável:</b> ajuste tamanho e largura do texto.</li>
+                <li><b>Aparência confortável:</b> ajuste tamanho, largura e tema sem perder o ponto da leitura.</li>
                 <li><b>Comentários e curtidas:</b> compartilhe suas impressões.</li>
                 <li><b>Publicações programadas:</b> saiba quando o próximo capítulo chegará.</li>
             </ul></div>
         </section>
 
+        <section class="tour-section theme-section" id="temas">
+            <div class="section-heading"><span>03 · Leitura do seu jeito</span><h2>Quatro atmosferas para cada momento</h2><p>O tema escolhido, o tamanho da fonte e a largura do texto ficam salvos no aparelho. Ao voltar para outro capítulo, sua preferência continua ativa.</p></div>
+            <div class="theme-showcase">
+                <article class="theme-card theme-dark"><span>Escuro</span><h3>Noite profunda</h3><p>Fundo preto e contraste suave para leitura noturna ou ambientes com pouca luz.</p><div class="theme-lines"><i></i><i></i><i></i></div></article>
+                <article class="theme-card theme-offwhite"><span>Off-white</span><h3>Claro confortável</h3><p>Uma página clara e neutra, menos intensa que o branco puro.</p><div class="theme-lines"><i></i><i></i><i></i></div></article>
+                <article class="theme-card theme-paper"><span>Papel</span><h3>Sensação impressa</h3><p>Tons amarelados e texto marrom para lembrar a experiência de um livro físico.</p><div class="theme-lines"><i></i><i></i><i></i></div></article>
+                <article class="theme-card theme-mono"><span>P&amp;B</span><h3>Contraste essencial</h3><p>Preto e branco puros, sem acentos coloridos e com máxima objetividade visual.</p><div class="theme-lines"><i></i><i></i><i></i></div></article>
+            </div>
+            <div class="reader-help-grid">
+                <div><b>A− / A+</b><span>Diminua ou amplie a fonte até encontrar o tamanho ideal.</span></div>
+                <div><b>Texto amplo</b><span>Aumente a largura da coluna em telas maiores.</span></div>
+                <div><b>Tema</b><span>Troque a aparência imediatamente, inclusive no celular.</span></div>
+                <div><b>Preferência salva</b><span>As escolhas permanecem neste navegador ou PWA.</span></div>
+            </div>
+        </section>
+
         <section class="tour-section" id="codice">
-            <div class="section-heading"><span>03 · Códice</span><h2>Conheça quem habita cada capítulo</h2><p>O Códice revela somente os personagens presentes na cena, evitando informações fora de hora.</p></div>
+            <div class="section-heading"><span>04 · Códice</span><h2>Conheça quem habita cada capítulo</h2><p>O Códice revela somente os personagens presentes na cena, evitando informações fora de hora e possíveis spoilers.</p></div>
             <div class="codex-demo">
                 <div class="codex-portrait">✦</div><div><small>FICHA DE PERSONAGEM</small><h3>Segredos, relações e primeiras aparições</h3><p>Toque em um personagem durante a leitura para abrir sua ficha, conhecer seu papel e aprofundar-se na história sem sair do capítulo.</p></div>
             </div>
         </section>
 
+        <section class="tour-section status-section" id="status">
+            <div class="section-heading"><span>05 · Jornada editorial</span><h2>Entenda em que momento está cada obra</h2><p>Os selos aparecem nos destaques, na Biblioteca e nos detalhes para alinhar a expectativa do leitor antes de abrir uma história.</p></div>
+            <div class="status-roadmap">
+                <article><b class="status-germination">Em Germinação</b><h3>A ideia nasceu</h3><p>O conceito foi concebido, mas a história ainda está amadurecendo.</p></article>
+                <i>→</i><article><b class="status-creation">Em Criação</b><h3>Em desenvolvimento</h3><p>Personagens, trama e capítulos estão sendo construídos.</p></article>
+                <i>→</i><article><b class="status-soon">Em Breve</b><h3>Lançamento próximo</h3><p>A obra está sendo preparada para chegar aos leitores.</p></article>
+                <i>→</i><article><b class="status-progress">Em Andamento</b><h3>Publicação ativa</h3><p>Já há leitura disponível e novos capítulos podem chegar.</p></article>
+                <i>→</i><article><b class="status-complete">Concluída</b><h3>História completa</h3><p>A jornada chegou ao fim e pode ser lida integralmente.</p></article>
+            </div>
+        </section>
+
         <section class="tour-section author-section" id="autores">
-            <div class="section-heading"><span>04 · Criação</span><h2>Um estúdio para construir universos</h2><p>Autores e administradores possuem ferramentas editoriais reunidas em um só painel.</p></div>
+            <div class="section-heading"><span>06 · Criação</span><h2>Um estúdio para construir universos</h2><p>Autores e administradores possuem ferramentas editoriais reunidas em um só painel, do primeiro conceito ao capítulo publicado.</p></div>
             <div class="author-flow"><div><b>1</b><h3>Crie a obra</h3><p>Capa, sinopse, gênero e universo.</p></div><i>→</i><div><b>2</b><h3>Escreva capítulos</h3><p>Editor rico, imagens e trilhas.</p></div><i>→</i><div><b>3</b><h3>Programe</h3><p>Escolha o momento da publicação.</p></div><i>→</i><div><b>4</b><h3>Conecte</h3><p>Personagens, galeria e Oráculo.</p></div></div>
         </section>
 
         <section class="tour-section">
-            <div class="section-heading"><span>05 · Todo o portal</span><h2>Mais formas de viver o Codex</h2><p>Recursos complementares mantêm a comunidade, o conteúdo e o acesso organizados.</p></div>
+            <div class="section-heading"><span>07 · Todo o portal</span><h2>Mais formas de viver o Codex</h2><p>Recursos complementares mantêm a comunidade, o conteúdo e o acesso organizados.</p></div>
             <div class="feature-grid">
                 <article><div class="feature-icon">◈</div><h3>O Oráculo</h3><p>Publicações editoriais, avisos e conteúdos relacionados às obras e seus universos.</p></article>
                 <article><div class="feature-icon">▧</div><h3>Galeria multimídia</h3><p>Imagens e vídeos ampliam cenários, momentos e referências de cada história.</p></article>
                 <article><div class="feature-icon">⇩</div><h3>Aplicativo instalável</h3><p>Instale o Aurora Codex como PWA no celular para acesso rápido e experiência imersiva.</p></article>
                 <article><div class="feature-icon">♙</div><h3>Perfis e aprovação</h3><p>Leitores, autores e administradores recebem acessos adequados às suas responsabilidades.</p></article>
+            </div>
+        </section>
+
+        <section class="tour-section first-steps" id="primeiros-passos">
+            <div class="section-heading"><span>08 · Primeiros passos</span><h2>Comece sem se perder</h2><p>O caminho muda conforme seu perfil, mas a experiência foi organizada para que cada recurso apareça no momento certo.</p></div>
+            <div class="steps-columns">
+                <article><span>PARA LEITORES</span><ol><li>Explore os destaques ou use os filtros da Biblioteca.</li><li>Abra os detalhes e confira status, sinopse, capítulos e galeria.</li><li>Favorite a obra para encontrá-la na Estante.</li><li>Durante a leitura, escolha tema, fonte e largura.</li><li>Use o Códice, a trilha, curtidas e comentários sem sair do capítulo.</li></ol></article>
+                <article><span>PARA AUTORES</span><ol><li>Cadastre a obra e defina sua etapa editorial.</li><li>Crie capítulos com numeração livre, inclusive 0.1 ou 1.1.</li><li>Publique agora ou programe data e horário.</li><li>Vincule personagens aos capítulos em que realmente aparecem.</li><li>Complete o universo com galeria, trilhas e publicações do Oráculo.</li></ol></article>
             </div>
         </section>
 
