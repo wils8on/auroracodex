@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/ler.css?v=black-reader-v1">
+    <link rel="stylesheet" href="css/ler.css?v=reader-themes-v1">
     <link rel="stylesheet" href="css/ux.css">
 </head>
 <body>
@@ -49,6 +49,13 @@
 
             <div class="reader-preferences" role="group" aria-label="Preferências de leitura">
                 <span>Aparência do texto</span>
+                <label class="theme-picker-label" for="tema-leitura">Tema</label>
+                <select id="tema-leitura" aria-label="Tema de leitura">
+                    <option value="dark">Escuro</option>
+                    <option value="offwhite">Off-white</option>
+                    <option value="paper">Papel</option>
+                    <option value="mono">P&amp;B</option>
+                </select>
                 <button type="button" id="diminuir-fonte" aria-label="Diminuir tamanho do texto">A−</button>
                 <button type="button" id="aumentar-fonte" aria-label="Aumentar tamanho do texto">A+</button>
                 <button type="button" id="alternar-largura" aria-pressed="false">Texto amplo</button>
@@ -188,7 +195,7 @@
 
     <!-- Interface nativa com o script dinâmico do Firebase -->
     <script type="module" src="js/pwa.js?v=pwa-v1"></script>
-    <script type="module" src="js/ler.js?v=black-reader-v1"></script>
+    <script type="module" src="js/ler.js?v=reader-themes-v1"></script>
 
     <!-- Script de Interação Local da Página -->
     <script>

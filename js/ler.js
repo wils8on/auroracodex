@@ -38,13 +38,19 @@ function configurarPreferenciasLeitura() {
     const chapterText = document.getElementById("capitulo-texto-exibicao");
     const status = document.getElementById("status-preferencias");
     if (!core || !chapterText) return;
-    let preferences = { fontSize: 1.25, wide: false };
+    let preferences = { fontSize: 1.25, wide: false, theme: "dark" };
     try { preferences = { ...preferences, ...JSON.parse(localStorage.getItem(READER_PREFERENCES_KEY) || "{}") }; } catch { /* usa padrões */ }
 
     const apply = message => {
         preferences.fontSize = Math.min(1.6, Math.max(1, Number(preferences.fontSize) || 1.25));
+        if (!["dark", "offwhite", "paper", "mono"].includes(preferences.theme)) preferences.theme = "dark";
         core.style.setProperty("--reader-font-size", `${preferences.fontSize}rem`);
         core.classList.toggle("reader-wide", !!preferences.wide);
+        document.body.dataset.readerTheme = preferences.theme;
+        const themePicker = document.getElementById("tema-leitura");
+        if (themePicker) themePicker.value = preferences.theme;
+        const themeColors = { dark: "#050505", offwhite: "#F4F1EA", paper: "#F2E3BC", mono: "#FFFFFF" };
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColors[preferences.theme]);
         document.getElementById("alternar-largura")?.setAttribute("aria-pressed", String(!!preferences.wide));
         try { localStorage.setItem(READER_PREFERENCES_KEY, JSON.stringify(preferences)); } catch { /* preferência não persistida */ }
         if (status && message) status.textContent = message;
@@ -61,6 +67,11 @@ function configurarPreferenciasLeitura() {
     document.getElementById("alternar-largura")?.addEventListener("click", () => {
         preferences.wide = !preferences.wide;
         apply(preferences.wide ? "Largura de leitura ampliada." : "Largura de leitura confortável.");
+    });
+    document.getElementById("tema-leitura")?.addEventListener("change", event => {
+        preferences.theme = event.target.value;
+        const nomes = { dark: "escuro", offwhite: "off-white", paper: "papel", mono: "preto e branco" };
+        apply(`Tema de leitura alterado para ${nomes[preferences.theme]}.`);
     });
     apply();
 }
