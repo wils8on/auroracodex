@@ -9,6 +9,7 @@ import { loadBookChapters } from "./catalog-service.js";
 import { renderChapterList } from "./chapter-list.js";
 import { renderContentState, showToast } from "./feedback.js";
 import { bindDialogCloseButton, closeAccessibleDialog, makeActivatable, openAccessibleDialog } from "./dialog-accessibility.js";
+import { bookStatusMarkup, emptyBookStatusMessage, normalizeBookStatus } from "./book-status.js";
 
 window.fecharModal = () => closeAccessibleDialog(document.getElementById("netflix-modal"));
 bindDialogCloseButton(document.getElementById("netflix-modal"));
@@ -137,7 +138,7 @@ function aplicarFiltros() {
             (livro.sinopse || "").toLowerCase().includes(textoBusca);
 
         const bateGenero = !generoSelecionado || livro.genero === generoSelecionado;
-        const bateStatus = !statusSelecionado || livro.status === statusSelecionado;
+        const bateStatus = !statusSelecionado || normalizeBookStatus(livro.status) === statusSelecionado;
 
         const bateTags = tagsSelecionadas.size === 0 ||
             (livro.subgeneros || []).some(tag => tagsSelecionadas.has(tag));
@@ -180,13 +181,7 @@ function renderizarGrid(livros) {
 }
 
 function gerarBadgeStatus(status) {
-    const mapaClasses = {
-        "Em Breve": "status-em-breve",
-        "Em Andamento": "status-em-andamento",
-        "Concluído": "status-concluido"
-    };
-    const classe = mapaClasses[status] || "status-em-breve";
-    return `<span class="status-badge ${classe}">${status || 'Em Breve'}</span>`;
+    return bookStatusMarkup(status);
 }
 
 // Pop-up estilo Netflix com busca de capítulos (mesmo comportamento da Home)
@@ -201,6 +196,14 @@ async function abrirModalNetflix(idLivro, livro) {
     if (titulo) titulo.innerText = livro.titulo;
     if (universo) universo.innerText = livro.universo || "Universo Independente";
     if (sinopse) sinopse.innerText = livro.sinopse;
+    let statusContainer = document.getElementById("modal-status-obra");
+    if (!statusContainer && sinopse) {
+        statusContainer = document.createElement("div");
+        statusContainer.id = "modal-status-obra";
+        statusContainer.className = "modal-book-status";
+        sinopse.before(statusContainer);
+    }
+    if (statusContainer) statusContainer.innerHTML = bookStatusMarkup(livro.status, true);
 
     atualizarBotaoFavorito(idLivro);
 
@@ -216,6 +219,7 @@ async function abrirModalNetflix(idLivro, livro) {
     try {
         const capitulos = await loadBookChapters(idLivro);
         renderChapterList({ container: listaCapitulosContainer, chapters: capitulos, bookId: idLivro });
+        if (!capitulos.length && listaCapitulosContainer) listaCapitulosContainer.innerHTML = `<p class="book-status-empty">${emptyBookStatusMessage(livro.status)}</p>`;
         carregarGaleriaModal(idLivro);
     } catch (err) {
         console.error("Erro ao carregar capítulos:", err);

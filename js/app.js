@@ -10,6 +10,7 @@ import { renderChapterList } from "./chapter-list.js";
 import { renderContentState, showToast } from "./feedback.js";
 import { bindDialogCloseButton, closeAccessibleDialog, makeActivatable, openAccessibleDialog } from "./dialog-accessibility.js";
 import { escapeHtml, safeUrl } from "./security.js";
+import { bookStatusMarkup, emptyBookStatusMessage } from "./book-status.js";
 
 window.fecharModal = () => closeAccessibleDialog(document.getElementById("netflix-modal"));
 bindDialogCloseButton(document.getElementById("netflix-modal"));
@@ -151,6 +152,7 @@ function exibirDestaquePorIndice(index) {
     const heroSinopse = document.getElementById("hero-sinopse-destaque") || document.querySelector(".hero-synopsis");
     const btnLer = document.getElementById("btn-ler-destaque") || document.querySelector(".btn-read");
     const btnInfo = document.getElementById("btn-info-destaque") || document.querySelector(".btn-info");
+    const heroStatus = document.getElementById("hero-status-destaque");
 
     const capaSegura = safeUrl(livro.capa);
     if (heroBg && capaSegura) {
@@ -163,6 +165,7 @@ function exibirDestaquePorIndice(index) {
 
     if (heroTitulo) heroTitulo.innerText = livro.titulo;
     if (heroSinopse) heroSinopse.innerText = livro.sinopse;
+    if (heroStatus) heroStatus.innerHTML = bookStatusMarkup(livro.status, true);
 
     if (btnInfo) btnInfo.onclick = () => abrirModalNetflix(livro.id, livro);
     if (btnLer) btnLer.onclick = () => abrirModalNetflix(livro.id, livro);
@@ -230,6 +233,14 @@ async function abrirModalNetflix(idLivro, livro) {
     if (titulo) titulo.innerText = livro.titulo;
     if (universo) universo.innerText = filtrarNomeUniverso(livro.universo);
     if (sinopse) sinopse.innerText = livro.sinopse;
+    let statusContainer = document.getElementById("modal-status-obra");
+    if (!statusContainer && sinopse) {
+        statusContainer = document.createElement("div");
+        statusContainer.id = "modal-status-obra";
+        statusContainer.className = "modal-book-status";
+        sinopse.before(statusContainer);
+    }
+    if (statusContainer) statusContainer.innerHTML = bookStatusMarkup(livro.status, true);
 
     atualizarBotaoFavorito(idLivro);
 
@@ -246,6 +257,7 @@ async function abrirModalNetflix(idLivro, livro) {
         // Busca capítulos ordenados numericamente
         const capitulos = await loadBookChapters(idLivro);
         renderChapterList({ container: listaCapitulosContainer, chapters: capitulos, bookId: idLivro });
+        if (!capitulos.length && listaCapitulosContainer) listaCapitulosContainer.innerHTML = `<p class="book-status-empty">${emptyBookStatusMessage(livro.status)}</p>`;
         carregarGaleriaModal(idLivro);
     } catch (err) {
         console.error("Erro ao carregar capítulos:", err);

@@ -8,7 +8,7 @@
 /* Coluna Esquerda: Lista de Obras */
 .sidebar-books {
     width: 320px;
-    background-color: #1C1830;
+    background-color: #0C0C0C;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     padding: 25px;
     display: flex;
@@ -87,7 +87,7 @@
 /* Coluna Direita: Área de Trabalho */
 .workspace-book {
     flex-grow: 1;
-    background-color: #15111F;
+    background-color: #050505;
     padding: 40px;
     overflow-y: auto;
 }
