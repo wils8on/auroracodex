@@ -9,6 +9,7 @@ import { renderChapterList } from "./chapter-list.js";
 import { extractYouTubeId, openMediaViewer } from "./media-viewer.js";
 import { renderContentState, showToast } from "./feedback.js";
 import { bindDialogCloseButton, closeAccessibleDialog, makeActivatable, openAccessibleDialog } from "./dialog-accessibility.js";
+import { bookStatusMarkup, emptyBookStatusMessage } from "./book-status.js";
 
 window.fecharModal = () => closeAccessibleDialog(document.getElementById("netflix-modal"));
 bindDialogCloseButton(document.getElementById("netflix-modal"));
@@ -173,6 +174,14 @@ async function abrirModalNetflix(idLivro, livro) {
     if (titulo) titulo.innerText = livro.titulo;
     if (universoLabel) universoLabel.innerText = livro.universoNome || "Universo Independente";
     if (sinopse) sinopse.innerText = livro.sinopse;
+    let statusContainer = document.getElementById("modal-status-obra");
+    if (!statusContainer && sinopse) {
+        statusContainer = document.createElement("div");
+        statusContainer.id = "modal-status-obra";
+        statusContainer.className = "modal-book-status";
+        sinopse.before(statusContainer);
+    }
+    if (statusContainer) statusContainer.innerHTML = bookStatusMarkup(livro.status, true);
 
     atualizarBotaoFavorito(idLivro);
 
@@ -188,6 +197,7 @@ async function abrirModalNetflix(idLivro, livro) {
     try {
         const capitulos = await loadBookChapters(idLivro);
         renderChapterList({ container: listaCapitulosContainer, chapters: capitulos, bookId: idLivro });
+        if (!capitulos.length && listaCapitulosContainer) listaCapitulosContainer.innerHTML = `<p class="book-status-empty">${emptyBookStatusMessage(livro.status)}</p>`;
         carregarGaleriaModal(idLivro);
     } catch (err) {
         console.error("Erro ao carregar capítulos:", err);

@@ -6,6 +6,7 @@ import { loadUserProfile, hasProfile } from "./user-service.js";
 import { escapeHtml, safeUrl, sanitizeRichHtml } from "./security.js";
 import { setButtonBusy, showToast } from "./feedback.js";
 import { confirmAction } from "./dialog-accessibility.js?v=confirm-dialog-v1";
+import { normalizeBookStatus } from "./book-status.js";
 
 const LEGACY_OWNER_EMAIL = "wilsononole@gmail.com";
 let usuarioAtual = null;
@@ -308,7 +309,7 @@ function VincularEventosObras() {
                 document.getElementById("universo-atual-label").innerText = livro.universoNome
                     ? livro.universoNome
                     : "Nenhum — vincule na aba Universos";
-                document.getElementById("status-obra").value = livro.status || "Em Andamento";
+                document.getElementById("status-obra").value = normalizeBookStatus(livro.status);
                 document.getElementById("sinopse").value = livro.sinopse;
                 document.getElementById("url-capa").value = livro.capa || "";
                 document.getElementById("arquivo-capa").value = ""; // limpa seleção de arquivo anterior

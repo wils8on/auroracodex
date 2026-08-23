@@ -28,16 +28,11 @@ export function openMediaViewer(value, type, metadata = {}) {
     closeButton.style.cssText = "position:absolute; top:20px; right:20px; width:44px; height:44px; border:0; border-radius:50%; background:rgba(0,0,0,.65); color:#fff; font-size:2rem; cursor:pointer;";
     overlay.appendChild(closeButton);
 
-    const watermark = document.createElement("div");
-    watermark.textContent = "AURORA CODEX • CONTEÚDO PROTEGIDO";
-    watermark.setAttribute("aria-hidden", "true");
-    watermark.style.cssText = "position:absolute; inset:auto 5% 5%; z-index:2; pointer-events:none; color:rgba(255,255,255,.22); font-size:clamp(.65rem,1.5vw,1rem); font-weight:700; letter-spacing:.16em; text-align:center; transform:rotate(-5deg);";
-    overlay.appendChild(watermark);
     overlay.addEventListener("contextmenu", event => event.preventDefault());
     overlay.addEventListener("dragstart", event => event.preventDefault());
 
     const content = document.createElement("figure");
-    content.style.cssText = "width:min(94vw,1000px); max-height:90vh; display:flex; flex-direction:column; align-items:stretch; overflow:hidden; border:1px solid rgba(255,255,255,.12); border-radius:12px; background:#171220; box-shadow:0 24px 70px rgba(0,0,0,.65);";
+    content.style.cssText = "width:min(94vw,1000px); max-height:90vh; display:flex; flex-direction:column; align-items:stretch; overflow:hidden; border:1px solid rgba(255,255,255,.12); border-radius:12px; background:#080808; box-shadow:0 24px 70px rgba(0,0,0,.65);";
 
     if (type === "video") {
         const videoId = extractYouTubeId(value);

@@ -10,16 +10,6 @@ import { confirmAction } from "./dialog-accessibility.js?v=confirm-dialog-v1";
 const READER_PREFERENCES_KEY = "aurora-codex:preferencias-leitura";
 
 function configurarProtecaoConteudo(user) {
-    const watermark = document.getElementById("content-watermark");
-    const identificador = user.email || user.displayName || user.uid.slice(0, 8);
-    if (watermark) {
-        watermark.replaceChildren(...Array.from({ length: 18 }, () => {
-            const mark = document.createElement("span");
-            mark.textContent = `AURORA CODEX • ${identificador}`;
-            return mark;
-        }));
-    }
-
     const areaProtegida = target => target instanceof Element && Boolean(target.closest(
         ".reading-core, .oracle-sidebar, .character-profile-dialog, .chapter-availability-dialog"
     ));
