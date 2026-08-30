@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/dashboard.css?v=black-status-v1">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/autor.css?v=editorial-scheduling-v1">
+    <link rel="stylesheet" href="../css/autor.css?v=author-ux-v1">
     <link rel="stylesheet" href="../css/ux.css?v=hidden-states-v1">
     <style>
         /* CORREÇÃO DE OVERFLOW: Força a rolagem vertical nativa e impede cortes de tela */
@@ -27,26 +27,26 @@
 
         /* Respiro na base (padding-bottom: 120px) para evitar botões colados ou ocultos */
         .autor-container { 
-            max-width: 950px; 
+            max-width: 1180px;
             margin: 80px auto; 
             padding: 0 20px 120px 20px; 
         }
         
         .autor-title { font-family: 'Cinzel', serif; color: #FFF; margin-bottom: 20px; letter-spacing: 1px; }
         
-        .tabs-nav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .tab-btn { background: transparent; border: none; color: #8C8C8C; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; padding: 10px 20px; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
+        .tabs-nav { display: flex; flex-wrap: nowrap; gap: 6px; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.08); padding: 7px; border-radius: 10px; background:#0B0B0B; overflow-x:auto; scrollbar-width:thin; }
+        .tab-btn { flex:0 0 auto; background: transparent; border: none; color: #8C8C8C; font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 600; padding: 10px 16px; cursor: pointer; border-radius: 6px; transition: all 0.2s; }
         .tab-btn:hover { color: #FFF; background-color: rgba(255,255,255,0.05); }
         .tab-btn.active { color: #FFF; background-color: #F97316; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
-        .form-wrapper { background-color: #121214; border: 1px solid #2A2440; border-radius: 8px; padding: 30px; }
+        .form-wrapper { background-color: #0C0C0C; border: 1px solid #292929; border-radius: 12px; padding: 30px; box-shadow:0 18px 45px rgba(0,0,0,.15); }
         .form-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
         .form-group { flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
         .form-group label { color: #8C8C8C; font-size: 0.85rem; text-transform: uppercase; font-weight: 500; }
-        .form-group input, .form-group textarea, .form-group select { background-color: #1E1A30; color: #FFF; border: 1px solid #332C4D; padding: 12px; border-radius: 6px; font-family: inherit; font-size: 0.95rem; }
+        .form-group input, .form-group textarea, .form-group select { background-color: #141414; color: #FFF; border: 1px solid #343434; padding: 12px; border-radius: 7px; font-family: inherit; font-size: 0.95rem; }
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #F97316; outline: none; }
         
         /* Grid de Subgêneros (Tags Clicáveis) */
@@ -82,16 +82,26 @@
     </nav>
 
     <main class="autor-container" id="conteudo-principal" tabindex="-1">
-        <div class="tabs-nav">
-            <button class="tab-btn active" onclick="alternarAba('aba-cadastrar')">Editar/Criar Livro</button>
-            <button class="tab-btn" onclick="alternarAba('aba-gerenciar')">Suas Obras</button>
-            <button class="tab-btn" onclick="alternarAba('aba-capitulos')">Novo Capítulo</button>
-            <button class="tab-btn" onclick="alternarAba('aba-personagens')">Cadastrar Personagens</button>
-            <button class="tab-btn" onclick="alternarAba('aba-taxonomias')">Gêneros &amp; Tags</button>
-            <button class="tab-btn" onclick="alternarAba('aba-universos')">Universos</button>
-            <button class="tab-btn" onclick="alternarAba('aba-galeria')">Galeria</button>
-            <button class="tab-btn" onclick="alternarAba('aba-oraculo')">Oráculo</button>
+        <header class="author-workspace-header">
+            <div><span>ESTÚDIO EDITORIAL</span><h2>Construa e acompanhe suas histórias</h2><p>Escolha uma tarefa abaixo. O painel mantém cada etapa da obra organizada sem esconder as ferramentas avançadas.</p></div>
+            <div class="author-quick-actions" aria-label="Atalhos de criação">
+                <button type="button" onclick="abrirFerramenta('aba-cadastrar')"><b>＋</b><span>Nova obra<small>Comece um projeto</small></span></button>
+                <button type="button" onclick="abrirFerramenta('aba-capitulos')"><b>✎</b><span>Novo capítulo<small>Escreva e programe</small></span></button>
+                <button type="button" onclick="abrirFerramenta('aba-personagens')"><b>♙</b><span>Personagem<small>Amplie o Códice</small></span></button>
+                <button type="button" onclick="abrirFerramenta('aba-galeria')"><b>▧</b><span>Galeria<small>Adicione mídia</small></span></button>
+            </div>
+        </header>
+        <div class="tabs-nav" role="tablist" aria-label="Ferramentas do estúdio">
+            <button class="tab-btn active" role="tab" aria-selected="true" data-title="Configurações da obra" data-description="Cadastre uma nova história ou atualize capa, sinopse, status e identidade editorial." onclick="alternarAba('aba-cadastrar')">Obra</button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-title="Suas obras" data-description="Localize, filtre, edite ou remova os projetos que você pode administrar." onclick="alternarAba('aba-gerenciar')">Suas Obras</button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-title="Capítulos" data-description="Escreva, numere livremente, adicione trilha e programe a publicação." onclick="alternarAba('aba-capitulos')">Capítulos</button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-title="Personagens e Códice" data-description="Vincule personagens às obras e exatamente aos capítulos em que aparecem." onclick="alternarAba('aba-personagens')">Personagens</button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-title="Gêneros e tags" data-description="Mantenha a classificação do catálogo consistente e fácil de explorar." onclick="alternarAba('aba-taxonomias')">Gêneros &amp; Tags</button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-title="Universos conectados" data-description="Agrupe histórias que compartilham cenários, personagens ou acontecimentos." onclick="alternarAba('aba-universos')">Universos</button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-title="Galeria multimídia" data-description="Organize imagens e vídeos complementares com título, categoria e descrição." onclick="alternarAba('aba-galeria')">Galeria</button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-title="Oráculo" data-description="Publique avisos, bastidores e conteúdos editoriais para os leitores." onclick="alternarAba('aba-oraculo')">Oráculo</button>
         </div>
+        <div class="author-context" id="author-context"><span>ETAPA ATUAL</span><div><b id="author-context-title">Configurações da obra</b><p id="author-context-description">Cadastre uma nova história ou atualize capa, sinopse, status e identidade editorial.</p></div></div>
 
         <!-- ABA 1: CADASTRO/EDIÇÃO DE LIVRO -->
         <div id="aba-cadastrar" class="tab-content active">
@@ -620,13 +630,20 @@
     <script>
         function alternarAba(abaId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => { btn.classList.remove('active'); btn.setAttribute('aria-selected', 'false'); });
             document.getElementById(abaId).classList.add('active');
-            
-            // Garante o mapeamento do botão mesmo com eventos dinâmicos
-            if (event && event.target) {
-                event.target.classList.add('active');
+            const botao = document.querySelector(`[onclick="alternarAba('${abaId}')"]`);
+            if (botao) {
+                botao.classList.add('active');
+                botao.setAttribute('aria-selected', 'true');
+                document.getElementById('author-context-title').textContent = botao.dataset.title || botao.textContent;
+                document.getElementById('author-context-description').textContent = botao.dataset.description || '';
             }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function abrirFerramenta(abaId) {
+            document.querySelector(`[onclick="alternarAba('${abaId}')"]`)?.click();
         }
 
         // Lógica do Contador de Palavras Real-time (agora sobre o editor rico contentEditable)

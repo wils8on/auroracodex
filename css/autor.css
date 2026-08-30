@@ -462,3 +462,12 @@
     .management-pagination { gap: 8px; }
     .management-pagination button { flex: 1; padding-inline: 10px; }
 }
+
+/* Cabeçalho orientado a tarefas do estúdio editorial */
+.author-workspace-header{display:grid;grid-template-columns:1fr 1.25fr;gap:28px;align-items:end;margin-bottom:24px;padding:28px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:radial-gradient(circle at 90% 10%,rgba(249,115,22,.12),transparent 36%),#0b0b0b}
+.author-workspace-header>div:first-child>span,.author-context>span{color:#fb923c;font-size:.7rem;font-weight:700;letter-spacing:.14em}.author-workspace-header h2{margin:8px 0 10px;font:700 clamp(1.6rem,3vw,2.5rem)/1.15 Cinzel,serif}.author-workspace-header p{max-width:530px;color:#999;line-height:1.65;font-size:.9rem}
+.author-quick-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.author-quick-actions button{display:flex;align-items:center;gap:12px;min-height:72px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:9px;color:#fff;background:#111;text-align:left;cursor:pointer;transition:.2s}.author-quick-actions button:hover{border-color:#f97316;transform:translateY(-2px)}.author-quick-actions b{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;color:#fb923c;background:rgba(249,115,22,.12);font-size:1.15rem}.author-quick-actions span{display:flex;flex-direction:column;font-weight:600}.author-quick-actions small{margin-top:3px;color:#777;font-size:.7rem;font-weight:400}
+.author-context{display:flex;align-items:center;gap:18px;margin-bottom:28px;padding:14px 18px;border-left:3px solid #f97316;border-radius:0 8px 8px 0;background:#0d0d0d}.author-context>span{flex:0 0 auto}.author-context b{font-size:.92rem}.author-context p{margin-top:3px;color:#858585;font-size:.78rem;line-height:1.4}
+.tab-content>.autor-title{margin-top:6px}.form-group small{line-height:1.5}.btn-submit{min-height:50px}.tabs-nav{position:sticky;top:69px;z-index:8;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+@media(max-width:850px){.author-workspace-header{grid-template-columns:1fr}.tabs-nav{top:63px}.author-context{align-items:flex-start;flex-direction:column;gap:5px}}
+@media(max-width:560px){.author-workspace-header{padding:20px}.author-quick-actions{grid-template-columns:1fr 1fr}.author-quick-actions button{align-items:flex-start;flex-direction:column;min-height:108px}.author-context{padding:13px 15px}.tab-btn{padding-inline:13px!important}.form-wrapper{padding:20px!important}.form-group{min-width:100%!important}}

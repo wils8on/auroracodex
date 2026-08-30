@@ -7,8 +7,8 @@
   "start_url": "./index.html?source=pwa",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#15111F",
-  "theme_color": "#15111F",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "orientation": "portrait-primary",
   "categories": ["books", "entertainment", "lifestyle"],
   "icons": [
@@ -35,6 +35,11 @@
       "name": "Minha Estante",
       "short_name": "Estante",
       "url": "./estante.html"
+    },
+    {
+      "name": "Trilhas dos Capítulos",
+      "short_name": "Trilhas",
+      "url": "./trilhas.html"
     }
   ]
 }
