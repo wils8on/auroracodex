@@ -8,6 +8,8 @@ import { safeUrl } from "./security.js";
 let trilhas = [];
 let trilhaAtual = null;
 let carregamentoAtual = 0;
+let filaAtual = [];
+let playerYouTubeAtual = null;
 
 function capituloVisivel(capitulo) {
     if (capitulo.status === "rascunho") return false;
@@ -74,6 +76,7 @@ function preencherFiltroObras() {
 function renderizarTrilhas() {
     const filtro = document.getElementById("filtro-obra-trilhas")?.value || "";
     const visiveis = filtro ? trilhas.filter(item => item.livroId === filtro) : trilhas;
+    filaAtual = visiveis;
     const lista = document.getElementById("lista-trilhas");
     if (trilhaAtual && !visiveis.some(item => item.id === trilhaAtual.id)) trilhaAtual = null;
     document.getElementById("contador-trilhas").textContent = `${visiveis.length} faixa${visiveis.length === 1 ? "" : "s"}`;
@@ -102,6 +105,12 @@ function renderizarTrilhas() {
     });
 }
 
+function mudarFaixa(direcao = 1) {
+    if (!filaAtual.length) return;
+    const indiceAtual = Math.max(0, filaAtual.findIndex(item => item.id === trilhaAtual?.id));
+    tocarTrilha(filaAtual[(indiceAtual + direcao + filaAtual.length) % filaAtual.length]);
+}
+
 function tocarTrilha(trilha, atualizarLista = true) {
     trilhaAtual = trilha;
     const capa = document.getElementById("playlist-capa"); capa.src = trilha.capa; capa.alt = `Capa de ${trilha.livroTitulo}`;
@@ -110,24 +119,40 @@ function tocarTrilha(trilha, atualizarLista = true) {
     document.getElementById("playlist-capitulo").textContent = `Trilha vinculada ao capítulo ${trilha.capituloNumero}`;
     const player = document.getElementById("playlist-player");
     player.replaceChildren();
+    playerYouTubeAtual = null;
     const videoId = extractYouTubeId(trilha.url);
     if (videoId) {
         const iframe = document.createElement("iframe");
         iframe.height = "152";
-        iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&loop=1&playlist=${encodeURIComponent(videoId)}`;
+        iframe.id = `youtube-playlist-${Date.now()}`;
+        iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`;
         iframe.title = `Trilha de ${trilha.capituloTitulo}`;
         iframe.allow = "autoplay; encrypted-media; picture-in-picture";
         iframe.allowFullscreen = true;
         player.appendChild(iframe);
+        playerYouTubeAtual = iframe.contentWindow;
+        iframe.addEventListener("load", () => iframe.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: iframe.id }), "https://www.youtube.com"));
     } else if (trilha.url.includes("open.spotify.com")) {
         const link = document.createElement("a"); link.className = "spotify-link"; link.href = safeUrl(trilha.url); link.target = "_blank"; link.rel = "noopener"; link.textContent = "♫ Ouvir no Spotify"; player.appendChild(link);
     } else {
         const source = safeUrl(trilha.url);
-        const audio = document.createElement("audio"); audio.controls = true; audio.autoplay = true; audio.loop = true; audio.src = source; player.appendChild(audio);
+        const audio = document.createElement("audio"); audio.controls = true; audio.autoplay = true; audio.src = source; player.appendChild(audio);
+        audio.addEventListener("ended", () => mudarFaixa(1));
         audio.play().catch(() => { document.getElementById("playlist-capitulo").textContent += " · Toque em reproduzir para iniciar"; });
     }
+    const controles = document.createElement("div"); controles.className = "playlist-controls";
+    const anterior = document.createElement("button"); anterior.type = "button"; anterior.textContent = "← Anterior"; anterior.addEventListener("click", () => mudarFaixa(-1));
+    const proxima = document.createElement("button"); proxima.type = "button"; proxima.textContent = "Próxima →"; proxima.addEventListener("click", () => mudarFaixa(1));
+    controles.append(anterior, proxima); player.appendChild(controles);
     if (atualizarLista) renderizarTrilhas();
 }
+
+window.addEventListener("message", evento => {
+    if (evento.origin !== "https://www.youtube.com" || evento.source !== playerYouTubeAtual) return;
+    let dados = evento.data;
+    if (typeof dados === "string") { try { dados = JSON.parse(dados); } catch { return; } }
+    if (dados?.event === "infoDelivery" && dados.info?.playerState === 0) mudarFaixa(1);
+});
 
 function limparPlayer() {
     trilhaAtual = null;

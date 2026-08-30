@@ -12,8 +12,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/dashboard.css?v=black-status-v1">
-    <link rel="stylesheet" href="css/trilhas.css?v=playlist-v1">
+    <link rel="stylesheet" href="css/trilhas.css?v=playlist-v2">
     <link rel="stylesheet" href="css/ux.css">
+    <style>.playlist-controls{display:flex;justify-content:space-between;gap:10px;margin-top:13px}.playlist-controls button{padding:9px 13px;border:1px solid #333;border-radius:8px;color:#ddd;background:#151515;cursor:pointer}.playlist-controls button:hover,.playlist-controls button:focus-visible{border-color:#f97316;color:#fff}</style>
 </head>
 <body>
     <a class="skip-link" href="#conteudo-principal">Ir para as trilhas</a>
@@ -34,19 +35,19 @@
     </nav>
 
     <main class="soundtracks-page" id="conteudo-principal" tabindex="-1">
-        <header class="soundtracks-heading"><span>♫ EXPERIÊNCIA SONORA</span><h2>Trilhas dos capítulos</h2><p>Escolha uma obra, reencontre suas músicas e deixe a faixa selecionada tocar em repetição enquanto explora o Codex.</p></header>
+        <header class="soundtracks-heading"><span>♫ EXPERIÊNCIA SONORA</span><h2>Trilhas dos capítulos</h2><p>Escolha uma obra e deixe a playlist seguir capítulo após capítulo. Ao terminar a última faixa, a experiência recomeça automaticamente pela primeira.</p></header>
         <div class="soundtracks-toolbar"><label for="filtro-obra-trilhas">Obra</label><select id="filtro-obra-trilhas"><option value="">Todas as obras</option></select><span id="contador-trilhas" role="status">Carregando trilhas...</span></div>
         <section class="playlist-layout" aria-label="Playlist de capítulos">
             <article class="now-playing" id="agora-tocando">
-                <div class="now-cover"><img id="playlist-capa" src="assets/icons/aurora-codex-512.png" alt=""><span>EM REPETIÇÃO</span></div>
+                <div class="now-cover"><img id="playlist-capa" src="assets/icons/aurora-codex-512.png" alt=""><span>PLAYLIST EM LOOP</span></div>
                 <div class="now-copy"><small id="playlist-obra">AURORA CODEX</small><h3 id="playlist-faixa">Escolha uma trilha</h3><p id="playlist-capitulo">As músicas dos capítulos aparecerão ao lado.</p></div>
                 <div class="playlist-player" id="playlist-player"><p>Selecione uma faixa para começar.</p></div>
             </article>
             <div class="track-list" id="lista-trilhas" aria-live="polite"><p class="playlist-empty">Buscando capítulos com trilha sonora...</p></div>
         </section>
-        <p class="autoplay-note">A reprodução tenta iniciar automaticamente e permanece em loop. Por política do navegador, alguns celulares exigem um primeiro toque no player.</p>
+        <p class="autoplay-note">YouTube e arquivos de áudio avançam automaticamente e, depois da última faixa, voltam à primeira. Links externos do Spotify não conseguem avisar ao portal quando terminam. Por política do navegador, alguns celulares exigem um primeiro toque no player.</p>
     </main>
     <script type="module" src="js/mobile-nav.js?v=mobile-nav-v1"></script>
-    <script type="module" src="js/trilhas.js?v=playlist-v1"></script>
+    <script type="module" src="js/trilhas.js?v=playlist-v2"></script>
 </body>
 </html>
