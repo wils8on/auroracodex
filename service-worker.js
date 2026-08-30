@@ -1,16 +1,19 @@
-const CACHE_NAME = "aurora-codex-shell-v8";
+const CACHE_NAME = "aurora-codex-shell-v9";
 const SHELL_FILES = [
     "./",
     "./index.html",
     "./dashboard.html",
     "./biblioteca.html",
     "./tour.html",
+    "./trilhas.html",
     "./css/style.css",
     "./css/dashboard.css",
     "./css/ux.css",
     "./css/tour.css",
+    "./css/trilhas.css",
     "./js/mobile-nav.js",
     "./js/pwa.js",
+    "./js/trilhas.js",
     "./manifest.webmanifest",
     "./assets/icons/aurora-codex-192.png",
     "./assets/icons/aurora-codex-512.png"
