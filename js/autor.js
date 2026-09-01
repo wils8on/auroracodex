@@ -145,16 +145,46 @@ function inicializarPreviewImagens() {
     const inputCapaCapitulo = document.getElementById("arquivo-capa-capitulo");
     const previewCapaCapitulo = document.getElementById("preview-capa-capitulo");
     const wrapperCapaCapitulo = document.getElementById("preview-wrapper-capa-capitulo");
+    const btnRemoverCapaCapitulo = document.getElementById("remover-capa-capitulo");
+    const btnRemoverTrilha = document.getElementById("remover-trilha-capitulo");
+    const inputTrilhaLink = document.getElementById("trilha-sonora");
+    const inputTrilhaArquivo = document.getElementById("arquivo-trilha-capitulo");
+
+    const atualizarBotaoRemoverTrilha = () => {
+        const possuiTrilha = Boolean(inputTrilhaLink?.value || document.getElementById("trilha-sonora-upload")?.value || inputTrilhaArquivo?.files?.length);
+        if (btnRemoverTrilha) btnRemoverTrilha.style.display = possuiTrilha ? "inline-flex" : "none";
+    };
 
     if (inputCapaCapitulo) {
         inputCapaCapitulo.addEventListener("change", () => {
             if (inputCapaCapitulo.files && inputCapaCapitulo.files[0]) {
                 previewCapaCapitulo.src = URL.createObjectURL(inputCapaCapitulo.files[0]);
+                previewCapaCapitulo.style.display = "block";
                 wrapperCapaCapitulo.style.display = "block";
                 document.getElementById("progresso-upload-capa-capitulo").innerText = "";
+                if (btnRemoverCapaCapitulo) btnRemoverCapaCapitulo.style.display = "inline-flex";
             }
         });
     }
+
+    btnRemoverCapaCapitulo?.addEventListener("click", () => {
+        inputCapaCapitulo.value = "";
+        document.getElementById("capa-capitulo").value = "";
+        previewCapaCapitulo.removeAttribute("src");
+        previewCapaCapitulo.style.display = "none";
+        document.getElementById("progresso-upload-capa-capitulo").innerText = "Imagem marcada para remoção. Salve o capítulo para confirmar.";
+        btnRemoverCapaCapitulo.style.display = "none";
+    });
+
+    btnRemoverTrilha?.addEventListener("click", () => {
+        if (inputTrilhaLink) inputTrilhaLink.value = "";
+        if (inputTrilhaArquivo) inputTrilhaArquivo.value = "";
+        document.getElementById("trilha-sonora-upload").value = "";
+        document.getElementById("progresso-upload-trilha").innerText = "Trilha marcada para remoção. Salve o capítulo para confirmar.";
+        atualizarBotaoRemoverTrilha();
+    });
+    inputTrilhaLink?.addEventListener("input", atualizarBotaoRemoverTrilha);
+    inputTrilhaArquivo?.addEventListener("change", atualizarBotaoRemoverTrilha);
 
     // Alterna entre "Link" e "Upload de Áudio" pra trilha sonora do capítulo
     const tipoTrilha = document.getElementById("tipo-trilha-capitulo");
@@ -652,6 +682,8 @@ function resetarFormularioCapitulo() {
         if (trilhaUploadInput) trilhaUploadInput.value = "";
         const progressoTrilha = document.getElementById("progresso-upload-trilha");
         if (progressoTrilha) progressoTrilha.innerText = "";
+        const btnRemoverTrilha = document.getElementById("remover-trilha-capitulo");
+        if (btnRemoverTrilha) btnRemoverTrilha.style.display = "none";
 
         const corInput = document.getElementById("cor-cena-capitulo");
         if (corInput) corInput.value = "#f97316";
@@ -754,8 +786,10 @@ function vincularEventosCapitulos(livroId) {
                 const wrapperCapaCapitulo = document.getElementById("preview-wrapper-capa-capitulo");
                 if (cap.capa) {
                     document.getElementById("preview-capa-capitulo").src = cap.capa;
+                    document.getElementById("preview-capa-capitulo").style.display = "block";
                     wrapperCapaCapitulo.style.display = "block";
                     document.getElementById("progresso-upload-capa-capitulo").innerText = "Imagem atual (envie um novo arquivo para substituir)";
+                    document.getElementById("remover-capa-capitulo").style.display = "inline-flex";
                 } else {
                     wrapperCapaCapitulo.style.display = "none";
                 }
@@ -770,6 +804,7 @@ function vincularEventosCapitulos(livroId) {
                 document.getElementById("trilha-sonora-upload").value = ehUploadProprio ? trilhaAtual : "";
                 document.getElementById("arquivo-trilha-capitulo").value = "";
                 document.getElementById("progresso-upload-trilha").innerText = ehUploadProprio ? "Áudio atual (envie um novo arquivo para substituir)" : "";
+                document.getElementById("remover-trilha-capitulo").style.display = trilhaAtual ? "inline-flex" : "none";
 
                 // Conteúdo pode ter sido salvo como HTML (editor rico) ou como texto puro (capítulos antigos)
                 const editor = document.getElementById("conteudo-capitulo");

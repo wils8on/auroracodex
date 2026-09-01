@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/autor.css?v=word-import-v1">
     <link rel="stylesheet" href="../css/ux.css?v=hidden-states-v1">
-    <style>.import-preview-dialog{position:fixed;inset:50% auto auto 50%;transform:translate(-50%,-50%);z-index:1000}.import-preview-open{overflow:hidden}</style>
+    <style>.import-preview-dialog{position:fixed;inset:50% auto auto 50%;transform:translate(-50%,-50%);z-index:1000}.import-preview-open{overflow:hidden}.media-remove-btn{align-items:center;margin-top:10px;padding:8px 12px;border:1px solid #7f1d1d;border-radius:6px;color:#fca5a5;background:#1c0b0b;cursor:pointer;font-size:.78rem;font-weight:600}.media-remove-btn:hover,.media-remove-btn:focus-visible{border-color:#ef4444;color:#fff;background:#3b0d0d}</style>
     <style>
         /* CORREÇÃO DE OVERFLOW: Força a rolagem vertical nativa e impede cortes de tela */
         html, body {
@@ -271,6 +271,7 @@
                             <input type="hidden" id="trilha-sonora-upload">
                             <div id="progresso-upload-trilha" style="font-size: 0.8rem; color: #8C8C8C; margin-top: 6px;"></div>
                         </div>
+                        <button type="button" class="media-remove-btn" id="remover-trilha-capitulo" style="display:none;">Remover trilha do capítulo</button>
                     </div>
 
                     <div class="form-row" style="align-items: flex-start;">
@@ -281,6 +282,7 @@
                             <div id="preview-wrapper-capa-capitulo" style="margin-top: 10px; display: none;">
                                 <img id="preview-capa-capitulo" style="width: 130px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid #332C4D;">
                                 <div id="progresso-upload-capa-capitulo" style="font-size: 0.8rem; color: #8C8C8C; margin-top: 6px;"></div>
+                                <button type="button" class="media-remove-btn" id="remover-capa-capitulo">Remover imagem do capítulo</button>
                             </div>
                         </div>
                         <div class="form-group" style="max-width: 150px; min-width: 120px;">
@@ -765,6 +767,6 @@
         document.getElementById('fechar-preview-importacao')?.addEventListener('click', fecharDialogImportacao);
     </script>
     <script type="module" src="../js/mobile-nav.js?v=mobile-nav-v1"></script>
-    <script type="module" src="../js/autor.js?v=word-import-v1"></script>
+    <script type="module" src="../js/autor.js?v=chapter-media-remove-v1"></script>
 </body>
 </html>
