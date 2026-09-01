@@ -1,4 +1,4 @@
-const CACHE_NAME = "aurora-codex-shell-v10";
+const CACHE_NAME = "aurora-codex-shell-v11";
 const SHELL_FILES = [
     "./",
     "./index.html",
@@ -14,6 +14,7 @@ const SHELL_FILES = [
     "./js/mobile-nav.js",
     "./js/pwa.js",
     "./js/trilhas.js",
+    "./js/vendor/mammoth.browser.min.js",
     "./manifest.webmanifest",
     "./assets/icons/aurora-codex-192.png",
     "./assets/icons/aurora-codex-512.png"

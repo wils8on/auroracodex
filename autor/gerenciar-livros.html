@@ -14,8 +14,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/dashboard.css?v=black-status-v1">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/autor.css?v=author-ux-v1">
+    <link rel="stylesheet" href="../css/autor.css?v=word-import-v1">
     <link rel="stylesheet" href="../css/ux.css?v=hidden-states-v1">
+    <style>.import-preview-dialog{position:fixed;inset:50% auto auto 50%;transform:translate(-50%,-50%);z-index:1000}.import-preview-open{overflow:hidden}</style>
     <style>
         /* CORREÇÃO DE OVERFLOW: Força a rolagem vertical nativa e impede cortes de tela */
         html, body {
@@ -291,10 +292,10 @@
                     <div class="form-group">
                         <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                             <label for="importar-arquivo-capitulo" style="background:#2A2440; border:1px solid #332C4D; color:#FFF; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:0.85rem; display:inline-flex; align-items:center; gap:8px; margin:0;">
-                                📄 Importar .txt / .html
+                                📄 Importar Word / TXT / HTML
                             </label>
-                            <input type="file" id="importar-arquivo-capitulo" accept=".txt,.html" style="display:none;">
-                            <span style="color:#737373; font-size:0.8rem;">Substitui o conteúdo atual</span>
+                            <input type="file" id="importar-arquivo-capitulo" accept=".docx,.txt,.html,text/plain,text/html,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display:none;">
+                            <span style="color:#737373; font-size:0.8rem;">Mostra uma prévia antes de substituir o conteúdo</span>
                         </div>
                     </div>
 
@@ -627,6 +628,15 @@
         </div>
     </main>
 
+    <dialog class="import-preview-dialog" id="import-preview-dialog" aria-labelledby="import-preview-title">
+        <div class="import-preview-head"><div><span>PRÉVIA DA IMPORTAÇÃO</span><h2 id="import-preview-title">Revisar conteúdo</h2></div><button type="button" id="fechar-preview-importacao" aria-label="Fechar">×</button></div>
+        <p id="import-preview-status">Confira a formatação antes de substituir o texto atual.</p>
+        <div class="import-preview-content" id="import-preview-content"></div>
+        <div class="import-preview-messages" id="import-preview-messages" hidden></div>
+        <div class="import-preview-actions"><button type="button" id="cancelar-importacao">Cancelar</button><button type="button" class="btn-submit" id="confirmar-importacao">Usar este conteúdo</button></div>
+    </dialog>
+
+    <script src="../js/vendor/mammoth.browser.min.js"></script>
     <script>
         function alternarAba(abaId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -672,34 +682,89 @@
             });
         }
 
-        // Importar conteúdo de um arquivo .txt ou .html (substitui o conteúdo atual do editor)
+        // Importação segura com prévia: Word (.docx), texto e HTML.
         const inputImportar = document.getElementById('importar-arquivo-capitulo');
+        const dialogImportacao = document.getElementById('import-preview-dialog');
+        const previewImportacao = document.getElementById('import-preview-content');
+        const mensagensImportacao = document.getElementById('import-preview-messages');
+        let htmlImportacaoPendente = '';
+
+        function abrirDialogImportacao() {
+            if (typeof dialogImportacao.showModal === 'function') dialogImportacao.showModal();
+            else { dialogImportacao.setAttribute('open', ''); document.body.classList.add('import-preview-open'); }
+        }
+
+        function fecharDialogImportacao() {
+            if (typeof dialogImportacao.close === 'function') dialogImportacao.close();
+            else { dialogImportacao.removeAttribute('open'); document.body.classList.remove('import-preview-open'); }
+        }
+
+        function escaparTextoImportado(valor) {
+            const elemento = document.createElement('div');
+            elemento.textContent = valor == null ? '' : String(valor);
+            return elemento.innerHTML;
+        }
+
+        function sanitizarHtmlImportado(valor) {
+            const template = document.createElement('template');
+            template.innerHTML = valor == null ? '' : String(valor);
+            const tags = new Set(['P','BR','STRONG','B','EM','I','U','S','BLOCKQUOTE','UL','OL','LI','H1','H2','H3','H4','A','SPAN','DIV']);
+            for (const node of [...template.content.querySelectorAll('*')]) {
+                if (!tags.has(node.tagName)) { node.replaceWith(...node.childNodes); continue; }
+                const hrefOriginal = node.tagName === 'A' ? node.getAttribute('href') : '';
+                const alinhamento = (node.style?.textAlign || '').toLowerCase();
+                for (const atributo of [...node.attributes]) node.removeAttribute(atributo.name);
+                if (['left','center','right','justify'].includes(alinhamento)) node.style.textAlign = alinhamento;
+                if (node.tagName === 'A' && /^https?:\/\//i.test(hrefOriginal || '')) {
+                    node.setAttribute('href', hrefOriginal); node.setAttribute('target', '_blank'); node.setAttribute('rel', 'noopener noreferrer');
+                }
+            }
+            return template.innerHTML;
+        }
+
+        function abrirPreviewImportacao(html, nomeArquivo, avisos = []) {
+            htmlImportacaoPendente = sanitizarHtmlImportado(html);
+            previewImportacao.innerHTML = htmlImportacaoPendente;
+            document.getElementById('import-preview-status').textContent = `${nomeArquivo} · Confira títulos, listas, ênfases e quebras de parágrafo.`;
+            mensagensImportacao.hidden = avisos.length === 0;
+            mensagensImportacao.textContent = avisos.length ? `Observações da conversão: ${avisos.join(' · ')}` : '';
+            abrirDialogImportacao();
+        }
+
         if (inputImportar && editorConteudo) {
-            inputImportar.addEventListener('change', () => {
+            inputImportar.addEventListener('change', async () => {
                 const arquivo = inputImportar.files[0];
                 if (!arquivo) return;
-
-                const leitor = new FileReader();
-                leitor.onload = () => {
-                    const texto = leitor.result;
-                    const ehHtml = arquivo.name.toLowerCase().endsWith('.html');
-
-                    if (ehHtml) {
-                        editorConteudo.innerHTML = texto;
+                if (arquivo.size > 10 * 1024 * 1024) { alert('O arquivo deve ter no máximo 10 MB.'); inputImportar.value = ''; return; }
+                try {
+                    const nome = arquivo.name.toLowerCase();
+                    if (nome.endsWith('.docx')) {
+                        if (!window.mammoth) throw new Error('O conversor Word ainda não foi carregado. Verifique sua conexão e tente novamente.');
+                        const resultado = await window.mammoth.convertToHtml({ arrayBuffer: await arquivo.arrayBuffer() }, {
+                            styleMap: ["p[style-name='Title'] => h2:fresh", "p[style-name='Heading 1'] => h2:fresh", "p[style-name='Heading 2'] => h3:fresh", "p[style-name='Quote'] => blockquote:fresh"]
+                        });
+                        abrirPreviewImportacao(resultado.value, arquivo.name, resultado.messages.map(item => item.message));
                     } else {
-                        editorConteudo.innerHTML = texto
-                            .split(/\r?\n/)
-                            .map(linha => linha.trim() === "" ? "" : `<p>${linha}</p>`)
-                            .join("");
+                        const texto = await arquivo.text();
+                        const html = nome.endsWith('.html') ? texto : texto.split(/\r?\n/).map(linha => linha.trim() ? `<p>${escaparTextoImportado(linha)}</p>` : '<p><br></p>').join('');
+                        abrirPreviewImportacao(html, arquivo.name);
                     }
-                    atualizarContadorPalavras();
+                } catch (erro) {
+                    console.error('Erro ao importar capítulo:', erro);
+                    alert(erro.message || 'Não foi possível importar o arquivo.');
+                } finally {
                     inputImportar.value = "";
-                };
-                leitor.readAsText(arquivo);
+                }
             });
         }
+        document.getElementById('confirmar-importacao')?.addEventListener('click', () => {
+            editorConteudo.innerHTML = htmlImportacaoPendente; atualizarContadorPalavras();
+            editorConteudo.dispatchEvent(new Event('input', { bubbles: true })); fecharDialogImportacao();
+        });
+        document.getElementById('cancelar-importacao')?.addEventListener('click', fecharDialogImportacao);
+        document.getElementById('fechar-preview-importacao')?.addEventListener('click', fecharDialogImportacao);
     </script>
     <script type="module" src="../js/mobile-nav.js?v=mobile-nav-v1"></script>
-    <script type="module" src="../js/autor.js?v=book-status-v1"></script>
+    <script type="module" src="../js/autor.js?v=word-import-v1"></script>
 </body>
 </html>

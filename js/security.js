@@ -21,7 +21,9 @@ export function sanitizeRichHtml(value) {
     for (const node of [...template.content.querySelectorAll("*")]) {
         if (!tags.has(node.tagName)) { node.replaceWith(...node.childNodes); continue; }
         const originalHref = node.tagName === "A" ? node.getAttribute("href") : "";
+        const textAlign = (node.style?.textAlign || "").toLowerCase();
         for (const attr of [...node.attributes]) node.removeAttribute(attr.name);
+        if (["left", "center", "right", "justify"].includes(textAlign)) node.style.textAlign = textAlign;
         if (node.tagName === "A") {
             const href = safeUrl(originalHref);
             if (href) node.setAttribute("href", href);
