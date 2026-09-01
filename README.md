@@ -78,6 +78,7 @@ A homologação de 8 de agosto de 2026 confirmou login, catálogo, autoria, leit
 
 1. Criar um projeto Firebase separado para homologação e completar os testes destrutivos.
 2. Auditar a migração de `autorId` e `criadoPor` e remover a exceção legada quando seguro.
+3. Avaliar as [notificações de novos capítulos por e-mail](docs/roadmap.md), incluindo consentimento, backend de publicação e custos do provedor.
 3. Ampliar testes automatizados dos serviços e fluxos do navegador.
 4. Evoluir a experiência de leitores, autores e administradores.
 5. Preparar observabilidade, custos, privacidade e escala.
