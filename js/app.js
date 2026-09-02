@@ -1,6 +1,6 @@
 // js/app.js
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, getDoc, setDoc, collection, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, collection, onSnapshot, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
 import { loadUserProfile } from "./user-service.js";
 import { bindFavoriteButton } from "./progress-service.js";
@@ -19,6 +19,8 @@ bindDialogCloseButton(document.getElementById("netflix-modal"));
 let listaDestaques = [];
 let indiceDestaqueAtual = 0;
 let timerCarrossel = null;
+let livrosHome = [];
+let progressoHome = [];
 
 // Monitora o estado do usuário logado na Home
 onAuthStateChanged(auth, async (user) => {
@@ -47,6 +49,7 @@ onAuthStateChanged(auth, async (user) => {
 
             // Inicializa a escuta do catálogo e do banner de destaque
             ouvirCatalogo();
+            ouvirProgressoUsuario(user.uid);
         }
     }
 });
@@ -105,6 +108,8 @@ function ouvirCatalogo() {
 
         // Inicializa o slider principal com todos os destaques encontrados
         iniciarCarrosselHero();
+        livrosHome = livrosCatalogo;
+        renderizarContinuarLeitura();
         renderizarTrilhasInicio(livrosCatalogo);
     }, (error) => {
         console.error("Erro ao carregar catálogo:", error);
@@ -124,30 +129,61 @@ async function renderizarTrilhasInicio(livros) {
     try {
         const grupos = await Promise.all(livros.map(async livro => {
             const capitulos = await loadBookChapters(livro.id);
-            return capitulos.filter(capitulo => {
+            const publicados = capitulos.filter(capitulo => {
                 if (!String(capitulo.trilhaSonora || "").trim() || capitulo.status === "rascunho") return false;
                 return capitulo.status !== "agendado" || (capitulo.data_agendamento && new Date(capitulo.data_agendamento).getTime() <= Date.now());
-            }).map(capitulo => ({ livro, capitulo }));
+            });
+            const disponiveis = capitulos.filter(capitulo => capitulo.status !== "rascunho" && (capitulo.status !== "agendado" || (capitulo.data_agendamento && new Date(capitulo.data_agendamento).getTime() <= Date.now())));
+            livro.ultimoCapituloPublicado = Math.max(0, ...disponiveis.map(capitulo => Number(capitulo.numero) || 0));
+            return publicados.map(capitulo => ({ livro, capitulo }));
         }));
-        const faixas = grupos.flat().slice(0, 10);
-        if (!faixas.length) { secao.style.display = "none"; return; }
+        renderizarContinuarLeitura();
+        const faixas = grupos.flat();
+        const porLivro = [...new Map(faixas.map(item => [item.livro.id, { livro:item.livro, quantidade:faixas.filter(faixa => faixa.livro.id === item.livro.id).length }])).values()];
+        if (!porLivro.length) { secao.style.display = "none"; return; }
         container.replaceChildren();
-        faixas.forEach(({ livro, capitulo }) => {
+        porLivro.forEach(({ livro, quantidade }) => {
             const card = document.createElement("a");
-            card.className = "soundtrack-home-card";
+            card.className = "soundtrack-book-card";
             card.href = `trilhas.html?livro=${encodeURIComponent(livro.id)}`;
             const capa = document.createElement("img"); capa.src = safeUrl(livro.capa, "assets/icons/aurora-codex-192.png"); capa.alt = "";
-            const copy = document.createElement("div");
-            const titulo = document.createElement("strong"); titulo.textContent = capitulo.titulo || `Capítulo ${capitulo.numero}`;
-            const meta = document.createElement("span"); meta.textContent = `${livro.titulo} · Capítulo ${capitulo.numero}`;
-            copy.append(titulo, meta);
-            const play = document.createElement("span"); play.className = "soundtrack-home-play"; play.textContent = "▶";
-            card.append(capa, copy, play); container.appendChild(card);
+            const copy = document.createElement("div"); copy.className = "soundtrack-book-copy";
+            const titulo = document.createElement("b"); titulo.textContent = livro.titulo;
+            const meta = document.createElement("span"); meta.textContent = `♫ ${quantidade} faixa${quantidade === 1 ? "" : "s"}`;
+            copy.append(titulo, meta); card.append(capa, copy); container.appendChild(card);
         });
     } catch (error) {
         console.error("Erro ao carregar trilhas na página inicial:", error);
         secao.style.display = "none";
     }
+}
+
+function ouvirProgressoUsuario(uid) {
+    onSnapshot(query(collection(db, "progresso_leitura"), where("uid", "==", uid)), snapshot => {
+        progressoHome = snapshot.docs.map(item => item.data()).filter(item => item.ultimoCapituloId);
+        renderizarContinuarLeitura();
+    }, error => console.error("Erro ao carregar continuidade de leitura:", error));
+}
+
+function renderizarContinuarLeitura() {
+    const secao = document.getElementById("secao-continuar-inicio");
+    const container = document.getElementById("continuar-inicio");
+    if (!secao || !container || !livrosHome.length) return;
+    const leituras = progressoHome.map(registro => ({ registro, livro:livrosHome.find(livro => livro.id === registro.livroId) })).filter(item => item.livro).sort((a,b) => new Date(b.registro.dataUltimaLeitura || 0) - new Date(a.registro.dataUltimaLeitura || 0)).slice(0, 4);
+    secao.style.display = leituras.length ? "block" : "none";
+    container.replaceChildren();
+    leituras.forEach(({ registro, livro }) => {
+        const card = document.createElement("a"); card.className = "continue-card"; card.href = `ler.html?livroId=${encodeURIComponent(livro.id)}&capituloId=${encodeURIComponent(registro.ultimoCapituloId)}`;
+        const capa = document.createElement("img"); capa.src = safeUrl(livro.capa, "assets/icons/aurora-codex-192.png"); capa.alt = "";
+        const copy = document.createElement("div");
+        const etiqueta = document.createElement("small"); etiqueta.textContent = registro.status === "concluida" ? "RELER" : "CONTINUAR LEITURA";
+        const titulo = document.createElement("b"); titulo.textContent = livro.titulo;
+        const capitulo = document.createElement("span"); capitulo.textContent = `Capítulo ${registro.ultimoCapituloNumero}${registro.ultimoCapituloTitulo ? ` · ${registro.ultimoCapituloTitulo}` : ""}`;
+        const maximo = Number(livro.ultimoCapituloPublicado) || Number(registro.ultimoCapituloNumero) || 1;
+        const percentual = Math.min(100, Math.max(4, (Number(registro.ultimoCapituloNumero) || 0) / maximo * 100));
+        const barra = document.createElement("div"); barra.className = "continue-progress"; const preenchimento = document.createElement("i"); preenchimento.style.width = `${percentual}%`; barra.appendChild(preenchimento);
+        copy.append(etiqueta, titulo, capitulo, barra); card.append(capa, copy); container.appendChild(card);
+    });
 }
 
 // Inicializa ou reseta o Carrossel do Hero Banner
