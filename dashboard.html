@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/dashboard.css?v=black-status-v1">
     <link rel="stylesheet" href="css/ux.css">
-    <style>.hero-synopsis{display:-webkit-box!important;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3}.discovery-row{margin-top:34px}.soundtrack-home-card{position:relative;display:grid;grid-template-columns:78px 1fr auto;align-items:center;gap:14px;min-width:330px;padding:10px;border:1px solid rgba(255,255,255,.09);border-radius:10px;color:#fff;background:#0d0d0d;cursor:pointer}.soundtrack-home-card:hover{border-color:#f97316;transform:translateY(-2px)}.soundtrack-home-card img{width:78px;height:78px;border-radius:7px;object-fit:cover}.soundtrack-home-card small,.soundtrack-home-card span{display:block}.soundtrack-home-card small{color:#f97316;font-weight:700}.soundtrack-home-card span{margin-top:6px;color:#888;font-size:.75rem}.soundtrack-home-play{display:grid!important;place-items:center;width:38px;height:38px!important;border-radius:50%;color:#050505!important;background:#fff}.portal-shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.portal-shortcut{min-height:120px;padding:20px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:linear-gradient(135deg,#111,#080808);transition:.2s}.portal-shortcut:hover{border-color:#f97316;transform:translateY(-3px)}.portal-shortcut b{display:block;margin-bottom:9px;font-family:Cinzel,serif}.portal-shortcut span{color:#888;font-size:.82rem;line-height:1.5}@media(max-width:700px){.portal-shortcuts{grid-template-columns:1fr 1fr}.soundtrack-home-card{min-width:285px;grid-template-columns:64px 1fr auto}.soundtrack-home-card img{width:64px;height:64px}}@media(max-width:420px){.portal-shortcuts{grid-template-columns:1fr}}</style>
+    <style>.hero-synopsis{display:-webkit-box!important;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3}.discovery-row{margin-top:34px}.soundtrack-book-card{position:relative;flex:0 0 190px;height:270px;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#111;cursor:pointer;transition:.22s}.soundtrack-book-card:hover{border-color:#f97316;transform:translateY(-5px)}.soundtrack-book-card img{width:100%;height:100%;object-fit:cover}.soundtrack-book-card:after{content:'';position:absolute;inset:30% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.96))}.soundtrack-book-copy{position:absolute;z-index:2;inset:auto 14px 14px}.soundtrack-book-copy b,.soundtrack-book-copy span{display:block}.soundtrack-book-copy b{font-family:Cinzel,serif}.soundtrack-book-copy span{margin-top:7px;color:#f97316;font-size:.72rem;font-weight:700}.continue-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}.continue-card{display:grid;grid-template-columns:92px 1fr;gap:16px;min-height:132px;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:#0c0c0c;transition:.2s}.continue-card:hover{border-color:#f97316;transform:translateY(-3px)}.continue-card img{width:92px;height:108px;border-radius:7px;object-fit:cover}.continue-card small{color:#f97316;font-size:.68rem;font-weight:700;letter-spacing:.08em}.continue-card b,.continue-card span{display:block}.continue-card b{margin:8px 0 5px;font-family:Cinzel,serif}.continue-card span{color:#999;font-size:.78rem}.continue-progress{height:4px;margin-top:13px;overflow:hidden;border-radius:4px;background:#292929}.continue-progress i{display:block;height:100%;background:#f97316}.portal-shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.portal-shortcut{min-height:120px;padding:20px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:linear-gradient(135deg,#111,#080808);transition:.2s}.portal-shortcut:hover{border-color:#f97316;transform:translateY(-3px)}.portal-shortcut b{display:block;margin-bottom:9px;font-family:Cinzel,serif}.portal-shortcut span{color:#888;font-size:.82rem;line-height:1.5}@media(max-width:700px){.portal-shortcuts{grid-template-columns:1fr 1fr}.soundtrack-book-card{flex-basis:155px;height:220px}}@media(max-width:420px){.portal-shortcuts{grid-template-columns:1fr}.continue-grid{grid-template-columns:1fr}}</style>
 </head>
 <body>
     <a class="skip-link" href="#conteudo-principal">Ir para o conteúdo</a>
@@ -90,6 +90,11 @@
 
     <!-- Conteúdo dos Carrosséis -->
     <main class="content-rows" id="conteudo-principal" tabindex="-1">
+
+        <section class="row" id="secao-continuar-inicio" style="display:none;">
+            <h3 class="row-title">Continue de onde parou</h3>
+            <div class="continue-grid" id="continuar-inicio"></div>
+        </section>
 
         <!-- Fileira 1: Universos Literários (Dinâmica) -->
         <section class="row">
@@ -175,6 +180,6 @@
     </script>
 
     <script type="module" src="js/mobile-nav.js?v=mobile-nav-v1"></script>
-    <script type="module" src="js/app.js?v=home-discovery-v1"></script>
+    <script type="module" src="js/app.js?v=continue-reading-v1"></script>
 </body>
 </html>
