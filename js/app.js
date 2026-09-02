@@ -134,7 +134,7 @@ async function renderizarTrilhasInicio(livros) {
                 return capitulo.status !== "agendado" || (capitulo.data_agendamento && new Date(capitulo.data_agendamento).getTime() <= Date.now());
             });
             const disponiveis = capitulos.filter(capitulo => capitulo.status !== "rascunho" && (capitulo.status !== "agendado" || (capitulo.data_agendamento && new Date(capitulo.data_agendamento).getTime() <= Date.now())));
-            livro.ultimoCapituloPublicado = Math.max(0, ...disponiveis.map(capitulo => Number(capitulo.numero) || 0));
+            livro.capitulosDaObra = capitulos;
             return publicados.map(capitulo => ({ livro, capitulo }));
         }));
         renderizarContinuarLeitura();
@@ -179,10 +179,17 @@ function renderizarContinuarLeitura() {
         const etiqueta = document.createElement("small"); etiqueta.textContent = registro.status === "concluida" ? "RELER" : "CONTINUAR LEITURA";
         const titulo = document.createElement("b"); titulo.textContent = livro.titulo;
         const capitulo = document.createElement("span"); capitulo.textContent = `Capítulo ${registro.ultimoCapituloNumero}${registro.ultimoCapituloTitulo ? ` · ${registro.ultimoCapituloTitulo}` : ""}`;
-        const maximo = Number(livro.ultimoCapituloPublicado) || Number(registro.ultimoCapituloNumero) || 1;
-        const percentual = Math.min(100, Math.max(4, (Number(registro.ultimoCapituloNumero) || 0) / maximo * 100));
+        const capitulosDaObra = Array.isArray(livro.capitulosDaObra) ? livro.capitulosDaObra : [];
+        const total = capitulosDaObra.length || Math.max(1, Number(registro.ultimoCapituloNumero) || 1);
+        const indiceAtual = capitulosDaObra.findIndex(item => item.id === registro.ultimoCapituloId);
+        const lidos = indiceAtual >= 0 ? indiceAtual + 1 : Math.min(total, Number(registro.ultimoCapituloNumero) || 0);
+        const percentual = Math.min(100, Math.max(0, lidos / total * 100));
+        const percentualFormatado = percentual.toLocaleString("pt-BR", { minimumFractionDigits:2, maximumFractionDigits:2 });
+        const linhaProgresso = document.createElement("div"); linhaProgresso.className = "continue-progress-row";
         const barra = document.createElement("div"); barra.className = "continue-progress"; const preenchimento = document.createElement("i"); preenchimento.style.width = `${percentual}%`; barra.appendChild(preenchimento);
-        copy.append(etiqueta, titulo, capitulo, barra); card.append(capa, copy); container.appendChild(card);
+        const legenda = document.createElement("span"); legenda.className = "continue-percent"; legenda.textContent = `${lidos} de ${total} • ${percentualFormatado}%`;
+        linhaProgresso.append(barra, legenda);
+        copy.append(etiqueta, titulo, capitulo, linhaProgresso); card.append(capa, copy); container.appendChild(card);
     });
 }
 
