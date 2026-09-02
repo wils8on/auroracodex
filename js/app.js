@@ -33,6 +33,7 @@ onAuthStateChanged(auth, async (user) => {
         // Puxa permissões e perfil do banco
         const dados = await loadUserProfile(user.uid);
         if (dados) {
+            setDoc(doc(db, "usuarios", user.uid), { ultimoLogin: new Date().toISOString() }, { merge: true }).catch(error => console.warn("Não foi possível registrar o último acesso:", error));
             
             // Atualiza tag de perfil (AUTOR, LEITOR, ADMIN)
             if (document.getElementById('user-role-badge')) {
@@ -59,6 +60,7 @@ function ouvirCatalogo() {
         if (container) container.innerHTML = "";
 
         listaDestaques = []; // Reinicia a lista a cada atualização do banco
+        const livrosCatalogo = [];
 
         if (snapshot.empty) {
             if (container) {
@@ -70,6 +72,7 @@ function ouvirCatalogo() {
         snapshot.forEach((docSnap) => {
             const livro = docSnap.data();
             const id = docSnap.id;
+            livrosCatalogo.push({ id, ...livro });
 
             // 1. RENDERIZA OS CARDS DA FILEIRA "UNIVERSOS CONECTADOS"
             if (container) {
@@ -102,6 +105,7 @@ function ouvirCatalogo() {
 
         // Inicializa o slider principal com todos os destaques encontrados
         iniciarCarrosselHero();
+        renderizarTrilhasInicio(livrosCatalogo);
     }, (error) => {
         console.error("Erro ao carregar catálogo:", error);
         renderContentState(document.getElementById("catalogo-livros"), {
@@ -111,6 +115,39 @@ function ouvirCatalogo() {
         });
         showToast("Não foi possível atualizar o catálogo.", "error");
     });
+}
+
+async function renderizarTrilhasInicio(livros) {
+    const container = document.getElementById("trilhas-inicio");
+    const secao = document.getElementById("secao-trilhas-inicio");
+    if (!container || !secao) return;
+    try {
+        const grupos = await Promise.all(livros.map(async livro => {
+            const capitulos = await loadBookChapters(livro.id);
+            return capitulos.filter(capitulo => {
+                if (!String(capitulo.trilhaSonora || "").trim() || capitulo.status === "rascunho") return false;
+                return capitulo.status !== "agendado" || (capitulo.data_agendamento && new Date(capitulo.data_agendamento).getTime() <= Date.now());
+            }).map(capitulo => ({ livro, capitulo }));
+        }));
+        const faixas = grupos.flat().slice(0, 10);
+        if (!faixas.length) { secao.style.display = "none"; return; }
+        container.replaceChildren();
+        faixas.forEach(({ livro, capitulo }) => {
+            const card = document.createElement("a");
+            card.className = "soundtrack-home-card";
+            card.href = `trilhas.html?livro=${encodeURIComponent(livro.id)}`;
+            const capa = document.createElement("img"); capa.src = safeUrl(livro.capa, "assets/icons/aurora-codex-192.png"); capa.alt = "";
+            const copy = document.createElement("div");
+            const titulo = document.createElement("strong"); titulo.textContent = capitulo.titulo || `Capítulo ${capitulo.numero}`;
+            const meta = document.createElement("span"); meta.textContent = `${livro.titulo} · Capítulo ${capitulo.numero}`;
+            copy.append(titulo, meta);
+            const play = document.createElement("span"); play.className = "soundtrack-home-play"; play.textContent = "▶";
+            card.append(capa, copy, play); container.appendChild(card);
+        });
+    } catch (error) {
+        console.error("Erro ao carregar trilhas na página inicial:", error);
+        secao.style.display = "none";
+    }
 }
 
 // Inicializa ou reseta o Carrossel do Hero Banner
