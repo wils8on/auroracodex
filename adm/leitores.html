@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#15111F">
+    <meta name="theme-color" content="#050505">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="../manifest.webmanifest">
@@ -51,6 +51,7 @@
         .badge-ativa { background: rgba(59,130,246,0.18); color:#6EA8FE; }
         .badge-concluida { background: rgba(70,211,105,0.18); color:#46d369; }
         .badge-favorito { background: rgba(249,115,22,0.18); color:#FF6B6B; }
+        body{background:#050505!important}.adm-container{max-width:1280px}.insights-hero{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:30px;padding:28px;border:1px solid #242424;border-radius:16px;background:radial-gradient(circle at 90% 10%,rgba(249,115,22,.15),transparent 34%),#0b0b0b}.insights-hero span{color:#f97316;font-size:.7rem;font-weight:700;letter-spacing:.16em}.insights-hero h2{margin:7px 0 8px;font:700 clamp(1.8rem,4vw,3rem) Cinzel,serif}.insights-hero p{color:#8c8c8c}.insights-health{display:flex;gap:10px}.insights-health div{min-width:130px;padding:12px;border:1px solid #292929;border-radius:9px;background:#111}.insights-health b,.insights-health small{display:block}.insights-health b{color:#fff;font-size:1.2rem}.insights-health small{margin-top:4px;color:#777}.stats-grid{grid-template-columns:repeat(6,1fr)}.stat-card{text-align:left;border-radius:12px;background:#0b0b0b}.stat-card .stat-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:rgba(249,115,22,.1)}.stat-card .stat-numero{margin-top:15px}.race-panel{margin:18px 0 38px;padding:24px;border:1px solid #242424;border-radius:14px;background:#0a0a0a}.section-kicker{color:#f97316;font-size:.68rem;font-weight:700;letter-spacing:.14em}.race-panel h3{margin:7px 0 5px;font:700 1.35rem Cinzel,serif}.race-panel>p{color:#777;font-size:.84rem}.reader-races{display:grid;gap:14px;margin-top:20px}.race-book{padding:16px;border:1px solid #222;border-radius:10px;background:#0e0e0e}.race-book-head{display:flex;align-items:center;gap:12px;margin-bottom:15px}.race-book-head img{width:42px;height:56px;border-radius:5px;object-fit:cover}.race-book-head span{display:block;margin-top:4px;color:#777;font-size:.75rem}.race-track{position:relative;height:58px;margin:6px 4px 0;border-radius:30px;background:linear-gradient(90deg,#181818,#26201b);box-shadow:inset 0 0 0 1px #2c2c2c}.race-track:after{content:'🏁';position:absolute;right:10px;top:17px}.race-runner{position:absolute;top:8px;left:clamp(10px,var(--progress),calc(100% - 54px));transition:left .5s}.race-runner img{width:40px;height:40px;border:2px solid #f97316;border-radius:50%;object-fit:cover;background:#222}.race-runner span{position:absolute;left:45px;top:10px;min-width:max-content;color:#ccc;font-size:.68rem}.reader-cell{display:flex;align-items:center;gap:10px}.reader-cell img,.book-cell img{width:34px;height:34px;border-radius:50%;object-fit:cover;background:#222}.book-cell{display:flex;align-items:center;gap:10px}.book-cell img{height:44px;border-radius:4px}.muted-time{color:#888;font-size:.78rem}@media(max-width:1000px){.stats-grid{grid-template-columns:repeat(3,1fr)}.insights-hero{align-items:flex-start;flex-direction:column}}@media(max-width:650px){.stats-grid{grid-template-columns:repeat(2,1fr)}.insights-health{width:100%;flex-direction:column}.table-wrapper{overflow-x:auto}.race-runner span{display:none}}
     </style>
 </head>
 <body>
@@ -67,10 +68,7 @@
     </nav>
 
     <main class="adm-container animate-fade-in" id="conteudo-principal" tabindex="-1">
-        <h2 class="adm-title">
-            Dashboard de Leitores
-        </h2>
-        <p style="color:#8C8C8C; margin-top:-20px; margin-bottom:30px;">Acompanhe o engajamento e progresso do seu público</p>
+        <header class="insights-hero"><div><span>INTELIGÊNCIA EDITORIAL</span><h2>Leitores em movimento</h2><p>Acompanhe interesse, avanço e vínculo do público com cada universo.</p></div><div class="insights-health"><div><b id="insight-ultima-atividade">—</b><small>Última atividade</small></div><div><b id="insight-obras-engajadas">0</b><small>Obras com leitores</small></div></div></header>
 
         <div class="stats-grid">
             <div class="stat-card">
@@ -93,7 +91,11 @@
                 <div class="stat-numero" id="stat-concluiram">0</div>
                 <div class="stat-label">Concluíram</div>
             </div>
+            <div class="stat-card"><div class="stat-icon">↗</div><div class="stat-numero" id="stat-ativos-sete-dias">0</div><div class="stat-label">Ativos em 7 dias</div></div>
+            <div class="stat-card"><div class="stat-icon">◎</div><div class="stat-numero" id="stat-taxa-conclusao">0%</div><div class="stat-label">Taxa de conclusão</div></div>
         </div>
+
+        <section class="race-panel"><span class="section-kicker">PROGRESSO VISUAL</span><h3>Corrida dos leitores por obra</h3><p>Cada avatar mostra o último capítulo alcançado em relação ao capítulo mais avançado publicado.</p><div class="reader-races" id="corrida-leitores"><p style="color:#737373">Preparando o percurso...</p></div></section>
 
         <div class="tabs-leitores">
             <button class="tab-leitores-btn active" id="tab-btn-leitor" onclick="window.__alternarAbaLeitores('leitor')">Por Leitor</button>
@@ -108,13 +110,14 @@
                         <tr>
                             <th>Leitor</th>
                             <th>E-mail</th>
+                            <th>Último acesso</th>
                             <th>Ativas</th>
                             <th>Concluídas</th>
                             <th>Favoritos</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-por-leitor">
-                        <tr><td colspan="5" style="text-align:center; color:#737373;">Carregando...</td></tr>
+                        <tr><td colspan="6" style="text-align:center; color:#737373;">Carregando...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -149,6 +152,6 @@
     </script>
 
     <script type="module" src="../js/mobile-nav.js?v=mobile-nav-v1"></script>
-    <script type="module" src="../js/adm-leitores.js"></script>
+    <script type="module" src="../js/adm-leitores.js?v=reader-insights-v1"></script>
 </body>
 </html>

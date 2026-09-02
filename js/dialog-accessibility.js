@@ -26,6 +26,9 @@ export function bindDialogCloseButton(dialog) {
     button.type = "button";
     button.setAttribute("aria-label", "Fechar detalhes da obra");
     button.addEventListener("click", () => closeAccessibleDialog(dialog));
+    dialog.addEventListener("click", event => {
+        if (event.target === dialog) closeAccessibleDialog(dialog);
+    });
 }
 
 export function confirmAction({

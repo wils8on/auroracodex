@@ -67,7 +67,7 @@ function inicializarTrilhas() {
 
 function preencherFiltroObras() {
     const select = document.getElementById("filtro-obra-trilhas");
-    const atual = select.value;
+    const atual = select.value || new URLSearchParams(window.location.search).get("livro") || "";
     const obras = [...new Map(trilhas.map(item => [item.livroId, item.livroTitulo])).entries()].sort((a, b) => a[1].localeCompare(b[1], "pt-BR"));
     select.replaceChildren(new Option("Todas as obras", ""), ...obras.map(([id, titulo]) => new Option(titulo, id)));
     if (obras.some(([id]) => id === atual)) select.value = atual;
